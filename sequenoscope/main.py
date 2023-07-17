@@ -31,8 +31,8 @@ def main():
         print('Task "' + module + '" not recognised. Cannot continue.\n', file=sys.stderr)
         print_usage_and_exit()
 
-    exec("import Sequenoscope.{}.{}".format(module, module))
-    exec("Sequenoscope.{}.{}".format(module,module) + '.run()')
+    exec("import sequenoscope.{}.{}".format(module, module))
+    exec("sequenoscope.{}.{}".format(module,module) + '.run()')
 
 if __name__ == '__main__':
     main()
