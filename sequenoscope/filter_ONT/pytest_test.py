@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-from Sequenoscope.filter_ONT import SeqtkRunner, SeqSummaryProcesser
-from Sequenoscope.utils.parser import GeneralSeqParser
-from Sequenoscope.utils.sequence_class import Sequence
+from sequenoscope.filter_ONT import SeqtkRunner, SeqSummaryProcesser
+from sequenoscope.utils.parser import GeneralSeqParser
+from sequenoscope.utils.sequence_class import Sequence
 
 
-seq_summary_file = "/mnt/c/Users/ameknas/Desktop/Sequenoscope/Sequenoscope/sequenoscope/analyze/test_sequences/sequencing_summary_FAT53867_9a53b23a.txt"
-path_output = "/mnt/c/Users/ameknas/Desktop/Sequenoscope/Sequenoscope/sequenoscope/filter_ONT"
+seq_summary_file = "/mnt/c/Users/ameknas/Desktop/sequenoscope/sequenoscope/sequenoscope/analyze/test_sequences/sequencing_summary_FAT53867_9a53b23a.txt"
+path_output = "/mnt/c/Users/ameknas/Desktop/sequenoscope/sequenoscope/sequenoscope/filter_ONT"
 technology = "ONT"
 
-invalid_seq_file = "/mnt/c/Users/ameknas/Desktop/Sequenoscope/Sequenoscope/sequenoscope/analyze/test_sequences/invalid_input.fastq"
-path_enriched_test_file = "/mnt/c/Users/ameknas/Desktop/Sequenoscope/Sequenoscope/sequenoscope/analyze/test_sequences/Test_br1_sal_lam_enriched.fastq"
-test_csv = "/mnt/c/Users/ameknas/Desktop/Sequenoscope/Sequenoscope/sequenoscope/analyze/test_sequences/test_output_unblocked_ids.csv"
+invalid_seq_file = "/mnt/c/Users/ameknas/Desktop/sequenoscope/sequenoscope/sequenoscope/analyze/test_sequences/invalid_input.fastq"
+path_enriched_test_file = "/mnt/c/Users/ameknas/Desktop/sequenoscope/sequenoscope/sequenoscope/analyze/test_sequences/Test_br1_sal_lam_enriched.fastq"
+test_csv = "/mnt/c/Users/ameknas/Desktop/sequenoscope/sequenoscope/sequenoscope/analyze/test_sequences/test_output_unblocked_ids.csv"
 
-seq_summary_fastq = "/mnt/c/Users/ameknas/Desktop/Sequenoscope/Sequenoscope/sequenoscope/analyze/test_sequences/barcode01_fastq_pass.fastq"
+seq_summary_fastq = "/mnt/c/Users/ameknas/Desktop/sequenoscope/sequenoscope/sequenoscope/analyze/test_sequences/barcode01_fastq_pass.fastq"
 
 def test_seq_summary_parser():
     parsed_object = GeneralSeqParser(seq_summary_file, "seq_summary")

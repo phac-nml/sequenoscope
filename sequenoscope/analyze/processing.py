@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from Sequenoscope.utils.__init__ import run_command
+from sequenoscope.utils.__init__ import run_command
 
 
 class SamBamProcessor:

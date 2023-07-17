@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import os
-from Sequenoscope.constant import DefaultValues
-from Sequenoscope.utils.__init__ import run_command
+from sequenoscope.constant import DefaultValues
+from sequenoscope.utils.__init__ import run_command
 
 
 class Minimap2Runner:

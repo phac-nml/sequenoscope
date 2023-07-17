@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from Sequenoscope.utils.__init__ import run_command
-from Sequenoscope.constant import DefaultValues
+from sequenoscope.utils.__init__ import run_command
+from sequenoscope.constant import DefaultValues
 import os
 
 

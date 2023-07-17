@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from Sequenoscope.utils.__init__ import run_command
-from Sequenoscope.utils.sequence_class import Sequence
+from sequenoscope.utils.__init__ import run_command
+from sequenoscope.utils.sequence_class import Sequence
 import os
 
 class FastPRunner:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from Sequenoscope.utils.__init__ import run_command
+from sequenoscope.utils.__init__ import run_command
 import os
 
 class SeqtkRunner:

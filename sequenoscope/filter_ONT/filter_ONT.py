@@ -2,11 +2,11 @@
 import argparse as ap
 import os
 import sys
-from Sequenoscope.version import __version__
-from Sequenoscope.utils.parser import GeneralSeqParser 
-from Sequenoscope.utils.sequence_class import Sequence
-from Sequenoscope.filter_ONT.seq_summary_processing import SeqSummaryProcesser
-from Sequenoscope.filter_ONT.seqtk import SeqtkRunner
+from sequenoscope.version import __version__
+from sequenoscope.utils.parser import GeneralSeqParser 
+from sequenoscope.utils.sequence_class import Sequence
+from sequenoscope.filter_ONT.seq_summary_processing import SeqSummaryProcesser
+from sequenoscope.filter_ONT.seqtk import SeqtkRunner
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
@@ -55,7 +55,7 @@ def run():
     force = args.force
 
     print("-"*40)
-    print("Sequenoscope filter_ONT version {}: filtering ONT reads based on paramters".format(__version__))
+    print("sequenoscope filter_ONT version {}: filtering ONT reads based on paramters".format(__version__))
     print("-"*40)
 
     ## intializing directory for files

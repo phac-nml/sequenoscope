@@ -3,8 +3,8 @@
 import statistics
 import pysam
 from math import log
-from Sequenoscope.constant import DefaultValues
-from Sequenoscope.utils.__init__ import run_command, is_non_zero_file
+from sequenoscope.constant import DefaultValues
+from sequenoscope.utils.__init__ import run_command, is_non_zero_file
 
 
 

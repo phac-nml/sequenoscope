@@ -2,18 +2,18 @@
 import argparse as ap
 import os
 import sys
-from Sequenoscope.constant import SequenceTypes
-from Sequenoscope.version import __version__
-from Sequenoscope.utils.parser import GeneralSeqParser 
-from Sequenoscope.utils.sequence_class import Sequence
-from Sequenoscope.analyze.minimap2 import Minimap2Runner
-from Sequenoscope.analyze.fastP import FastPRunner
-from Sequenoscope.analyze.kat import KatRunner
-from Sequenoscope.analyze.processing import SamBamProcessor
-from Sequenoscope.analyze.fastq_extractor import FastqExtractor
-from Sequenoscope.analyze.seq_manifest import SeqManifest
-from Sequenoscope.utils.parser import FastqPairedEndRenamer
-from Sequenoscope.analyze.seq_manifest import SeqManifestSummary
+from sequenoscope.constant import SequenceTypes
+from sequenoscope.version import __version__
+from sequenoscope.utils.parser import GeneralSeqParser 
+from sequenoscope.utils.sequence_class import Sequence
+from sequenoscope.analyze.minimap2 import Minimap2Runner
+from sequenoscope.analyze.fastP import FastPRunner
+from sequenoscope.analyze.kat import KatRunner
+from sequenoscope.analyze.processing import SamBamProcessor
+from sequenoscope.analyze.fastq_extractor import FastqExtractor
+from sequenoscope.analyze.seq_manifest import SeqManifest
+from sequenoscope.utils.parser import FastqPairedEndRenamer
+from sequenoscope.analyze.seq_manifest import SeqManifestSummary
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
@@ -64,7 +64,7 @@ def run():
     force = args.force
 
     print("-"*40)
-    print(f"Sequenoscope analyze version {__version__}: processing and analyzing reads based on given paramters")
+    print(f"sequenoscope analyze version {__version__}: processing and analyzing reads based on given paramters")
     print("-"*40)
 
     ## intializing directory for files

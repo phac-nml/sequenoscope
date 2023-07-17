@@ -2,10 +2,10 @@
 
 import os
 from math import log
-from Sequenoscope.constant import DefaultValues
-from Sequenoscope.utils.parser import fastq_parser
-from Sequenoscope.analyze.bam import BamProcessor
-from Sequenoscope.utils.__init__ import is_non_zero_file
+from sequenoscope.constant import DefaultValues
+from sequenoscope.utils.parser import fastq_parser
+from sequenoscope.analyze.bam import BamProcessor
+from sequenoscope.utils.__init__ import is_non_zero_file
 
 
 class SeqManifest:

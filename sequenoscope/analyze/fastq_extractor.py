@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from Sequenoscope.constant import DefaultValues
+from sequenoscope.constant import DefaultValues
 
 class FastqExtractor:
     out_prefix = None
