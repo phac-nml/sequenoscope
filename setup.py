@@ -23,17 +23,17 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-exec(open('Sequenoscope/version.py').read())
+exec(open('sequenoscope/version.py').read())
 
 setup(
-    name='Sequenoscope',
+    name='sequenoscope',
     include_package_data=True,
     version='0.0.1',
     python_requires='>=3.7.0, <3.8.11',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=find_packages(exclude=['tests']),
-    url='https://github.com/ameknas/sequenoscope',
+    url='https://github.com/phac-nml/sequenoscope',
     license='GPLv3',
     author='Abdallah Meknas',
     author_email='abdallah.meknas@phac-aspc.gc.ca',
@@ -41,7 +41,7 @@ setup(
         'Description'),
     keywords='Keywords',
     classifiers=classifiers,
-    package_dir={'Sequenoscope': 'Sequenoscope'},
+    package_dir={'sequenoscope': 'sequenoscope'},
     package_data={
         "": ["*.csv", "*txt"],
     },
@@ -62,7 +62,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'Sequenoscope=Sequenoscope.main:main',
+            'sequenoscope=sequenoscope.main:main',
         ],
     },
 )
