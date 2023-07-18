@@ -86,11 +86,48 @@ To quickly get started with the `analyze` module, follow the instructions below:
 
 This command will initiate the analysis process using default settings. The Fastq files will be processed, and the results will be saved in the specified output directory.
 
-Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run sequenoscope analyze -h or sequenoscope analyze --help.
+Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run `sequenoscope analyze -h` or `sequenoscope analyze --help`.
 
-Remember to replace <file.fq> with the actual path to your Fastq file, <ref.fasta> with the path to your reference database, and <output_directory> with the desired location for the output files.
+Remember to replace `<file.fq>` with the actual path to your Fastq file, `<ref.fasta>` with the path to your reference database, and `<output_directory>` with the desired location for the output files.
 
 If you encounter any issues or need further assistance, refer to the full documentation or consult the available resources for troubleshooting.
+
+-------
+
+To quickly get started with the `filter_ONT` module, follow the instructions below:
+
+1. Ensure that you have the necessary input files prepared:
+   - **Input Fastq files:** Provide the path to the adaptive sequencing Fastq files you want to process using the `--input_fastq` option.
+   - **ONT sequencing summary file:** Specify the path to the ONT sequencing summary file using the `--input_summary` option.
+
+2. Choose an output file and directory for the filtered reads:
+   - Specify the output file path and directory using the `--output` option. This is a required parameter.
+
+3. Set the desired filtering criteria:
+   - You can apply various filters to the reads based on the following options:
+     - Classification: Use the `-cls` or `--classification` option to designate the adaptive-sampling sequencing decision classification. Valid options are `'unblocked'`, `'stop_receiving'`, or `'no_decision'`.
+     - Channel/Pore number: Set the minimum and maximum channel/pore number for filtering using the `-min_ch` and `-max_ch` options.
+     - Duration: Define the minimum and maximum duration of the sequencing run in seconds using the `-min_dur` and `-max_dur` options.
+     - Start time: Specify the minimum and maximum start time of the sequencing run in seconds using the `-min_start` and `-max_start` options.
+     - Q score: Determine the minimum and maximum q score for filtering using the `-min_q` and `-max_q` options.
+     - Read length: Set the minimum and maximum read length for filtering using the `-min_len` and `-max_len` options.
+
+4. Run the command with the basic required options:
+
+        sequenoscope filter_ONT --input_fastq <file.fq> --input_summary <seq_summary.txt> -o <output.fastq>
+
+This command will initiate the filtering process based on the specified criteria and save the filtered reads to the output file.
+
+Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run `sequenoscope filter_ONT -h` or `sequenoscope filter_ONT --help`.
+
+Remember to replace `<file.fq>` with the actual path to your adaptive sequencing Fastq file, `<seq_summary.txt>` with the path to your ONT sequencing summary file, and `<output.fastq>` with the desired path and filename for the filtered reads.
+
+If you encounter any issues or need further assistance, refer to the full documentation or consult the available resources for troubleshooting.
+
+-------------
+To quickly get started with the `plot` module, follow the instructions below:
+
+**Coming soon**
 
 ## Benchmarks
 
