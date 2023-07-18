@@ -71,7 +71,27 @@ If you run ``sequenoscope``, you should see the following usage statement:
 
 Quick start
 =====
-**Coming soon**
+To quickly get started with the `analyze` module, follow the instructions below:
+
+1. Ensure that you have the necessary input files and reference database prepared:
+   - **Input Fastq files:** Provide the path to the Fastq files you want to process using the `--input_fastq` option.
+   - **Reference database:** Specify the path to the reference database using the `--input_reference` option.
+
+2. Choose an output directory for the results:
+   - Specify the output directory using the `--output` option. This is a required parameter.
+
+3. Run the command with the basic required options:
+
+        sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.fasta> -o <output_directory>
+
+This command will initiate the analysis process using default settings. The Fastq files will be processed, and the results will be saved in the specified output directory.
+
+Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run sequenoscope analyze -h or sequenoscope analyze --help.
+
+Remember to replace <file.fq> with the actual path to your Fastq file, <ref.fasta> with the path to your reference database, and <output_directory> with the desired location for the output files.
+
+If you encounter any issues or need further assistance, refer to the full documentation or consult the available resources for troubleshooting.
+
 ## Benchmarks
 
 **Coming soon**
