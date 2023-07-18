@@ -47,11 +47,17 @@ Install using pip:
 
 **Coming soon**
 
+If you wish to install sequenoscope from source, please first ensure these dependencies are installed and configured on your system:
+`fastp==0.23.2`
+`kat==2.4.2`
+`minimap2==2.24`
+`seqtk==1.3`
+`samtools==1.6`
+`pysam==0.16.0.1`
+
 Install the latest master branch version directly from Github:
 
         pip install git+https://github.com/phac-nml/sequenoscope.git
-
-
 
 ## Usage
 If you run ``sequenoscope``, you should see the following usage statement:
