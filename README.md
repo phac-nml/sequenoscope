@@ -54,7 +54,20 @@ Install the latest master branch version directly from Github:
 
 
 ## Usage
-**Coming soon**
+If you run ``sequenoscope``, you should see the following usage statement:
+
+        Usage: sequenoscope <command> <required arguments>
+        
+        To get full help for a command use one of:
+        sequenoscope <command> -h
+        sequenoscope <command> --help
+        
+        
+        Available commands:
+        
+        analyze     map reads to a target and produce a report with sequencing statistics
+        plot        generate plots based on fastq or kmer hash files
+        filter_ONT  filter reads from a fastq file based on a sequencing summary file
 
 Quick start
 =====
