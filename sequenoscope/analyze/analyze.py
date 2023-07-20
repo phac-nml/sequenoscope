@@ -36,6 +36,7 @@ def parse_args():
     parser.add_argument("-max_len", "--maximum_read_length", default= 0, metavar="", type=int, help="A designation of the maximum read length. reads longer than the integer specified required will be discarded, default is 0 meaning no limitation")
     parser.add_argument("-trm_fr", "--trim_front_bp", default= 0, metavar="", type=int, help="A designation of the how many bases to trim from the front of the sequence, default is 0.")
     parser.add_argument("-trm_tail", "--trim_tail_bp", default= 0,metavar="", type=int, help="A designation of the how many bases to trim from the tail of the sequence, default is 0")
+    parser.add_argument("-q", "--quality_threshold", default= 15, metavar="", type=int, help="Quality score threshold for filtering reads. Reads with an average quality score below this threshold will be discarded. If not specified, no quality filtering will be performed.")
     #parser.add_argument('--exclude', required=False, help='Choose to exclude reads based on reference instead of including them', action='store_true')
     parser.add_argument('--kat_hist_kmer', default= 27, metavar="", type=int, help="A designation of the kmer size when running kat hist")
     parser.add_argument('--minimap2_kmer', default= 15, metavar="", type=int, help="A designation of the kmer size when running minimap2")
@@ -60,6 +61,7 @@ def run():
     max_len = args.maximum_read_length
     trim_front = args.trim_front_bp
     trim_tail = args.trim_tail_bp
+    quality_threshold = args.quality_threshold
     #exclude = args.exclude
     force = args.force
 
@@ -120,8 +122,8 @@ def run():
 
     ## filtering reads with fastp
 
-    fastp_run_process = FastPRunner(sequencing_sample, out_directory, f"{out_prefix}_fastp_output", 
-                                    min_read_len=min_len, max_read_len=max_len, trim_front_bp=trim_front,
+    fastp_run_process = FastPRunner(sequencing_sample, out_directory, f"{out_prefix}_fastp_output",
+                                    qualified_quality_phred=quality_threshold, min_read_len=min_len, max_read_len=max_len, trim_front_bp=trim_front,
                                     trim_tail_bp=trim_tail, report_only=False, dedup=False, threads=threads)
 
     

@@ -19,7 +19,7 @@ class FastPRunner:
     result_files = {"html":"", "json":"", "output_files_fastp":[]}
     paired = False
 
-    def __init__(self, read_set, out_dir, out_prefix, min_read_len=15, max_read_len=0, 
+    def __init__(self, read_set, out_dir, out_prefix, qualified_quality_phred=15, min_read_len=15, max_read_len=0, 
     trim_front_bp=0, trim_tail_bp=0, report_only=True, dedup=False, threads=1):
         """
         Initalize the class with read_set, out_dir, and out_prefix
@@ -33,6 +33,8 @@ class FastPRunner:
                 a designation of what the output files will be named
             out_prefix_2: str
                 a designation of what the output files will be named in the event that paired end reads are provided
+            qualified_quality_phred
+                the quality value that a base is qualified. Default 15 means phred quality >=Q15 is qualified. (int [=15])
             min_read_len: int
                 reads shorter than the integer specified required will be discarded, default is 15
             max_read_len: int
@@ -52,6 +54,7 @@ class FastPRunner:
         self.out_dir = out_dir
         self.out_prefix = out_prefix
         self.out_prefix_2 = f"{self.out_prefix}_2"
+        self.qualified_quality_phred = qualified_quality_phred
         self.min_read_len = min_read_len
         self.max_read_len = max_read_len
         self.trim_front_bp = trim_front_bp
@@ -83,6 +86,7 @@ class FastPRunner:
         cmd_args['-t'] = self.trim_tail_bp
         cmd_args['-l'] = self.min_read_len
         cmd_args['--length_limit'] = self.max_read_len
+        cmd_args['-q'] = self.qualified_quality_phred
         if self.paired:
             cmd_args['-I'] = self.read_set.files[1]
             out2 = os.path.join(self.out_dir,f"{self.out_prefix_2}.fastp.fastq")
