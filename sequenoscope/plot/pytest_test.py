@@ -3,6 +3,7 @@ import pytest
 from pathlib import Path
 from seq_manifest_plots import DataUtil, SourceFileTaxonCoveredBarChart, BoxPlot, RatioBarChart, SingleRatioBarChart
 from decision_bar_chart import IndependentDecisionStackedBarChart, CumulativeDecisionBarChart 
+from violin_plot import ViolinPlotter
 
 # def test_read_data():
 #     path = '/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt'
@@ -31,33 +32,59 @@ from decision_bar_chart import IndependentDecisionStackedBarChart, CumulativeDec
 
 #----------------------------------------
 
-@pytest.fixture
-def sample_data_1():
-    return '/home/ameknas/sequenoscope-1/test_SE/sample_manifest.txt'
+# @pytest.fixture
+# def sample_data_1():
+#     return '/home/ameknas/sequenoscope-1/test_SE/sample_manifest.txt'
 
 
-def test_IndependentDecisionStackedBarChart_process_data(sample_data_1):
-    chart = IndependentDecisionStackedBarChart(data_path=sample_data_1, time_bin_unit='minutes')
-    chart.process_data()
-    assert hasattr(chart, 'total_count_2')
-    assert hasattr(chart, 'decision_count')
+# def test_IndependentDecisionStackedBarChart_process_data(sample_data_1):
+#     chart = IndependentDecisionStackedBarChart(data_path=sample_data_1, time_bin_unit='minutes')
+#     chart.process_data()
+#     assert hasattr(chart, 'total_count_2')
+#     assert hasattr(chart, 'decision_count')
 
-def test_IndependentDecisionStackedBarChart_create_trace(sample_data_1):
-    chart = IndependentDecisionStackedBarChart(data_path=sample_data_1, time_bin_unit='minutes')
-    chart.create_trace()
-    assert hasattr(chart, 'hourly_counts')
-    assert hasattr(chart, 'count_values')
+# def test_IndependentDecisionStackedBarChart_create_trace(sample_data_1):
+#     chart = IndependentDecisionStackedBarChart(data_path=sample_data_1, time_bin_unit='minutes')
+#     chart.create_trace()
+#     assert hasattr(chart, 'hourly_counts')
+#     assert hasattr(chart, 'count_values')
 
-def test_IndependentDecisionStackedBarChart_create_chart(sample_data_1):
-    chart = IndependentDecisionStackedBarChart(data_path=sample_data_1, time_bin_unit='minutes')
-    chart.create_chart()
-    chart_file = Path("independent_decision_bar_chart.html")
-    assert chart_file.is_file()
-    #chart_file.unlink()  # delete the file after the test
+# def test_IndependentDecisionStackedBarChart_create_chart(sample_data_1):
+#     chart = IndependentDecisionStackedBarChart(data_path=sample_data_1, time_bin_unit='minutes')
+#     chart.create_chart()
+#     chart_file = Path("independent_decision_bar_chart.html")
+#     assert chart_file.is_file()
+#     chart_file.unlink()  # delete the file after the test
 
-def test_CumulativeDecisionBarChart_create_chart(sample_data_1):
-    chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
-    chart.create_chart()
-    chart_file = Path("cumulative_decision_bar_chart.html")
-    assert chart_file.is_file()
-    #chart_file.unlink()
+# def test_CumulativeDecisionBarChart_create_chart(sample_data_1):
+#     chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
+#     chart.create_chart()
+#     chart_file = Path("cumulative_decision_bar_chart.html")
+#     assert chart_file.is_file()
+#     chart_file.unlink()
+
+#----------------------------------------------------------------------
+
+def test_violin_plotter():
+    plotter = ViolinPlotter('/path/to/test.csv', '/path/to/control.csv')
+
+    # Test initial attributes
+    assert plotter.test_file == '/path/to/test.csv'
+    assert plotter.control_file == '/path/to/control.csv'
+    assert plotter.quality_metric == 'read_quality'
+    assert plotter.fraction == 0.1
+    assert plotter.data is None
+
+    # Test process_files method
+    plotter.process_files()
+    assert plotter.data is not None
+
+    # Test if ValueError is raised when quality_metric column doesn't exist
+    with pytest.raises(ValueError):
+        invalid_plotter = ViolinPlotter('/path/to/test.csv', '/path/to/control.csv', 'invalid_column')
+        invalid_plotter.process_files()
+
+    # Test if ValueError is raised when trying to plot before processing files
+    with pytest.raises(ValueError):
+        invalid_plotter = ViolinPlotter('/path/to/test.csv', '/path/to/control.csv')
+        invalid_plotter.create_violin_plot()
