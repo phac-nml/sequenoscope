@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 class IndependentDecisionStackedBarChart:
     def __init__(self, data_path, time_bin_unit):
         self.data_path = data_path
+        #make the classes a constat later on
         self.classes = {
             "stop_receiving": ["signal_positive"],
             "unblocked": ["data_service_unblock_mux_change"],
@@ -83,13 +84,21 @@ class IndependentDecisionStackedBarChart:
             xaxis=dict(showgrid=False, title='Start Time ({})'.format(self.time_bin_unit)),
             yaxis=dict(showgrid=False, title='Percentage'),
             yaxis2=dict(showgrid=False, title='Read Count', overlaying='y', side='right'),  
-            title='Decision Distribution vs Read Count',    
+            legend=dict(
+                orientation='h',
+                yanchor='top',
+                y=1.05,
+                xanchor='right',
+                x=1
+            ),
+            margin=dict(t=50, b=50)    
         )
         fig.write_html("independent_decision_bar_chart.html")
 
 class CumulativeDecisionBarChart:
     def __init__(self, data_path, time_bin_unit):
         self.data_path = data_path
+        #make the classes a constat later on
         self.classes = {
             "stop_receiving": ["signal_positive"],
             "unblocked": ["data_service_unblock_mux_change"],
@@ -98,14 +107,19 @@ class CumulativeDecisionBarChart:
         self.time_bin_unit = time_bin_unit
 
     def create_chart(self):
+
+        #####this needs to be its own method like above
+
         # Load data from the file
-        df = pd.read_csv(self.data_path, sep='\t')
+        data = pd.read_csv(self.data_path, sep='\t')
 
         # Convert the 'start_time' column to datetime format
-        df['start_time'] = pd.to_datetime(df['start_time'])
+        data['start_time'] = pd.to_datetime(data['start_time'])
+
+        total_count_2 = data.groupby('start_time').size().reset_index(name='total_count')
 
         # Calculate the count for each decision at each start time
-        decision_count = df.groupby(['start_time', 'decision']).size().reset_index(name='count')
+        decision_count = data.groupby(['start_time', 'decision']).size().reset_index(name='count')
 
         # Modify the counting logic to count "signal_negative" and "unblock_mux_change" only once for "no_decision"
         decision_count['decision'] = decision_count['decision'].apply(lambda x: 'no_decision' if x in ['signal_negative', 'unblock_mux_change'] else x)
@@ -129,6 +143,9 @@ class CumulativeDecisionBarChart:
         # Create lists to store the x-axis values for the bar chart
         x_values = []
 
+        #####this needs to be its own method like above
+
+        df = pd.read_csv(self.data_path, sep='\t')
         df['start_time'] = pd.to_datetime(df['start_time'])
         df.set_index('start_time', inplace=True)
         if self.time_bin_unit == "hours":
@@ -137,6 +154,11 @@ class CumulativeDecisionBarChart:
             hourly_counts = df.resample('1T').count()
         elif self.time_bin_unit == "seconds":
             hourly_counts = df.resample('1S').count()
+
+        # Remove time 0 from hourly_counts
+        hourly_counts = hourly_counts[hourly_counts.index != pd.to_datetime(0)]
+        ##??
+        count_values = hourly_counts['read_id'].tolist()
 
         # Create the stacked bar chart
         fig = go.Figure()
@@ -147,21 +169,45 @@ class CumulativeDecisionBarChart:
             filtered_data = decision_count[decision_count['decision'] == decision]
             filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
 
+            if self.time_bin_unit == "hours":
+                filtered_data = filtered_data[
+                    (filtered_data['start_time_numeric'] % 3600 == 0) | (filtered_data['start_time_numeric'] % 1800 == 0) | (filtered_data['start_time_numeric'] == 0)
+                    ]
+            elif self.time_bin_unit == "minutes":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
+            
+            x_values.extend(filtered_data['start_time_numeric'].map(convert_time_units))
+
             fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(convert_time_units),
                                  y=filtered_data['percentage'],
                                  name=decision,
                                  marker_color=color_palette[idx],
                                  yaxis='y'))
+        
+        x_values = list(pd.unique(x_values))
+
+        ###this if statement is useless
 
         if self.time_bin_unit == 'hours' or self.time_bin_unit == 'minutes':
-            cumulative_counts = hourly_counts['read_id'].cumsum()
-            fig.add_trace(go.Scatter(x=x_values,
+            total_count_2['start_time_numeric'] = total_count_2['start_time'].astype(int)
+            cumulative_counts = total_count_2['total_count'].cumsum()
+            fig.add_trace(go.Scatter(x=total_count_2['start_time_numeric'].astype(int).map(convert_time_units),
                                      y=cumulative_counts,
                                      name='Read Count',
                                      mode='lines',
                                      line=dict(color='black'),
                                      visible=True,
                                      yaxis='y2'))
+        elif self.time_bin_unit == 'seconds':
+            total_count_2['start_time_numeric'] = total_count_2['start_time'].astype(int)
+            cumulative_counts = total_count_2['total_count'].cumsum()
+            fig.add_trace(go.Scatter(x=total_count_2['start_time_numeric'].astype(int).map(convert_time_units),
+                                    y=cumulative_counts,
+                                    name='Read Count',
+                                    mode='lines',
+                                    line=dict(color='black'),
+                                    visible=True,
+                                    yaxis='y2'))
 
         fig.update_layout(
             barmode='stack',
