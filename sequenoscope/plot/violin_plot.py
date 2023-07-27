@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 
 class ViolinPlotter:
-    def __init__(self, test_file, control_file, quality_metric='read_quality', fraction=0.1):
+    def __init__(self, test_file, control_file, quality_metric='read_qscore', fraction=0.1):
         self.test_file = test_file
         self.control_file = control_file
         self.fraction = fraction
