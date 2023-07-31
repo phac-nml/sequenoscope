@@ -1,8 +1,13 @@
 import pandas as pd
 import plotly.graph_objects as go
+import os
 
 class IndependentDecisionStackedBarChart:
-    def __init__(self, data_path, time_bin_unit):
+    data_path = None
+    status = False
+    error_messages = None
+
+    def __init__(self, data_path, time_bin_unit="seconds"):
         self.data_path = data_path
         #make the classes a constat later on
         self.classes = {
@@ -42,8 +47,10 @@ class IndependentDecisionStackedBarChart:
         self.process_data()
         self.create_trace()
         convert_time_units = lambda x: pd.to_timedelta(x, unit='s') / pd.Timedelta('1{}'.format(self.time_bin_unit))
+
         x_values = []
         fig = go.Figure()
+
         color_palette = ['blue', 'green', 'orange', 'red'] 
         for idx, decision in enumerate(self.decision_count['decision'].unique()):
             filtered_data = self.decision_count[self.decision_count['decision'] == decision]
@@ -95,7 +102,37 @@ class IndependentDecisionStackedBarChart:
         )
         fig.write_html("independent_decision_bar_chart.html")
 
+        self.status = self.check_files("independent_decision_bar_chart.html")
+        if self.status == False:
+            self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
+            raise ValueError(str(self.error_messages))
+
+    def check_files(self, files_to_check):
+        """
+        check if the output file exists and is not empty
+
+        Arguments:
+            files_to_check: list
+                list of file paths
+
+        Returns:
+            bool:
+                returns True if the generated output file is found and not empty, False otherwise
+        """
+        if isinstance (files_to_check, str):
+            files_to_check = [files_to_check]
+        for f in files_to_check:
+            if not os.path.isfile(f):
+                return False
+            elif os.path.getsize(f) == 0:
+                return False
+        return True   
+
 class CumulativeDecisionBarChart:
+    data_path = None
+    status = False
+    error_messages = None
+
     def __init__(self, data_path, time_bin_unit):
         self.data_path = data_path
         #make the classes a constat later on
@@ -106,67 +143,46 @@ class CumulativeDecisionBarChart:
         }
         self.time_bin_unit = time_bin_unit
 
-    def create_chart(self):
-
-        #####this needs to be its own method like above
-
-        # Load data from the file
+    def process_data(self):
         data = pd.read_csv(self.data_path, sep='\t')
-
-        # Convert the 'start_time' column to datetime format
         data['start_time'] = pd.to_datetime(data['start_time'])
-
-        total_count_2 = data.groupby('start_time').size().reset_index(name='total_count')
-
-        # Calculate the count for each decision at each start time
+        self.total_count_2 = data.groupby('start_time').size().reset_index(name='total_count')
         decision_count = data.groupby(['start_time', 'decision']).size().reset_index(name='count')
-
-        # Modify the counting logic to count "signal_negative" and "unblock_mux_change" only once for "no_decision"
         decision_count['decision'] = decision_count['decision'].apply(lambda x: 'no_decision' if x in ['signal_negative', 'unblock_mux_change'] else x)
         decision_count = decision_count.groupby(['start_time', 'decision']).sum().reset_index()
-
-        # Map the decisions based on the dictionary
         decision_count['decision'] = decision_count['decision'].map(lambda x: next((k for k, v in self.classes.items() if x in v), x))
-
-        # Calculate the cumulative count for each decision at each start time
         decision_count['cumulative_count'] = decision_count.groupby('decision')['count'].cumsum()
-
-        # Calculate the cumulative total count for each start time
         decision_count['cumulative_total_count'] = decision_count.groupby('start_time')['cumulative_count'].transform('sum')
-
-        # Calculate the percentage for each decision at each start time
         decision_count['percentage'] = decision_count['cumulative_count'] / decision_count['cumulative_total_count'] * 100
-
-        # Define the time bin unit and selected unit
-        convert_time_units = lambda x: pd.to_timedelta(x, unit='s') / pd.Timedelta('1{}'.format(self.time_bin_unit))
-
-        # Create lists to store the x-axis values for the bar chart
-        x_values = []
-
-        #####this needs to be its own method like above
-
+        self.decision_count = decision_count
+        self.x_values = []
+    
+    def create_trace(self):
         df = pd.read_csv(self.data_path, sep='\t')
         df['start_time'] = pd.to_datetime(df['start_time'])
         df.set_index('start_time', inplace=True)
         if self.time_bin_unit == "hours":
-            hourly_counts = df.resample('30T').count()
+            self.hourly_counts = df.resample('30T').count()
         elif self.time_bin_unit == "minutes":
-            hourly_counts = df.resample('1T').count()
+            self.hourly_counts = df.resample('1T').count()
         elif self.time_bin_unit == "seconds":
-            hourly_counts = df.resample('1S').count()
+            self.hourly_counts = df.resample('1S').count()
 
-        # Remove time 0 from hourly_counts
-        hourly_counts = hourly_counts[hourly_counts.index != pd.to_datetime(0)]
-        ##??
-        count_values = hourly_counts['read_id'].tolist()
+        self.hourly_counts = self.hourly_counts[self.hourly_counts.index != pd.to_datetime(0)]
+        self.count_values = self.hourly_counts['read_id'].tolist()
 
-        # Create the stacked bar chart
+    def create_chart(self):
+        self.process_data()
+        self.create_trace()
+
+        convert_time_units = lambda x: pd.to_timedelta(x, unit='s') / pd.Timedelta('1{}'.format(self.time_bin_unit))
+
         fig = go.Figure()
 
         # Define a custom color palette for the decisions
         color_palette = ['blue', 'green', 'orange', 'red']  
-        for idx, decision in enumerate(decision_count['decision'].unique()):
-            filtered_data = decision_count[decision_count['decision'] == decision]
+        for idx, decision in enumerate(self.decision_count['decision'].unique()):
+            filtered_data = self.decision_count[self.decision_count['decision'] == decision]
             filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
 
             if self.time_bin_unit == "hours":
@@ -176,7 +192,7 @@ class CumulativeDecisionBarChart:
             elif self.time_bin_unit == "minutes":
                 filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
             
-            x_values.extend(filtered_data['start_time_numeric'].map(convert_time_units))
+            self.x_values.extend(filtered_data['start_time_numeric'].map(convert_time_units))
 
             fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(convert_time_units),
                                  y=filtered_data['percentage'],
@@ -184,24 +200,11 @@ class CumulativeDecisionBarChart:
                                  marker_color=color_palette[idx],
                                  yaxis='y'))
         
-        x_values = list(pd.unique(x_values))
+        self.x_values = list(pd.unique(self.x_values))
 
-        ###this if statement is useless
-
-        if self.time_bin_unit == 'hours' or self.time_bin_unit == 'minutes':
-            total_count_2['start_time_numeric'] = total_count_2['start_time'].astype(int)
-            cumulative_counts = total_count_2['total_count'].cumsum()
-            fig.add_trace(go.Scatter(x=total_count_2['start_time_numeric'].astype(int).map(convert_time_units),
-                                     y=cumulative_counts,
-                                     name='Read Count',
-                                     mode='lines',
-                                     line=dict(color='black'),
-                                     visible=True,
-                                     yaxis='y2'))
-        elif self.time_bin_unit == 'seconds':
-            total_count_2['start_time_numeric'] = total_count_2['start_time'].astype(int)
-            cumulative_counts = total_count_2['total_count'].cumsum()
-            fig.add_trace(go.Scatter(x=total_count_2['start_time_numeric'].astype(int).map(convert_time_units),
+        self.total_count_2['start_time_numeric'] = self.total_count_2['start_time'].astype(int)
+        cumulative_counts = self.total_count_2['total_count'].cumsum()
+        fig.add_trace(go.Scatter(x=self.total_count_2['start_time_numeric'].astype(int).map(convert_time_units),
                                     y=cumulative_counts,
                                     name='Read Count',
                                     mode='lines',
@@ -227,4 +230,28 @@ class CumulativeDecisionBarChart:
 
         # Display the stacked bar chart
         fig.write_html("cumulative_decision_bar_chart.html")
+        self.status = self.check_files("cumulative_decision_bar_chart.html")
+        if self.status == False:
+            self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
+            raise ValueError(str(self.error_messages))
 
+    def check_files(self, files_to_check):
+        """
+        check if the output file exists and is not empty
+
+        Arguments:
+            files_to_check: list
+                list of file paths
+
+        Returns:
+            bool:
+                returns True if the generated output file is found and not empty, False otherwise
+        """
+        if isinstance (files_to_check, str):
+            files_to_check = [files_to_check]
+        for f in files_to_check:
+            if not os.path.isfile(f):
+                return False
+            elif os.path.getsize(f) == 0:
+                return False
+        return True

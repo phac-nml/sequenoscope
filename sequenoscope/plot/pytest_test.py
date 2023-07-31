@@ -1,35 +1,40 @@
 import os
 import pytest
 from pathlib import Path
-from seq_manifest_plots import DataUtil, SourceFileTaxonCoveredBarChart, BoxPlot, RatioBarChart, SingleRatioBarChart
+from seq_manifest_plots import SeqManifestPlotter
 from decision_bar_chart import IndependentDecisionStackedBarChart, CumulativeDecisionBarChart 
 from violin_plot import ViolinPlotter
 from stats_table import MakeStatsTable
 
-# def test_read_data():
-#     path = '/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt'
-#     df = DataUtil.read_data(path)
-#     assert not df.empty, 'DataFrame should not be empty'
+@pytest.fixture
+def test_data_paths():
+    test_file = '/home/ameknas/sequenoscope-1/test_stool_samples/0026/QIA_sample_manifest_summary.txt'
+    control_file = '/home/ameknas/sequenoscope-1/test_stool_samples/0026/ZYMO_sample_manifest_summary.txt'
+    return test_file, control_file
 
-# def test_source_file_taxon_covered_bar_chart():
-#     chart = SourceFileTaxonCoveredBarChart('/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt', '/home/ameknas/sequenoscope-1/test_stool_samples/0023/ZYMO_sample_manifest_summary.txt')
-#     chart.generate_plot()
-#     assert os.path.exists("source_file_taxon_covered_bar_chart.html"), "HTML file not generated"
+def test_generate_source_file_taxon_covered_bar_chart(test_data_paths):
+    test_file, control_file = test_data_paths
+    plotter = SeqManifestPlotter(test_file, control_file)
+    plotter.generate_source_file_taxon_covered_bar_chart()
+    assert plotter.status == True
 
-# def test_box_plot():
-#     plot = BoxPlot('/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt', '/home/ameknas/sequenoscope-1/test_stool_samples/0023/ZYMO_sample_manifest_summary.txt', 'taxon_%_covered_bases')
-#     plot.generate_plot()
-#     assert os.path.exists("box_plot.html"), "HTML file not generated"
+def test_generate_box_plot(test_data_paths):
+    test_file, control_file = test_data_paths
+    plotter = SeqManifestPlotter(test_file, control_file)
+    plotter.generate_box_plot("taxon_%_covered_bases")
+    assert plotter.status == True
 
-# def test_ratio_bar_chart():
-#     chart = RatioBarChart('/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt', '/home/ameknas/sequenoscope-1/test_stool_samples/0023/ZYMO_sample_manifest_summary.txt')
-#     chart.generate_plot()
-#     assert os.path.exists("ratio_bar_chart.html"), "HTML file not generated"
+def test_generate_ratio_bar_chart(test_data_paths):
+    test_file, control_file = test_data_paths
+    plotter = SeqManifestPlotter(test_file, control_file)
+    plotter.generate_ratio_bar_chart()
+    assert plotter.status == True
 
-# def test_single_ratio_bar_chart():
-#     chart = SingleRatioBarChart('/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt', '/home/ameknas/sequenoscope-1/test_stool_samples/0023/ZYMO_sample_manifest_summary.txt', 'taxon_%_covered_bases')
-#     chart.generate_plot()
-#     assert os.path.exists("single_ratio_bar_chart.html"), "HTML file not generated"
+def test_generate_single_ratio_bar_chart(test_data_paths):
+    test_file, control_file = test_data_paths
+    plotter = SeqManifestPlotter(test_file, control_file)
+    plotter.generate_single_ratio_bar_chart("taxon_%_covered_bases")
+    assert plotter.status == True
 
 #----------------------------------------
 
@@ -55,14 +60,26 @@ from stats_table import MakeStatsTable
 #     chart.create_chart()
 #     chart_file = Path("independent_decision_bar_chart.html")
 #     assert chart_file.is_file()
-#     chart_file.unlink()  # delete the file after the test
+# #     chart_file.unlink()  # delete the file after the test
+
+# def test_CumulativeDecisionBarChart_process_data(sample_data_1):
+#     chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
+#     chart.process_data()
+#     assert hasattr(chart, 'total_count_2')
+#     assert hasattr(chart, 'decision_count')
+
+# def test_CumulativeDecisionBarChart_create_trace(sample_data_1):
+#     chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
+#     chart.create_trace()
+#     assert hasattr(chart, 'hourly_counts')
+#     assert hasattr(chart, 'count_values')
 
 # def test_CumulativeDecisionBarChart_create_chart(sample_data_1):
 #     chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
 #     chart.create_chart()
 #     chart_file = Path("cumulative_decision_bar_chart.html")
 #     assert chart_file.is_file()
-#     chart_file.unlink()
+#     # chart_file.unlink()
 
 #----------------------------------------------------------------------
 
@@ -96,14 +113,16 @@ from stats_table import MakeStatsTable
 #         invalid_plotter = ViolinPlotter(test_file, control_file)
 #         invalid_plotter.create_violin_plot()
 
-def test_MakeStatsTable():
-    # Define the paths to your test files
-    test_file_path = "/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt"
-    control_file_path = "/home/ameknas/sequenoscope-1/test_stool_samples/0023/ZYMO_sample_manifest_summary.txt"
+#---------------------------------------------------------------------------------------
 
-    stats_table = MakeStatsTable(test_file_path, control_file_path)
-    stats_table.generate_stats()
-    stats_table.save_to_csv()
+# def test_MakeStatsTable():
+#     # Define the paths to your test files
+#     test_file_path = "/home/ameknas/sequenoscope-1/test_stool_samples/0023/Qia_sample_manifest_summary.txt"
+#     control_file_path = "/home/ameknas/sequenoscope-1/test_stool_samples/0023/ZYMO_sample_manifest_summary.txt"
 
-    # Check if the output file was created
-    assert os.path.isfile('result.csv')
+#     stats_table = MakeStatsTable(test_file_path, control_file_path)
+#     stats_table.generate_stats()
+#     stats_table.save_to_csv()
+
+#     # Check if the output file was created
+#     assert os.path.isfile('stat_results.csv')

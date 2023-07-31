@@ -1,7 +1,13 @@
 import pandas as pd
+import os
 import plotly.express as px
 
 class ViolinPlotter:
+    test_file = None
+    control_file = None
+    status = False
+    error_messages = None
+
     def __init__(self, test_file, control_file, quality_metric='read_qscore', fraction=0.1):
         self.test_file = test_file
         self.control_file = control_file
@@ -59,3 +65,29 @@ class ViolinPlotter:
 
         # Show the plot
         fig.write_html("violin_comparison_plot.html")
+
+        self.status = self.check_files("violin_comparison_plot.html")
+        if self.status == False:
+            self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
+            raise ValueError(str(self.error_messages))
+
+    def check_files(self, files_to_check):
+        """
+        check if the output file exists and is not empty
+
+        Arguments:
+            files_to_check: list
+                list of file paths
+
+        Returns:
+            bool:
+                returns True if the generated output file is found and not empty, False otherwise
+        """
+        if isinstance (files_to_check, str):
+            files_to_check = [files_to_check]
+        for f in files_to_check:
+            if not os.path.isfile(f):
+                return False
+            elif os.path.getsize(f) == 0:
+                return False
+        return True 
