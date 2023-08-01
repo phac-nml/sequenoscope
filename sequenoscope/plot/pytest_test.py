@@ -1,10 +1,11 @@
+#!/usr/bin/env python
 import os
 import pytest
 from pathlib import Path
-from seq_manifest_plots import SeqManifestPlotter
-from decision_bar_chart import IndependentDecisionStackedBarChart, CumulativeDecisionBarChart 
-from violin_plot import ViolinPlotter
-from stats_table import MakeStatsTable
+from sequenoscope.plot.seq_manifest_plots import SeqManifestPlotter
+from sequenoscope.plot.decision_bar_chart import IndependentDecisionStackedBarChart, CumulativeDecisionBarChart
+from sequenoscope.plot.stats_table import MakeStatsTable
+from sequenoscope.plot.violin_plot import ViolinPlotter
 
 @pytest.fixture
 def test_data_paths():

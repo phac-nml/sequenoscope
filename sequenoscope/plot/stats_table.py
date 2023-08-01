@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pandas as pd
 import os
 from scipy import stats

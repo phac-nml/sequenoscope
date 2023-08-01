@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pandas as pd
 import plotly.graph_objects as go
 import os
