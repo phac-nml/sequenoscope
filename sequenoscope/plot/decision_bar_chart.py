@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import os
 
-class IndependentDecisionStackedBarChart:
+class IndependentDecisionStackedBarChart():
     data_path = None
     status = False
     error_messages = None
