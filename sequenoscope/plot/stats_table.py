@@ -8,10 +8,14 @@ class MakeStatsTable:
     control_file = None
     status = False
     error_messages = None
+    output_dir = None
+    output_prefix = None
 
-    def __init__(self, test_file, control_file):
+    def __init__(self, test_file, control_file, output_dir, output_prefix="sample"):
         self.test_file = test_file
         self.control_file = control_file
+        self.output_dir = output_dir
+        self.output_prefix = output_prefix
 
         self.test_data = pd.read_csv(test_file, delimiter='\t')
         self.control_data = pd.read_csv(control_file, delimiter='\t')
@@ -69,9 +73,10 @@ class MakeStatsTable:
                 self.result_df = pd.concat([self.result_df, new_row], ignore_index=True)
 
     def save_to_csv(self, filename='stat_results.csv'):
-        self.result_df.to_csv(filename, index=False)
+        output_file_path = os.path.join(self.output_dir, self.output_prefix + filename)
+        self.result_df.to_csv(output_file_path, index=False)
 
-        self.status = self.check_files("stat_results.csv")
+        self.status = self.check_files(output_file_path)
         if self.status == False:
             self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
             raise ValueError(str(self.error_messages))

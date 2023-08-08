@@ -8,10 +8,14 @@ class ViolinPlotter:
     control_file = None
     status = False
     error_messages = None
+    output_dir = None
+    output_prefix = None
 
-    def __init__(self, test_file, control_file, quality_metric='read_qscore', fraction=0.1):
+    def __init__(self, test_file, control_file, output_dir, output_prefix="sample", quality_metric='read_qscore', fraction=0.1):
         self.test_file = test_file
         self.control_file = control_file
+        self.output_dir = output_dir
+        self.output_prefix = output_prefix
         self.fraction = fraction
         self.quality_metric = quality_metric
         self.data = None
@@ -65,9 +69,10 @@ class ViolinPlotter:
         )
 
         # Show the plot
-        fig.write_html("violin_comparison_plot.html")
+        output_file_path = os.path.join(self.output_dir, self.output_prefix + "_violin_comparison_plot.html")
+        fig.write_html(output_file_path)
 
-        self.status = self.check_files("violin_comparison_plot.html")
+        self.status = self.check_files(output_file_path)
         if self.status == False:
             self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
             raise ValueError(str(self.error_messages))

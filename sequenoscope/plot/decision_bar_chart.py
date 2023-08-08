@@ -7,9 +7,13 @@ class IndependentDecisionStackedBarChart():
     data_path = None
     status = False
     error_messages = None
+    output_dir = None
+    output_prefix = None
 
-    def __init__(self, data_path, time_bin_unit="seconds"):
+    def __init__(self, data_path, output_dir, output_prefix="sample", time_bin_unit="seconds"):
         self.data_path = data_path
+        self.output_dir = output_dir
+        self.output_prefix = output_prefix
         #make the classes a constat later on
         self.classes = {
             "stop_receiving": ["signal_positive"],
@@ -44,7 +48,7 @@ class IndependentDecisionStackedBarChart():
         self.hourly_counts = self.hourly_counts[self.hourly_counts.index != pd.to_datetime(0)]
         self.count_values = self.hourly_counts['read_id'].tolist()
 
-    def create_chart(self, file='test'):
+    def create_chart(self):
         self.process_data()
         self.create_trace()
         convert_time_units = lambda x: pd.to_timedelta(x, unit='s') / pd.Timedelta('1{}'.format(self.time_bin_unit))
@@ -101,9 +105,10 @@ class IndependentDecisionStackedBarChart():
             ),
             margin=dict(t=50, b=50)    
         )
-        fig.write_html(file + "independent_decision_bar_chart.html")
+        output_file_path = os.path.join(self.output_dir, self.output_prefix + "_independent_decision_bar_chart.html")
+        fig.write_html(output_file_path)
 
-        self.status = self.check_files("independent_decision_bar_chart.html")
+        self.status = self.check_files(output_file_path)
         if self.status == False:
             self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
             raise ValueError(str(self.error_messages))
@@ -133,9 +138,13 @@ class CumulativeDecisionBarChart:
     data_path = None
     status = False
     error_messages = None
+    output_dir = None
+    output_prefix = None
 
-    def __init__(self, data_path, time_bin_unit):
+    def __init__(self, data_path, output_dir, time_bin_unit, output_prefix="sample"):
         self.data_path = data_path
+        self.output_dir = output_dir
+        self.output_prefix = output_prefix
         #make the classes a constat later on
         self.classes = {
             "stop_receiving": ["signal_positive"],
@@ -228,10 +237,9 @@ class CumulativeDecisionBarChart:
             ),
             margin=dict(t=50, b=50)
         )
-
-        # Display the stacked bar chart
-        fig.write_html("cumulative_decision_bar_chart.html")
-        self.status = self.check_files("cumulative_decision_bar_chart.html")
+        output_file_path = os.path.join(self.output_dir, self.output_prefix + "_cumulative_decision_bar_chart.html")
+        fig.write_html(output_file_path)
+        self.status = self.check_files(output_file_path)
         if self.status == False:
             self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
             raise ValueError(str(self.error_messages))

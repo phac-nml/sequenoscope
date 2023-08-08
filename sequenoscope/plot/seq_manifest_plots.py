@@ -8,8 +8,12 @@ class SeqManifestPlotter:
     control_file_path = None
     status = False
     error_messages = None
+    output_dir = None
+    output_prefix = None
     
-    def __init__(self, test_file_path, control_file_path):
+    def __init__(self, test_file_path, control_file_path, output_dir, output_prefix="sample"):
+        self.output_dir = output_dir
+        self.output_prefix = output_prefix
         self.test_file_path = test_file_path
         self.control_file_path = control_file_path
         self.color_scale = ['#FF7F0E', '#1F77B4', '#FFC0CB', '#2CA02C', '#D62728', '#9467BD']
@@ -138,9 +142,10 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "single_ratio_bar_chart.html")
 
     def save_plot_to_html(self, fig, file_name):
-        fig.write_html(file_name)
+        output_file_path = os.path.join(self.output_dir, self.output_prefix + file_name)
+        fig.write_html(output_file_path)
 
-        self.status = self.check_files(file_name)
+        self.status = self.check_files(output_file_path)
         if self.status == False:
             self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
             raise ValueError(str(self.error_messages))
