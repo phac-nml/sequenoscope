@@ -44,4 +44,85 @@ def run():
     print(f"sequenoscope plot version {__version__}: Extracting files from directories for plotting")
     print("-"*40)
 
+    if not os.path.isdir(output_dir):
+        os.mkdir(output_dir, 0o755)
+    elif not force:
+        print(f"Error directory {output_dir} already exists, if you want to overwrite existing results then specify --force")
+        sys.exit()
+
+    for f in os.listdir(test_dir):
+        if 'manifest.txt' in f:
+            test_manifest = os.path.join(test_dir, f)
+        elif 'manifest_summary.txt' in f:
+            test_manifest_summary = os.path.join(test_dir, f)
+
+    for f in os.listdir(control_dir):
+        if 'manifest.txt' in f:
+            control_manifest = os.path.join(control_dir, f)
+        elif 'manifest_summary.txt' in f:
+            control_manifest_summary = os.path.join(control_dir, f)
+
+    if not test_manifest or not control_manifest or not test_manifest_summary or not control_manifest_summary:
+        raise ValueError("One or more required files were not found in the given directories.")
+    
+    print("-"*40)
+    print("Plotting manifest summary plots")
+    print("-"*40)
+
+    taxon_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
+    box_plot = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
+    ratio_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
+    single_ratio_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
+    stats_table = MakeStatsTable(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
+
+    taxon_bar_chart.generate_source_file_taxon_covered_bar_chart()
+    box_plot.generate_box_plot(summary_comp_parameter)
+    ratio_bar_chart.generate_ratio_bar_chart()
+    single_ratio_bar_chart.generate_single_ratio_bar_chart(summary_comp_parameter)
+    stats_table.generate_stats()
+    stats_table.save_to_csv()
+
+    print("-"*40)
+    print("Plotting seq manifest plots")
+    print("-"*40)
+
+    test_independent_decision_bar_chart = IndependentDecisionStackedBarChart(test_manifest, output_dir, output_prefix, time_bin_unit)
+    control_independent_decision_bar_chart = IndependentDecisionStackedBarChart(control_manifest, output_dir, output_prefix, time_bin_unit)
+    test_cumulative_decision_bar_chart = CumulativeDecisionBarChart(test_manifest, output_dir, output_prefix, time_bin_unit)
+    control_cumulative_decision_bar_chart = CumulativeDecisionBarChart(control_manifest, output_dir, output_prefix, time_bin_unit)
+    violin_plot_read_qscore = ViolinPlotter(test_manifest, control_manifest, output_dir, output_prefix, quality_metric='read_qscore', fraction=violin_data_precent)
+    violin_plot_read_length = ViolinPlotter(test_manifest, control_manifest, output_dir, output_prefix, quality_metric='read_len', fraction=violin_data_precent)
+
+    test_independent_decision_bar_chart.process_data()
+    test_independent_decision_bar_chart.create_trace()
+    test_independent_decision_bar_chart.create_chart()
+    #test_independent_decision_bar_chart.song_and_dance()
+
+    control_independent_decision_bar_chart.process_data()
+    control_independent_decision_bar_chart.create_trace()
+    control_independent_decision_bar_chart.create_chart()
+
+    test_cumulative_decision_bar_chart.process_data()
+    test_cumulative_decision_bar_chart.create_trace()
+    test_cumulative_decision_bar_chart.create_chart()
+
+    control_cumulative_decision_bar_chart.process_data()
+    control_cumulative_decision_bar_chart.create_trace()
+    control_cumulative_decision_bar_chart.create_chart()
+
+    violin_plot_read_qscore.process_files()
+    violin_plot_read_qscore.create_violin_plot()
+
+    violin_plot_read_length.process_files()
+    violin_plot_read_length.create_violin_plot()
+
+
+
+
+
+
+
+    
+
+
 
