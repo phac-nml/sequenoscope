@@ -169,7 +169,7 @@ class CumulativeDecisionBarChart:
     
     def create_trace(self):
         df = pd.read_csv(self.data_path, sep='\t')
-        df['start_time'] = pd.to_datetime(df['start_time'])
+        df['start_time'] = pd.to_datetime(df['start_time'], unit='s')
         df.set_index('start_time', inplace=True)
         if self.time_bin_unit == "hours":
             self.hourly_counts = df.resample('30T').count()

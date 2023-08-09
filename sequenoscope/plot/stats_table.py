@@ -21,7 +21,7 @@ class MakeStatsTable:
         self.control_data = pd.read_csv(control_file, delimiter='\t')
 
         self.parameters = ['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases',
-                           'mean_read_length', 'mean_read_length_reverse', 'taxon_length',
+                           'mean_read_length', 'taxon_length',
                            'taxon_%_covered_bases', 'taxon_mean_read_length']
         
         self.result_df = pd.DataFrame(columns=['Parameter', 'Test_Value', 'Control_Value', 'Ratio',
@@ -73,7 +73,7 @@ class MakeStatsTable:
                 self.result_df = pd.concat([self.result_df, new_row], ignore_index=True)
 
     def save_to_csv(self, filename='stat_results.csv'):
-        output_file_path = os.path.join(self.output_dir, self.output_prefix + filename)
+        output_file_path = os.path.join(self.output_dir, self.output_prefix + "_" + filename)
         self.result_df.to_csv(output_file_path, index=False)
 
         self.status = self.check_files(output_file_path)

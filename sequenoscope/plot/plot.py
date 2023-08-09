@@ -8,23 +8,36 @@ from sequenoscope.plot.stats_table import MakeStatsTable
 from sequenoscope.plot.violin_plot import ViolinPlotter
 from sequenoscope.version import __version__
 
+# TODO: fix cumulative decision chart
+# TODO: fix test and control file overwriting for decision charts
+# TODO: use color blind friendly colors for decision ba chart
+# TODO: Once finalized, incorporate new changes to decsion bar chart class
+# TODO: remove mean_Read_length_reverse from seqmanifest file
+# TODO: Make the decisions for all short_reads stop recieiving
+
+
+
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
                                usage="sequenoscope plot <'manifest', 'summary'> --test_file <test_file_path> --control_file <control_file_path> --plot_type <plot_type> --output_file <out_path>\nFor help use: sequenoscope plot -h or sequenoscope plot --help", 
                                 description="%(prog)s version {}: a tool for analyzing and processing sequencing data.".format(__version__),
                                 formatter_class= ap.RawTextHelpFormatter)
     
-    parser._optionals.title = "Arguments"
-    
-    # Main arguments
-    parser.add_argument('-T', '--test_dir', type=str, required=True, help="[REQUIRED] Path to test directory.")
-    parser.add_argument('-C', '--control_dir', type=str, required=True, help="[REQUIRED] Path to control directory.")
-    parser.add_argument('-o', '--output_dir', type=str, required=True, help="[REQUIRED] Output directory designation.")
-    parser.add_argument('-o_pre', '--output_prefix', type=str, default = 'sample', help="[REQUIRED] Output prefix added before plot names. default is sample")
-    parser.add_argument('--force', required=False, help='Force overwrite of existing results directory', action='store_true')
-    parser.add_argument('-SCP', '--summary_comp_paramter', default = 'taxon_%_covered_bases', choices=['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases', 'mean_read_length', 'taxon_length',	'taxon_covered_bases', 'taxon_%_covered_bases', 'taxon_mean_read_length'], type=str, help='type of paramter for the box plot and single ratio bar chart. default paramter is taxon_%_covered_bases')
-    parser.add_argument('-VP', '--violin_data_percent', default = 0.1, type=float, help='fraction of the data to use for the violin plot')
-    parser.add_argument('-bin', '--time_bin_unit', default="minutes", choices=['seconds', 'minutes', 'hours'], type=str, help='time bin used for decision bar charts')
+    # Customize the title of the optional arguments section in the help menu
+    parser._optionals.title = "Optional Arguments"
+
+    # Required Paths Group
+    paths_group = parser.add_argument_group('Required Paths', 'Specify the necessary directories for the tool.')
+    paths_group.add_argument('-T', '--test_dir', type=str, required=True, help="Path to test directory.\n\n")
+    paths_group.add_argument('-C', '--control_dir', type=str, required=True, help="Path to control directory.\n\n")
+    paths_group.add_argument('-o', '--output_dir', type=str, required=True, help="Output directory designation.\n\n")
+    paths_group.add_argument('--force', action='store_true', help='Force overwrite of existing results directory.\n\n')
+    # Plotting Options Group
+    plotting_group = parser.add_argument_group('Plotting Options', 'Customize the appearance and data for plots.\n\n')
+    plotting_group.add_argument('-o_pre', '--output_prefix', type=str, default='sample', help="Output prefix added before plot names. Default is 'sample'.\n\n")
+    plotting_group.add_argument('--comparison_metric', default='taxon_%_covered_bases', choices=['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases', 'mean_read_length', 'taxon_length', 'taxon_covered_bases', 'taxon_%_covered_bases', 'taxon_mean_read_length'], type=str, help='Type of parameter for the box plot and single ratio bar chart. Default parameter is taxon_%%_covered_bases.\n\n')
+    plotting_group.add_argument('-VP', '--violin_data_percent', default=0.1, type=float, help='Fraction of the data to use for the violin plot.\n\n')
+    plotting_group.add_argument('-bin', '--time_bin_unit', default="minutes", choices=['seconds', 'minutes', 'hours'], type=str, help='Time bin used for decision bar charts.\n\n')
 
     return parser.parse_args()
 
@@ -36,7 +49,7 @@ def run():
     output_dir = args.output_dir
     output_prefix = args.output_prefix
     force = args.force
-    summary_comp_parameter = args.summary_comp_paramter
+    summary_comp_parameter = args.comparison_metric
     violin_data_precent = args.violin_data_percent
     time_bin_unit = args.time_bin_unit
 
@@ -115,14 +128,3 @@ def run():
 
     violin_plot_read_length.process_files()
     violin_plot_read_length.create_violin_plot()
-
-
-
-
-
-
-
-    
-
-
-

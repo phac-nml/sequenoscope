@@ -142,7 +142,7 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "single_ratio_bar_chart.html")
 
     def save_plot_to_html(self, fig, file_name):
-        output_file_path = os.path.join(self.output_dir, self.output_prefix + file_name)
+        output_file_path = os.path.join(self.output_dir, self.output_prefix + "_" + file_name)
         fig.write_html(output_file_path)
 
         self.status = self.check_files(output_file_path)
