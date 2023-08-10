@@ -348,8 +348,8 @@ class SeqManifest:
             out_row['read_qscore'] = read_qual
             out_row['start_time'] = start_time
             out_row['end_time'] = end_time
-            out_row['decision'] = "N/A"
-            out_row['channel'] = "N/A"
+            out_row['decision'] = "signal_positive"
+            out_row['channel'] = "1"
 
 
             if len(mapped_contigs) == 0:
@@ -433,8 +433,8 @@ class SeqManifestSummary:
         self.out_prefix = out_prefix
         self.out_dir = out_dir
         self.paired = paired
-        if self.paired:
-            self.fields.insert(6, "mean_read_length_reverse")
+        # if self.paired:
+        #     self.fields.insert(6, "mean_read_length_reverse")
         pass
     
     def create_row(self):
@@ -479,8 +479,8 @@ class SeqManifestSummary:
                 out_row["taxon_%_covered_bases"] = 0
             out_row["taxon_mean_read_length"] = self.bam_obj.ref_stats[contig_id]['mean_len']
 
-            if self.paired:
-                out_row["mean_read_length_reverse"] = self.fastp_json_file["summary"]["after_filtering"]["read2_mean_length"]
+            # if self.paired:
+            #     out_row["mean_read_length_reverse"] = self.fastp_json_file["summary"]["after_filtering"]["read2_mean_length"]
 
             fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
         

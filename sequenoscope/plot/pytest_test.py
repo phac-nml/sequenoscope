@@ -7,41 +7,41 @@ from sequenoscope.plot.decision_bar_chart import IndependentDecisionStackedBarCh
 from sequenoscope.plot.stats_table import MakeStatsTable
 from sequenoscope.plot.violin_plot import ViolinPlotter
 
-@pytest.fixture
-def test_data_paths():
-    test_file = '/home/ameknas/sequenoscope-1/test_stool_samples/0026/QIA_sample_manifest_summary.txt'
-    control_file = '/home/ameknas/sequenoscope-1/test_stool_samples/0026/ZYMO_sample_manifest_summary.txt'
-    return test_file, control_file
+# @pytest.fixture
+# def test_data_paths():
+#     test_file = '/home/ameknas/sequenoscope-1/test_stool_samples/0026/QIA_sample_manifest_summary.txt'
+#     control_file = '/home/ameknas/sequenoscope-1/test_stool_samples/0026/ZYMO_sample_manifest_summary.txt'
+#     return test_file, control_file
 
-def test_generate_source_file_taxon_covered_bar_chart(test_data_paths):
-    test_file, control_file = test_data_paths
-    plotter = SeqManifestPlotter(test_file, control_file)
-    plotter.generate_source_file_taxon_covered_bar_chart()
-    assert plotter.status == True
+# def test_generate_source_file_taxon_covered_bar_chart(test_data_paths):
+#     test_file, control_file = test_data_paths
+#     plotter = SeqManifestPlotter(test_file, control_file)
+#     plotter.generate_source_file_taxon_covered_bar_chart()
+#     assert plotter.status == True
 
-def test_generate_box_plot(test_data_paths):
-    test_file, control_file = test_data_paths
-    plotter = SeqManifestPlotter(test_file, control_file)
-    plotter.generate_box_plot("taxon_%_covered_bases")
-    assert plotter.status == True
+# def test_generate_box_plot(test_data_paths):
+#     test_file, control_file = test_data_paths
+#     plotter = SeqManifestPlotter(test_file, control_file)
+#     plotter.generate_box_plot("taxon_%_covered_bases")
+#     assert plotter.status == True
 
-def test_generate_ratio_bar_chart(test_data_paths):
-    test_file, control_file = test_data_paths
-    plotter = SeqManifestPlotter(test_file, control_file)
-    plotter.generate_ratio_bar_chart()
-    assert plotter.status == True
+# def test_generate_ratio_bar_chart(test_data_paths):
+#     test_file, control_file = test_data_paths
+#     plotter = SeqManifestPlotter(test_file, control_file)
+#     plotter.generate_ratio_bar_chart()
+#     assert plotter.status == True
 
-def test_generate_single_ratio_bar_chart(test_data_paths):
-    test_file, control_file = test_data_paths
-    plotter = SeqManifestPlotter(test_file, control_file)
-    plotter.generate_single_ratio_bar_chart("taxon_%_covered_bases")
-    assert plotter.status == True
+# def test_generate_single_ratio_bar_chart(test_data_paths):
+#     test_file, control_file = test_data_paths
+#     plotter = SeqManifestPlotter(test_file, control_file)
+#     plotter.generate_single_ratio_bar_chart("taxon_%_covered_bases")
+#     assert plotter.status == True
 
 #----------------------------------------
 
-# @pytest.fixture
-# def sample_data_1():
-#     return '/home/ameknas/sequenoscope-1/test_SE/sample_manifest.txt'
+@pytest.fixture
+def sample_data_1():
+    return '/home/ameknas/sequenoscope-1/test_SE/sample_manifest.txt'
 
 
 # def test_IndependentDecisionStackedBarChart_process_data(sample_data_1):
@@ -63,24 +63,24 @@ def test_generate_single_ratio_bar_chart(test_data_paths):
 #     assert chart_file.is_file()
 # #     chart_file.unlink()  # delete the file after the test
 
-# def test_CumulativeDecisionBarChart_process_data(sample_data_1):
-#     chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
-#     chart.process_data()
-#     assert hasattr(chart, 'total_count_2')
-#     assert hasattr(chart, 'decision_count')
+def test_CumulativeDecisionBarChart_process_data(sample_data_1):
+    chart = CumulativeDecisionBarChart(data_path=sample_data_1, output_dir="/home/ameknas/sequenoscope/sequenoscope/plot", time_bin_unit='minutes')
+    chart.process_data()
+    assert hasattr(chart, 'total_count_2')
+    assert hasattr(chart, 'decision_count')
 
-# def test_CumulativeDecisionBarChart_create_trace(sample_data_1):
-#     chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
-#     chart.create_trace()
-#     assert hasattr(chart, 'hourly_counts')
-#     assert hasattr(chart, 'count_values')
+def test_CumulativeDecisionBarChart_create_trace(sample_data_1):
+    chart = CumulativeDecisionBarChart(data_path=sample_data_1, output_dir="/home/ameknas/sequenoscope/sequenoscope/plot", time_bin_unit='minutes')
+    chart.create_trace()
+    assert hasattr(chart, 'hourly_counts')
+    assert hasattr(chart, 'count_values')
 
-# def test_CumulativeDecisionBarChart_create_chart(sample_data_1):
-#     chart = CumulativeDecisionBarChart(data_path=sample_data_1, time_bin_unit='minutes')
-#     chart.create_chart()
-#     chart_file = Path("cumulative_decision_bar_chart.html")
-#     assert chart_file.is_file()
-#     # chart_file.unlink()
+def test_CumulativeDecisionBarChart_create_chart(sample_data_1):
+    chart = CumulativeDecisionBarChart(data_path=sample_data_1, output_dir="/home/ameknas/sequenoscope/sequenoscope/plot", time_bin_unit='minutes')
+    chart.create_chart()
+    chart_file = Path("cumulative_decision_bar_chart.html")
+    assert chart_file.is_file()
+    chart_file.unlink()
 
 #----------------------------------------------------------------------
 

@@ -9,11 +9,8 @@ from sequenoscope.plot.violin_plot import ViolinPlotter
 from sequenoscope.version import __version__
 
 # TODO: fix cumulative decision chart
-# TODO: fix test and control file overwriting for decision charts
 # TODO: use color blind friendly colors for decision ba chart
 # TODO: Once finalized, incorporate new changes to decsion bar chart class
-# TODO: remove mean_Read_length_reverse from seqmanifest file
-# TODO: Make the decisions for all short_reads stop recieiving
 
 
 
@@ -99,10 +96,10 @@ def run():
     print("Plotting seq manifest plots")
     print("-"*40)
 
-    test_independent_decision_bar_chart = IndependentDecisionStackedBarChart(test_manifest, output_dir, output_prefix, time_bin_unit)
-    control_independent_decision_bar_chart = IndependentDecisionStackedBarChart(control_manifest, output_dir, output_prefix, time_bin_unit)
-    test_cumulative_decision_bar_chart = CumulativeDecisionBarChart(test_manifest, output_dir, output_prefix, time_bin_unit)
-    control_cumulative_decision_bar_chart = CumulativeDecisionBarChart(control_manifest, output_dir, output_prefix, time_bin_unit)
+    test_independent_decision_bar_chart = IndependentDecisionStackedBarChart(test_manifest, output_dir, "test_" + output_prefix, time_bin_unit)
+    control_independent_decision_bar_chart = IndependentDecisionStackedBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
+    test_cumulative_decision_bar_chart = CumulativeDecisionBarChart(test_manifest, output_dir, "test_" + output_prefix, time_bin_unit)
+    control_cumulative_decision_bar_chart = CumulativeDecisionBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
     violin_plot_read_qscore = ViolinPlotter(test_manifest, control_manifest, output_dir, output_prefix, quality_metric='read_qscore', fraction=violin_data_precent)
     violin_plot_read_length = ViolinPlotter(test_manifest, control_manifest, output_dir, output_prefix, quality_metric='read_len', fraction=violin_data_precent)
 
