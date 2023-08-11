@@ -3,7 +3,16 @@ import pandas as pd
 import os
 import plotly.express as px
 
-class ViolinPlotter:
+class ViolinBuilder():
+    def __init__(self):
+        pass
+
+    def generate_chart(self):
+        self.process_files()
+        self.create_violin_plot()
+
+
+class ViolinPlotter(ViolinBuilder):
     test_file = None
     control_file = None
     status = False

@@ -8,7 +8,6 @@ from sequenoscope.plot.stats_table import MakeStatsTable
 from sequenoscope.plot.violin_plot import ViolinPlotter
 from sequenoscope.version import __version__
 
-# TODO: fix cumulative decision chart
 # TODO: use color blind friendly colors for decision ba chart
 # TODO: Once finalized, incorporate new changes to decsion bar chart class
 
@@ -100,28 +99,33 @@ def run():
     control_independent_decision_bar_chart = IndependentDecisionStackedBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
     test_cumulative_decision_bar_chart = CumulativeDecisionBarChart(test_manifest, output_dir, "test_" + output_prefix, time_bin_unit)
     control_cumulative_decision_bar_chart = CumulativeDecisionBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
-    violin_plot_read_qscore = ViolinPlotter(test_manifest, control_manifest, output_dir, output_prefix, quality_metric='read_qscore', fraction=violin_data_precent)
-    violin_plot_read_length = ViolinPlotter(test_manifest, control_manifest, output_dir, output_prefix, quality_metric='read_len', fraction=violin_data_precent)
+    violin_plot_read_qscore = ViolinPlotter(test_manifest, control_manifest, output_dir, "read_qscore_" + output_prefix, quality_metric='read_qscore', fraction=violin_data_precent)
+    violin_plot_read_length = ViolinPlotter(test_manifest, control_manifest, output_dir, "read_len_" + output_prefix, quality_metric='read_len', fraction=violin_data_precent)
 
-    test_independent_decision_bar_chart.process_data()
-    test_independent_decision_bar_chart.create_trace()
-    test_independent_decision_bar_chart.create_chart()
-    #test_independent_decision_bar_chart.song_and_dance()
+    # test_independent_decision_bar_chart.process_data()
+    # test_independent_decision_bar_chart.create_trace()
+    # test_independent_decision_bar_chart.create_chart()
+    test_independent_decision_bar_chart.generate_chart()
 
-    control_independent_decision_bar_chart.process_data()
-    control_independent_decision_bar_chart.create_trace()
-    control_independent_decision_bar_chart.create_chart()
+    # control_independent_decision_bar_chart.process_data()
+    # control_independent_decision_bar_chart.create_trace()
+    # control_independent_decision_bar_chart.create_chart()
+    control_independent_decision_bar_chart.generate_chart()
 
-    test_cumulative_decision_bar_chart.process_data()
-    test_cumulative_decision_bar_chart.create_trace()
-    test_cumulative_decision_bar_chart.create_chart()
+    # test_cumulative_decision_bar_chart.process_data()
+    # test_cumulative_decision_bar_chart.create_trace()
+    # test_cumulative_decision_bar_chart.create_chart()
+    test_cumulative_decision_bar_chart.generate_chart()
 
-    control_cumulative_decision_bar_chart.process_data()
-    control_cumulative_decision_bar_chart.create_trace()
-    control_cumulative_decision_bar_chart.create_chart()
+    # control_cumulative_decision_bar_chart.process_data()
+    # control_cumulative_decision_bar_chart.create_trace()
+    # control_cumulative_decision_bar_chart.create_chart()
+    control_cumulative_decision_bar_chart.generate_chart()
 
-    violin_plot_read_qscore.process_files()
-    violin_plot_read_qscore.create_violin_plot()
+    # violin_plot_read_qscore.process_files()
+    # violin_plot_read_qscore.create_violin_plot()
+    violin_plot_read_qscore.generate_chart()
 
-    violin_plot_read_length.process_files()
-    violin_plot_read_length.create_violin_plot()
+    # violin_plot_read_length.process_files()
+    # violin_plot_read_length.create_violin_plot()
+    violin_plot_read_length.generate_chart()

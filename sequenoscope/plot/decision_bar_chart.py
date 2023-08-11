@@ -3,7 +3,17 @@ import pandas as pd
 import plotly.graph_objects as go
 import os
 
-class IndependentDecisionStackedBarChart():
+class DecisionBarBuilder():
+    def __init__(self):
+        pass
+
+    def generate_chart(self):
+        self.process_data()
+        self.create_trace()
+        self.create_chart()
+    
+
+class IndependentDecisionStackedBarChart(DecisionBarBuilder):
     data_path = None
     status = False
     error_messages = None
@@ -134,14 +144,14 @@ class IndependentDecisionStackedBarChart():
                 return False
         return True   
 
-class CumulativeDecisionBarChart:
+class CumulativeDecisionBarChart(DecisionBarBuilder):
     data_path = None
     status = False
     error_messages = None
     output_dir = None
     output_prefix = None
 
-    def __init__(self, data_path, output_dir, time_bin_unit, output_prefix="sample"):
+    def __init__(self, data_path, output_dir, output_prefix="sample", time_bin_unit="seconds"):
         self.data_path = data_path
         self.output_dir = output_dir
         self.output_prefix = output_prefix
