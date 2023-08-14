@@ -8,8 +8,9 @@ from sequenoscope.plot.stats_table import MakeStatsTable
 from sequenoscope.plot.violin_plot import ViolinPlotter
 from sequenoscope.version import __version__
 
-# TODO: use color blind friendly colors for decision ba chart
-# TODO: Once finalized, incorporate new changes to decsion bar chart class
+# TODO: add comments to all classes to describe what's going on
+# TODO: Make sure that plot.py has is complete in terms of update and help messages
+# TODO: change the errors that pop up when plotting decision bar graphs 
 
 
 
@@ -33,7 +34,7 @@ def parse_args():
     plotting_group.add_argument('-o_pre', '--output_prefix', type=str, default='sample', help="Output prefix added before plot names. Default is 'sample'.\n\n")
     plotting_group.add_argument('--comparison_metric', default='taxon_%_covered_bases', choices=['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases', 'mean_read_length', 'taxon_length', 'taxon_covered_bases', 'taxon_%_covered_bases', 'taxon_mean_read_length'], type=str, help='Type of parameter for the box plot and single ratio bar chart. Default parameter is taxon_%%_covered_bases.\n\n')
     plotting_group.add_argument('-VP', '--violin_data_percent', default=0.1, type=float, help='Fraction of the data to use for the violin plot.\n\n')
-    plotting_group.add_argument('-bin', '--time_bin_unit', default="minutes", choices=['seconds', 'minutes', 'hours'], type=str, help='Time bin used for decision bar charts.\n\n')
+    plotting_group.add_argument('-bin', '--time_bin_unit', default="minutes", choices=['seconds', 'minutes', '5m', '15m', 'hours'], type=str, help='Time bin used for decision bar charts.\n\n')
 
     return parser.parse_args()
 
@@ -102,30 +103,10 @@ def run():
     violin_plot_read_qscore = ViolinPlotter(test_manifest, control_manifest, output_dir, "read_qscore_" + output_prefix, quality_metric='read_qscore', fraction=violin_data_precent)
     violin_plot_read_length = ViolinPlotter(test_manifest, control_manifest, output_dir, "read_len_" + output_prefix, quality_metric='read_len', fraction=violin_data_precent)
 
-    # test_independent_decision_bar_chart.process_data()
-    # test_independent_decision_bar_chart.create_trace()
-    # test_independent_decision_bar_chart.create_chart()
+
     test_independent_decision_bar_chart.generate_chart()
-
-    # control_independent_decision_bar_chart.process_data()
-    # control_independent_decision_bar_chart.create_trace()
-    # control_independent_decision_bar_chart.create_chart()
     control_independent_decision_bar_chart.generate_chart()
-
-    # test_cumulative_decision_bar_chart.process_data()
-    # test_cumulative_decision_bar_chart.create_trace()
-    # test_cumulative_decision_bar_chart.create_chart()
     test_cumulative_decision_bar_chart.generate_chart()
-
-    # control_cumulative_decision_bar_chart.process_data()
-    # control_cumulative_decision_bar_chart.create_trace()
-    # control_cumulative_decision_bar_chart.create_chart()
     control_cumulative_decision_bar_chart.generate_chart()
-
-    # violin_plot_read_qscore.process_files()
-    # violin_plot_read_qscore.create_violin_plot()
     violin_plot_read_qscore.generate_chart()
-
-    # violin_plot_read_length.process_files()
-    # violin_plot_read_length.create_violin_plot()
     violin_plot_read_length.generate_chart()

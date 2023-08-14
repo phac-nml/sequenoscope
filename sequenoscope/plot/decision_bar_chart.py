@@ -31,6 +31,7 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
             "no_decision": ["signal_negative", "unblock_mux_change"]
         }
         self.time_bin_unit = time_bin_unit
+        self.class_order = ["stop_receiving", "unblocked", "no_decision"]
 
     def process_data(self):
         data = pd.read_csv(self.data_path, sep='\t')
@@ -51,6 +52,10 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         df.set_index('start_time', inplace=True)
         if self.time_bin_unit == "hours":
             self.hourly_counts = df.resample('30T').count()
+        elif self.time_bin_unit == "15m":
+            self.hourly_counts = df.resample('15T').count()
+        elif self.time_bin_unit == "5m":
+            self.hourly_counts = df.resample('5T').count()
         elif self.time_bin_unit == "minutes":
             self.hourly_counts = df.resample('1T').count()
         elif self.time_bin_unit == "seconds":
@@ -58,33 +63,73 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         self.hourly_counts = self.hourly_counts[self.hourly_counts.index != pd.to_datetime(0)]
         self.count_values = self.hourly_counts['read_id'].tolist()
 
+    def convert_time_units(self, x):
+    # Convert the start_time_numeric (seconds) to minutes or hours or whatever the scale is
+        if self.time_bin_unit == "5m" or self.time_bin_unit == "15m":
+            return x / 60  # convert seconds to minutes
+        elif self.time_bin_unit == "hours":
+            return x / 3600  # convert seconds to hours
+        elif self.time_bin_unit == "minutes":
+            return x / 60
+        elif self.time_bin_unit == "seconds":
+            return x
+        else:
+            return x
+        
+    def generate_x_values(self):
+        self.x_values = []
+        
+        for decision in self.decision_count['decision'].unique():
+            filtered_data = self.decision_count[self.decision_count['decision'] == decision]
+            filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
+            if self.time_bin_unit == "hours":
+                filtered_data = filtered_data[
+                    (filtered_data['start_time_numeric'] % 3600 == 0) | 
+                    (filtered_data['start_time_numeric'] % 1800 == 0) | 
+                    (filtered_data['start_time_numeric'] == 0)
+                ]
+            elif self.time_bin_unit == "15m":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 900 == 0)]
+            elif self.time_bin_unit == "5m":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 300 == 0)]
+            elif self.time_bin_unit == "minutes":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
+
+            self.x_values.extend(filtered_data['start_time_numeric'].map(self.convert_time_units))
+        
+        self.x_values = list(pd.unique(self.x_values))
+
+
     def create_chart(self):
         self.process_data()
         self.create_trace()
-        convert_time_units = lambda x: pd.to_timedelta(x, unit='s') / pd.Timedelta('1{}'.format(self.time_bin_unit))
-
-        x_values = []
+        self.generate_x_values()
+    
         fig = go.Figure()
 
-        color_palette = ['blue', 'green', 'orange', 'red'] 
-        for idx, decision in enumerate(self.decision_count['decision'].unique()):
+        color_palette = ['#2ECC71', '#34495E', '#9B59B6', '#F1C40F']
+        for idx, decision in enumerate(self.class_order):
             filtered_data = self.decision_count[self.decision_count['decision'] == decision]
             filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
             if self.time_bin_unit == "hours":
                 filtered_data = filtered_data[
                     (filtered_data['start_time_numeric'] % 3600 == 0) | (filtered_data['start_time_numeric'] % 1800 == 0) | (filtered_data['start_time_numeric'] == 0)
                     ]
+            elif self.time_bin_unit == "15m":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 900 == 0)]
+            elif self.time_bin_unit == "5m":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 300 == 0)]
             elif self.time_bin_unit == "minutes":
                 filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
-            x_values.extend(filtered_data['start_time_numeric'].map(convert_time_units))  
-            fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(convert_time_units),
+
+            fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(self.convert_time_units),
                                  y=filtered_data['percentage'],
                                  name=decision,
                                  marker_color=color_palette[idx],
                                  yaxis='y'))
-        x_values= list(pd.unique(x_values))
-        if self.time_bin_unit == 'hours' or self.time_bin_unit == 'minutes':
-            fig.add_trace(go.Scatter(x=x_values,
+
+        if self.time_bin_unit == 'hours' or self.time_bin_unit == 'minutes' or self.time_bin_unit == '5m' or self.time_bin_unit == '15m':
+            fig.add_trace(go.Scatter(x=self.x_values,
                                     y=self.hourly_counts['read_id'],
                                     name='Read Count',
                                     mode='lines',
@@ -93,7 +138,7 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
                                     yaxis='y2'))
         elif self.time_bin_unit == 'seconds':
             self.total_count_2['start_time_numeric'] = self.total_count_2['start_time'].astype(int)
-            fig.add_trace(go.Scatter(x=self.total_count_2['start_time_numeric'].astype(int).map(convert_time_units),
+            fig.add_trace(go.Scatter(x=self.total_count_2['start_time_numeric'].astype(int).map(self.convert_time_units),
                                 y=self.total_count_2['total_count'],
                                 name='Read Count',
                                 mode='lines',
@@ -162,6 +207,7 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
             "no_decision": ["signal_negative", "unblock_mux_change"]
         }
         self.time_bin_unit = time_bin_unit
+        self.class_order = ["stop_receiving", "unblocked", "no_decision"]
 
     def process_data(self):
         data = pd.read_csv(self.data_path, sep='\t')
@@ -175,7 +221,6 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
         decision_count['cumulative_total_count'] = decision_count.groupby('start_time')['cumulative_count'].transform('sum')
         decision_count['percentage'] = decision_count['cumulative_count'] / decision_count['cumulative_total_count'] * 100
         self.decision_count = decision_count
-        self.x_values = []
     
     def create_trace(self):
         df = pd.read_csv(self.data_path, sep='\t')
@@ -183,6 +228,10 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
         df.set_index('start_time', inplace=True)
         if self.time_bin_unit == "hours":
             self.hourly_counts = df.resample('30T').count()
+        elif self.time_bin_unit == "15m":
+            self.hourly_counts = df.resample('15T').count()
+        elif self.time_bin_unit == "5m":
+            self.hourly_counts = df.resample('5T').count()
         elif self.time_bin_unit == "minutes":
             self.hourly_counts = df.resample('1T').count()
         elif self.time_bin_unit == "seconds":
@@ -191,17 +240,28 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
         self.hourly_counts = self.hourly_counts[self.hourly_counts.index != pd.to_datetime(0)]
         self.count_values = self.hourly_counts['read_id'].tolist()
 
+    def convert_time_units(self, x):
+    # Convert the start_time_numeric (seconds) to minutes or hours or whatever the scale is
+        if self.time_bin_unit == "5m" or self.time_bin_unit == "15m":
+            return x / 60  # convert seconds to minutes
+        elif self.time_bin_unit == "hours":
+            return x / 3600  # convert seconds to hours
+        elif self.time_bin_unit == "minutes":
+            return x / 60
+        elif self.time_bin_unit == "seconds":
+            return x
+        else:
+            return x
+
     def create_chart(self):
         self.process_data()
         self.create_trace()
 
-        convert_time_units = lambda x: pd.to_timedelta(x, unit='s') / pd.Timedelta('1{}'.format(self.time_bin_unit))
-
         fig = go.Figure()
 
         # Define a custom color palette for the decisions
-        color_palette = ['blue', 'green', 'orange', 'red']  
-        for idx, decision in enumerate(self.decision_count['decision'].unique()):
+        color_palette = ['#2ECC71', '#34495E', '#9B59B6', '#F1C40F']  
+        for idx, decision in enumerate(self.class_order):
             filtered_data = self.decision_count[self.decision_count['decision'] == decision]
             filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
 
@@ -209,22 +269,23 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
                 filtered_data = filtered_data[
                     (filtered_data['start_time_numeric'] % 3600 == 0) | (filtered_data['start_time_numeric'] % 1800 == 0) | (filtered_data['start_time_numeric'] == 0)
                     ]
+            elif self.time_bin_unit == "15m":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 900 == 0)]
+            elif self.time_bin_unit == "5m":
+                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 300 == 0)]
             elif self.time_bin_unit == "minutes":
                 filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
             
-            self.x_values.extend(filtered_data['start_time_numeric'].map(convert_time_units))
-
-            fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(convert_time_units),
+            fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(self.convert_time_units),
                                  y=filtered_data['percentage'],
                                  name=decision,
                                  marker_color=color_palette[idx],
                                  yaxis='y'))
         
-        self.x_values = list(pd.unique(self.x_values))
 
         self.total_count_2['start_time_numeric'] = self.total_count_2['start_time'].astype(int)
         cumulative_counts = self.total_count_2['total_count'].cumsum()
-        fig.add_trace(go.Scatter(x=self.total_count_2['start_time_numeric'].astype(int).map(convert_time_units),
+        fig.add_trace(go.Scatter(x=self.total_count_2['start_time_numeric'].astype(int).map(self.convert_time_units),
                                     y=cumulative_counts,
                                     name='Read Count',
                                     mode='lines',
