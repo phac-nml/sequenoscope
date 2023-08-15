@@ -5,15 +5,22 @@ import os
 
 class DecisionBarBuilder():
     def __init__(self):
+        """
+        Constructor for the DecisionBarBuilder class.
+        """
         pass
 
     def generate_chart(self):
+        """
+        Generates a chart by processing data, creating a trace, and then creating the chart.
+        """
         self.process_data()
         self.create_trace()
         self.create_chart()
     
 
 class IndependentDecisionStackedBarChart(DecisionBarBuilder):
+    # Class attributes to store various data paths, statuses, and error messages.
     data_path = None
     status = False
     error_messages = None
@@ -21,6 +28,19 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
     output_prefix = None
 
     def __init__(self, data_path, output_dir, output_prefix="sample", time_bin_unit="seconds"):
+        """
+        Constructor for the IndependentDecisionStackedBarChart class.
+        
+        Arguments:
+            data_path (str): 
+                Path to the data file.
+            output_dir (str): 
+                Directory where output should be saved.
+            output_prefix (str, optional): 
+                Prefix for the output file name. Defaults to "sample".
+            time_bin_unit (str, optional): 
+                Unit of time for binning. Defaults to "seconds".
+        """
         self.data_path = data_path
         self.output_dir = output_dir
         self.output_prefix = output_prefix
@@ -34,6 +54,9 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         self.class_order = ["stop_receiving", "unblocked", "no_decision"]
 
     def process_data(self):
+        """
+        Process data by loading it, parsing the date-times, and performing various aggregations.
+        """
         data = pd.read_csv(self.data_path, sep='\t')
         data['start_time'] = pd.to_datetime(data['start_time'])
         self.total_count_2 = data.groupby('start_time').size().reset_index(name='total_count')
@@ -47,6 +70,9 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         self.decision_count = decision_count
 
     def create_trace(self):
+        """
+        Generate trace based on the data path and the time bin unit provided in the instance.
+        """
         df = pd.read_csv(self.data_path, sep='\t')
         df['start_time'] = pd.to_datetime(df['start_time'], unit='s')
         df.set_index('start_time', inplace=True)
@@ -64,7 +90,17 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         self.count_values = self.hourly_counts['read_id'].tolist()
 
     def convert_time_units(self, x):
-    # Convert the start_time_numeric (seconds) to minutes or hours or whatever the scale is
+        """
+        Convert the time units based on the specified bin unit.
+
+        Arguments:
+            x (int or float): 
+                Numeric value representing time.
+
+        Returns:
+            int or float: 
+                Converted time value.
+        """
         if self.time_bin_unit == "5m" or self.time_bin_unit == "15m":
             return x / 60  # convert seconds to minutes
         elif self.time_bin_unit == "hours":
@@ -77,6 +113,9 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
             return x
         
     def generate_x_values(self):
+        """
+        Generate x values for the chart based on the decision count.
+        """
         self.x_values = []
         
         for decision in self.decision_count['decision'].unique():
@@ -101,6 +140,9 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
 
 
     def create_chart(self):
+        """
+        Create a stacked bar chart based on the processed data and x values.
+        """
         self.process_data()
         self.create_trace()
         self.generate_x_values()
@@ -190,6 +232,7 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         return True   
 
 class CumulativeDecisionBarChart(DecisionBarBuilder):
+    # Class attributes to store various data paths, statuses, and error messages.
     data_path = None
     status = False
     error_messages = None
@@ -197,6 +240,19 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
     output_prefix = None
 
     def __init__(self, data_path, output_dir, output_prefix="sample", time_bin_unit="seconds"):
+        """
+        Constructor for the CumulativeDecisionBarChart class.
+        
+        Arguments:
+            data_path (str): 
+                Path to the data file.
+            output_dir (str): 
+                Directory where output should be saved.
+            output_prefix (str, optional): 
+                Prefix for the output file name. Defaults to "sample".
+            time_bin_unit (str, optional): 
+                Unit of time for binning. Defaults to "seconds".
+        """
         self.data_path = data_path
         self.output_dir = output_dir
         self.output_prefix = output_prefix
@@ -210,6 +266,9 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
         self.class_order = ["stop_receiving", "unblocked", "no_decision"]
 
     def process_data(self):
+        """
+        Processes the data by loading it, parsing date-times, aggregating, and computing percentages.
+        """
         data = pd.read_csv(self.data_path, sep='\t')
         data['start_time'] = pd.to_datetime(data['start_time'])
         self.total_count_2 = data.groupby('start_time').size().reset_index(name='total_count')
@@ -223,6 +282,9 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
         self.decision_count = decision_count
     
     def create_trace(self):
+        """
+        Generate trace based on the data path and the time bin unit provided in the instance.
+        """
         df = pd.read_csv(self.data_path, sep='\t')
         df['start_time'] = pd.to_datetime(df['start_time'], unit='s')
         df.set_index('start_time', inplace=True)
@@ -241,7 +303,17 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
         self.count_values = self.hourly_counts['read_id'].tolist()
 
     def convert_time_units(self, x):
-    # Convert the start_time_numeric (seconds) to minutes or hours or whatever the scale is
+        """
+        Convert the time units based on the specified bin unit.
+
+        Arguments:
+            x (int or float): 
+                Numeric value representing time.
+
+        Returns:
+            int or float: 
+                Converted time value.
+        """
         if self.time_bin_unit == "5m" or self.time_bin_unit == "15m":
             return x / 60  # convert seconds to minutes
         elif self.time_bin_unit == "hours":
@@ -254,6 +326,9 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
             return x
 
     def create_chart(self):
+        """
+        Creates a stacked bar chart based on the processed data, x values, and percentages.
+        """
         self.process_data()
         self.create_trace()
 

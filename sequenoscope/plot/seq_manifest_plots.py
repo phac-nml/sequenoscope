@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 class SeqManifestPlotter:
+    # Class level attributes
     test_file_path = None
     control_file_path = None
     status = False
@@ -12,6 +13,19 @@ class SeqManifestPlotter:
     output_prefix = None
     
     def __init__(self, test_file_path, control_file_path, output_dir, output_prefix="sample"):
+        """
+        Initialize the SeqManifestPlotter with file paths and output details.
+        
+        Arguments:
+            test_file_path: str
+                Path to the test file
+            control_file_path: str
+                Path to the control file
+            output_dir: str
+                Directory path where the outputs will be saved
+            output_prefix: str, optional
+                Prefix for the output files (default is "sample")
+        """
         self.output_dir = output_dir
         self.output_prefix = output_prefix
         self.test_file_path = test_file_path
@@ -19,6 +33,17 @@ class SeqManifestPlotter:
         self.color_scale = ['#FF7F0E', '#1F77B4', '#FFC0CB', '#2CA02C', '#D62728', '#9467BD']
 
     def read_data_csv(self, path):
+        """
+        Reads a CSV file and returns its content as a DataFrame.
+        
+        Arguments:
+            path: str
+                Path to the CSV file
+
+        Returns:
+            pd.DataFrame:
+                Data from the file as a pandas DataFrame
+        """
         try:
             df = pd.read_csv(path, delimiter='\t')
         except Exception as e:
@@ -27,11 +52,27 @@ class SeqManifestPlotter:
         return df
 
     def read_and_append_source(self, path, source_name):
+        """
+        Reads data from a CSV file and appends a source name to the DataFrame.
+
+        Arguments:
+            path: str
+                Path to the CSV file
+            source_name: str
+                Name to append as source_file
+
+        Returns:
+            pd.DataFrame:
+                DataFrame with appended source_file column
+        """
         df = self.read_data_csv(path)
         df['source_file'] = source_name
         return df
 
     def generate_source_file_taxon_covered_bar_chart(self):
+        """
+        Generate a bar chart that visualizes taxon covered bases for test and control files.
+        """
         df1 = self.read_and_append_source(self.test_file_path, 'test file')
         df2 = self.read_and_append_source(self.control_file_path, 'control file')
         df = pd.concat([df1, df2])
@@ -63,6 +104,13 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "source_file_taxon_covered_bar_chart.html")
 
     def generate_box_plot(self, parameter):
+        """
+        Generate a box plot comparing a specific parameter from test and control files.
+        
+        Arguments:
+            parameter: str
+                Parameter/column name from the data to be visualized
+        """
         df1 = self.read_data_csv(self.test_file_path)
         df2 = self.read_data_csv(self.control_file_path)
         fig = go.Figure()
@@ -80,6 +128,9 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "box_plot.html")
 
     def generate_ratio_bar_chart(self):
+        """
+        Generate a bar chart that visualizes the ratio between test and control samples.
+        """
         test_data = self.read_data_csv(self.test_file_path).sort_values(by='sample_id')
         control_data = self.read_data_csv(self.control_file_path).sort_values(by='sample_id')
 
@@ -110,6 +161,13 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "ratio_bar_chart.html")
 
     def generate_single_ratio_bar_chart(self, parameter):
+        """
+        Generate a bar chart visualizing the ratio of a single parameter between test and control samples.
+        
+        Arguments:
+            parameter: str
+                Parameter/column name from the data to be visualized
+        """
         test_data = self.read_data_csv(self.test_file_path).sort_values(by='sample_id')
         control_data = self.read_data_csv(self.control_file_path).sort_values(by='sample_id')
         ratio_values = test_data[parameter] / control_data[parameter]
@@ -142,6 +200,15 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "single_ratio_bar_chart.html")
 
     def save_plot_to_html(self, fig, file_name):
+        """
+        Save a plotly figure as an HTML file in the specified output directory.
+
+        Arguments:
+            fig: plotly.graph_objects.Figure
+                Figure to save
+            file_name: str
+                Name for the output file
+        """
         output_file_path = os.path.join(self.output_dir, self.output_prefix + "_" + file_name)
         fig.write_html(output_file_path)
 

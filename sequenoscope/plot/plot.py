@@ -16,7 +16,7 @@ from sequenoscope.version import __version__
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
-                               usage="sequenoscope plot <'manifest', 'summary'> --test_file <test_file_path> --control_file <control_file_path> --plot_type <plot_type> --output_file <out_path>\nFor help use: sequenoscope plot -h or sequenoscope plot --help", 
+                               usage="sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>\nFor help use: sequenoscope plot -h or sequenoscope plot --help", 
                                 description="%(prog)s version {}: a tool for analyzing and processing sequencing data.".format(__version__),
                                 formatter_class= ap.RawTextHelpFormatter)
     
@@ -110,3 +110,7 @@ def run():
     control_cumulative_decision_bar_chart.generate_chart()
     violin_plot_read_qscore.generate_chart()
     violin_plot_read_length.generate_chart()
+
+    print("-"*40)
+    print("All Done")
+    print("-"*40)

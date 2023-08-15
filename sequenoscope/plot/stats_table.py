@@ -4,6 +4,7 @@ import os
 from scipy import stats
 
 class MakeStatsTable:
+    # Class attributes to store various data paths, statuses, and error messages.
     test_file = None
     control_file = None
     status = False
@@ -12,6 +13,19 @@ class MakeStatsTable:
     output_prefix = None
 
     def __init__(self, test_file, control_file, output_dir, output_prefix="sample"):
+        """
+        Constructor for the MakeStatsTable class.
+
+        Arguments:
+        - test_file: str
+            Path to the test data file.
+        - control_file: str
+            Path to the control data file.
+        - output_dir: str
+            Directory where the output will be saved.
+        - output_prefix: str
+            Prefix for the output filename. Default is "sample".
+        """
         self.test_file = test_file
         self.control_file = control_file
         self.output_dir = output_dir
@@ -28,6 +42,9 @@ class MakeStatsTable:
                                                'Statistical_Test', 'P-Value', 'Significance', 'taxon_id'])
 
     def generate_stats(self):
+        """
+        Generates statistical comparisons between test data and control data for specified parameters.
+        """
         # Iterate over each row in the test data
         for index, test_row in self.test_data.iterrows():
             # Extract the taxon ID for the current row
@@ -73,6 +90,13 @@ class MakeStatsTable:
                 self.result_df = pd.concat([self.result_df, new_row], ignore_index=True)
 
     def save_to_csv(self, filename='stat_results.csv'):
+        """
+        Saves the result data frame to a CSV file.
+
+        Arguments:
+        - filename: str
+            Name of the output file. Default is "stat_results.csv".
+        """
         output_file_path = os.path.join(self.output_dir, self.output_prefix + "_" + filename)
         self.result_df.to_csv(output_file_path, index=False)
 

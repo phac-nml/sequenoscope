@@ -5,14 +5,21 @@ import plotly.express as px
 
 class ViolinBuilder():
     def __init__(self):
+        """
+        Constructor for the ViolinBuilder class.
+        """
         pass
 
     def generate_chart(self):
+        """
+        Generates a chart by processing files and then creating the plot.
+        """
         self.process_files()
         self.create_violin_plot()
 
 
 class ViolinPlotter(ViolinBuilder):
+    # Class attributes to store various data paths, statuses, and error messages.
     test_file = None
     control_file = None
     status = False
@@ -21,6 +28,23 @@ class ViolinPlotter(ViolinBuilder):
     output_prefix = None
 
     def __init__(self, test_file, control_file, output_dir, output_prefix="sample", quality_metric='read_qscore', fraction=0.1):
+        """
+        Constructor for the ViolinPlotter class.
+
+        Arguments:
+        - test_file: str
+            Path to the test data file.
+        - control_file: str
+            Path to the control data file.
+        - output_dir: str
+            Directory where the output will be saved.
+        - output_prefix: str
+            Prefix for the output filename. Default is "sample".
+        - quality_metric: str
+            Quality metric to be used for the violin plot. Default is 'read_qscore'.
+        - fraction: float
+            Fraction of data to be sampled for plotting. Default is 0.1.
+        """
         self.test_file = test_file
         self.control_file = control_file
         self.output_dir = output_dir
@@ -30,6 +54,19 @@ class ViolinPlotter(ViolinBuilder):
         self.data = None
 
     def process_file(self, file_path, source_file):
+        """
+        Process a single file to prepare it for the violin plot.
+
+        Arguments:
+        - file_path: str
+            Path to the file to process.
+        - source_file: str
+            Source of the file. It's used as a label in the final plot.
+
+        Returns:
+        - pd.DataFrame
+            Processed dataframe with the required columns for plotting.
+        """
         # Read the file and add source_file column
         df = pd.read_csv(file_path, delimiter='\t')
         df['source_file'] = source_file
@@ -55,6 +92,9 @@ class ViolinPlotter(ViolinBuilder):
         return processed_chunks
 
     def process_files(self):
+        """
+        Process both test and control files.
+        """
         # Process the test file
         processed_test = self.process_file(self.test_file, 'Test')
 
@@ -65,6 +105,9 @@ class ViolinPlotter(ViolinBuilder):
         self.data = pd.concat([processed_test, processed_control])
 
     def create_violin_plot(self):
+        """
+        Generate the violin plot based on processed data.
+        """
         if self.data is None:
             raise ValueError("No data to plot. Please run the process_files() method first.")
 
