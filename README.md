@@ -133,7 +133,28 @@ If you encounter any issues or need further assistance, refer to the full docume
 -------------
 To quickly get started with the `plot` module, follow the instructions below:
 
-**Coming soon**
+1. **Required Paths:** Ensure you have designated the necessary directories:
+- **Test Directory:** Provide the path to the test directory that contains the seq manifest files from the analyze module. `-T` or `--test_dir` `<test_dir_path>`
+- **Control Directory:** Specify the path to the control directory that contains the seq manifest files from the analyze module. `-C` or `--control_dir` `<control_dir_path>`
+- **Output Directory:** Choose an output directory for the plots. `-o` or `--output_dir` `<out_path>`
+
+2. **Plotting Options:** Customize your plots with various options:
+- **Output Prefix:** You can add a prefix before plot names with the `--output_prefix` option. `-o_pre` or `--output_prefix` `<OUTPUT_PREFIX>`. *Default is 'sample'*.
+- **Comparison Metric:** Select a parameter for the box plot and single ratio bar chart using the `--comparison_metric` option. *Default parameter is taxon_%_covered_bases*.
+- **Violin Data Fraction:** Set a fraction of the data to use for the violin plot. `-VP` or `--violin_data_percent` `<0.1 - 1>`. *Default fraction is 0.1*
+- **Time Bin Unit:** Designate a time bin used for decision bar charts. `-bin` or `--time_bin_unit` `{seconds,minutes,5m,15m,hours}`. *Default bin is minutes*
+
+3. **Run the Command:** With the basic required options:
+
+        sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
+
+Use the `--force flag` if you wish to force an overwrite of an existing results directory.
+
+Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run `sequenoscope plot -h` or `sequenoscope plot --help`.
+
+Remember to replace `<test_dir_path>`, `<control_dir_path>`, and `<out_path>` with the actual paths for your directories.
+
+If you encounter any issues or need further assistance, refer to the full documentation or consult the available resources for troubleshooting.
 
 ## Benchmarks
 
