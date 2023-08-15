@@ -148,19 +148,13 @@ To quickly get started with the `plot` module, follow the instructions below:
 
         sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
 
-Remember to replace `<test_dir_path>`, `<control_dir_path>`, and `<out_path>` with the actual paths for your directories.
-
 Use the `--force flag` if you wish to force an overwrite of an existing results directory.
 
-4. **Help:** If you encounter any issues or need further assistance, refer to the help command:
+Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run `sequenoscope plot -h` or `sequenoscope plot --help`.
 
-        sequenoscope plot -h 
+Remember to replace `<test_dir_path>`, `<control_dir_path>`, and `<out_path>` with the actual paths for your directories.
 
-or
-
-        sequenoscope plot --help
-
-For more detailed information on available options, you can run the help commands provided. Ensure you replace placeholders with your actual paths and desired parameters.
+If you encounter any issues or need further assistance, refer to the full documentation or consult the available resources for troubleshooting.
 
 ## Benchmarks
 
