@@ -8,8 +8,6 @@ from sequenoscope.plot.stats_table import MakeStatsTable
 from sequenoscope.plot.violin_plot import ViolinPlotter
 from sequenoscope.version import __version__
 
-# TODO: add comments to all classes to describe what's going on
-# TODO: Make sure that plot.py has is complete in terms of update and help messages
 # TODO: change the errors that pop up when plotting decision bar graphs 
 
 

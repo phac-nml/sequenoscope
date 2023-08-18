@@ -137,6 +137,7 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
             self.x_values.extend(filtered_data['start_time_numeric'].map(self.convert_time_units))
         
         self.x_values = list(pd.unique(self.x_values))
+        self.x_values.sort()
 
 
     def create_chart(self):

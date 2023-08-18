@@ -3,7 +3,7 @@ import sys
 
 
 modules = {'analyze': 'map reads to a target and produce a report with sequencing statistics',
-            'plot': 'generate plots based on fastq or kmer hash files',
+            'plot': 'generate plots based on seq manifest files',
             'filter_ONT': 'filter reads from a fastq file based on a sequencing summary file'
             }
 
