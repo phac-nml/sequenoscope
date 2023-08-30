@@ -132,6 +132,7 @@ class SeqManifest:
         else:
             return 0
 
+
     def convert_qscores(self,qual_string):
         """
         Calculates the mean quality score for a read where they have been converted to Phred
@@ -146,7 +147,6 @@ class SeqManifest:
         qual_values = []
         for c in qual_string:
             qual_values.append(ord(c) - DefaultValues.phred_33_encoding_value)
-
         return qual_values
 
     def process_fastq(self, fastq_file_list, read_dict):
@@ -169,6 +169,7 @@ class SeqManifest:
                 qscore = self.calc_mean_qscores(qual)
                 read_dict[read_id] = [seq_len,qscore]
 
+
     def create_row(self):
         """
         create rows and store them into a dictionary
@@ -181,6 +182,8 @@ class SeqManifest:
         for field_id in self.fields:
             out_row[field_id] = ''
         return out_row
+        
+
 
     def create_manifest_with_sum(self):
         """
@@ -196,16 +199,15 @@ class SeqManifest:
 
         fin = open(self.in_seq_summary,'r')
         header = next(fin).strip().split(self.delim)
-        
-        read_list = []
 
+        read_set = set()
         with open(self.read_list, 'r') as file:
             lines = file.readlines()
 
         for line in lines:
             line = line.strip()
             if line != 'read_id':
-                read_list.append(line)
+                read_set.add(line)
 
         for line in fin:
             row = line.strip().split(self.delim)
@@ -215,11 +217,8 @@ class SeqManifest:
 
             read_id = row_data['read_id']
 
-            if read_id not in read_list:
+            if read_id not in read_set:
               continue
-
-            #if read_id not in self.filtered_reads.keys():
-            #   continue
 
             read_len = row_data['sequence_length_template']
             read_qual = row_data['mean_qscore_template']
@@ -251,10 +250,12 @@ class SeqManifest:
                 is_mapped = True
             if len(mapped_contigs) > 1:
                 is_uniq = False
+            
 
             fastp_status = False
             if read_id in self.filtered_reads:
                 fastp_status = True
+
             out_row['fastp_status'] = fastp_status
             out_row['sample_id'] = self.sample_id
             out_row['read_id'] = read_id
@@ -265,7 +266,6 @@ class SeqManifest:
             out_row['start_time'] = start_time
             out_row['end_time'] = end_time
             out_row['decision'] = row_data['end_reason']
-
 
             if len(mapped_contigs) == 0:
                 out_row['contig_id'] = ''
@@ -279,7 +279,7 @@ class SeqManifest:
         if self.status == False:
             self.error_messages = "one or more files was not created or was empty"
             raise ValueError(str(self.error_messages))
-        
+
         fin.close()
         fout.close()
 
