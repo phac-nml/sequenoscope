@@ -72,7 +72,7 @@ If you run ``sequenoscope``, you should see the following usage statement:
         Available commands:
         
         analyze     map reads to a target and produce a report with sequencing statistics
-        plot        generate plots based on fastq or kmer hash files
+        plot        generate plots based on directories with seq manifest files
         filter_ONT  filter reads from a fastq file based on a sequencing summary file
 
 Quick start
