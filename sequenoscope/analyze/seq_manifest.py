@@ -398,13 +398,13 @@ class SeqManifestSummary:
     sample_id = ''
     out_prefix = ''
     out_dir = ''
-    kmer_json_file = None
-    fastp_json_file = None
+    genome_size = None
+    coverage = None
     bam_obj = None
     status = False
     error_messages = None
 
-    def __init__(self,sample_id, bam_obj, out_prefix, out_dir, kmer_json_file=None,
+    def __init__(self,sample_id, bam_obj, out_prefix, out_dir, genome_size, coverage,
                   fastp_json_file=None, paired=False):
         """
         Initalize the class with sample_id, bam_obj, out_prefix, and out_dir. Extract sequencing
@@ -427,11 +427,12 @@ class SeqManifestSummary:
                 a designation of wheather or not the files specified belong to paired-end sequencing data
         """
         self.sample_id = sample_id
-        self.kmer_json_file = kmer_json_file
         self.fastp_json_file = fastp_json_file
         self.bam_obj = bam_obj
         self.out_prefix = out_prefix
         self.out_dir = out_dir
+        self.genome_size = genome_size
+        self.coverage = coverage
         self.paired = paired
         # if self.paired:
         #     self.fields.insert(6, "mean_read_length_reverse")
@@ -465,8 +466,8 @@ class SeqManifestSummary:
         out_row = self.create_row()
         for contig_id in self.bam_obj.ref_stats:
             out_row["sample_id"] = self.sample_id
-            out_row["est_genome_size"] = self.kmer_json_file["est_genome_size"]
-            out_row["est_kmer_coverage_depth"] = self.kmer_json_file["hom_peak"]["freq"]
+            out_row["est_genome_size"] = self.genome_size
+            out_row["est_kmer_coverage_depth"] = self.coverage
             out_row["total_bases"] = self.fastp_json_file["summary"]["before_filtering"]["total_bases"]
             out_row["total_fastp_bases"] = self.fastp_json_file["summary"]["after_filtering"]["total_bases"]
             out_row["mean_read_length"] = self.fastp_json_file["summary"]["after_filtering"]["read1_mean_length"]

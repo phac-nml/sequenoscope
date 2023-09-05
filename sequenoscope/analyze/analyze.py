@@ -14,6 +14,7 @@ from sequenoscope.analyze.fastq_extractor import FastqExtractor
 from sequenoscope.analyze.seq_manifest import SeqManifest
 from sequenoscope.utils.parser import FastqPairedEndRenamer
 from sequenoscope.analyze.seq_manifest import SeqManifestSummary
+from sequenoscope.analyze.mash import MashSketcher
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
@@ -155,8 +156,13 @@ def run():
 
     # using kat hist to analyze kmers
 
-    kat_run = KatRunner(sequencing_sample_filtered, input_reference, out_directory, f"{out_prefix}_kmer_analysis", kmersize = kat_hist_kmer_size)
-    kat_run.kat_hist()
+    # kat_run = KatRunner(sequencing_sample_filtered, input_reference, out_directory, f"{out_prefix}_kmer_analysis", kmersize = kat_hist_kmer_size)
+    # kat_run.kat_hist()
+
+    mash_run = MashSketcher(out_directory, out_prefix)
+    mash_results = mash_run.run_mash_sketch(fastp_run_process.result_files["output_files_fastp"])
+    mash_genome_size = mash_results["Genome Size"]
+    mash_coverage = mash_results["Coverage"]
 
     print("-"*40)
     print("Creating manifest files...")
@@ -173,14 +179,15 @@ def run():
                                in_seq_summary=seq_summary
                                )
         
-        kmer_file = GeneralSeqParser(kat_run.result_files["hist"]["json_file"], "json")
+        # kmer_file = GeneralSeqParser(kat_run.result_files["hist"]["json_file"], "json")
         fastp_file = GeneralSeqParser(fastp_run_process.result_files["json"], "json")
 
         seq_summary_single_end_run = SeqManifestSummary(out_prefix,
                                 manifest_with_sum_run.bam_obj, 
                                 f"{out_prefix}_manifest_summary",
                                 out_dir=out_directory,
-                                kmer_json_file=kmer_file.parsed_file,
+                                genome_size = mash_genome_size,
+                                coverage = mash_coverage,
                                 fastp_json_file=fastp_file.parsed_file
                                 )
     
@@ -199,7 +206,7 @@ def run():
                                end_time=end_time
                                )
         
-        kmer_file = GeneralSeqParser(kat_run.result_files["hist"]["json_file"], "json")
+        # kmer_file = GeneralSeqParser(kat_run.result_files["hist"]["json_file"], "json")
         fastp_file = GeneralSeqParser(fastp_run_process.result_files["json"], "json")
 
         if seq_class.upper() == SequenceTypes.paired_end:
@@ -207,7 +214,8 @@ def run():
                                     manifest_no_sum_run.bam_obj, 
                                     f"{out_prefix}_manifest_summary",
                                     out_dir=out_directory,
-                                    kmer_json_file=kmer_file.parsed_file,
+                                    genome_size = mash_genome_size,
+                                    coverage = mash_coverage,
                                     fastp_json_file=fastp_file.parsed_file,
                                     paired=True
                                     )
@@ -218,7 +226,8 @@ def run():
                                     manifest_no_sum_run.bam_obj, 
                                     f"{out_prefix}_manifest_summary",
                                     out_dir=out_directory,
-                                    kmer_json_file=kmer_file.parsed_file,
+                                    genome_size = mash_genome_size,
+                                    coverage = mash_coverage,
                                     fastp_json_file=fastp_file.parsed_file,
                                     paired=False
                                     )
