@@ -8,10 +8,6 @@ from sequenoscope.plot.stats_table import MakeStatsTable
 from sequenoscope.plot.violin_plot import ViolinPlotter
 from sequenoscope.version import __version__
 
-# TODO: change the errors that pop up when plotting decision bar graphs 
-
-
-
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
                                usage="sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>\nFor help use: sequenoscope plot -h or sequenoscope plot --help", 

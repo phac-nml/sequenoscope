@@ -1,0 +1,193 @@
+{
+  "paths": [
+    {
+      "_path": "python-scripts/sequenoscope",
+      "file_mode": "text",
+      "path_type": "hardlink",
+      "prefix_placeholder": "/home/ameknas/anaconda3/envs/test_build/conda-bld/sequenoscope_1694543893081/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_p",
+      "sha256": "1bb0b907f1b5d4eba50b6d076f9222e2648226a7a153a3f81f0cc0a920d45ba0",
+      "size_in_bytes": 499
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/INSTALLER",
+      "path_type": "hardlink",
+      "sha256": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+      "size_in_bytes": 5
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/LICENSE",
+      "path_type": "hardlink",
+      "sha256": "8e11b37549efdb7b1784ad9af64e77de8bb5f2ebc0c8a1012301993316fe7078",
+      "size_in_bytes": 23118
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/METADATA",
+      "path_type": "hardlink",
+      "sha256": "25f427ce42c56de8491c19fcd888d986633fd100e30d40c3eb9b3aa5da1da341",
+      "size_in_bytes": 1067
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/RECORD",
+      "path_type": "hardlink",
+      "sha256": "ad2974040f1e999e4603a424163694fa2eb1fe31e6f32a3b88117411df6ebad6",
+      "size_in_bytes": 3993
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/REQUESTED",
+      "path_type": "hardlink",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_in_bytes": 0
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/WHEEL",
+      "path_type": "hardlink",
+      "sha256": "c903798389a0e00c9b4639208bef72cb889010589b1909a5cfbf0f8a4e4eafe0",
+      "size_in_bytes": 92
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/direct_url.json",
+      "path_type": "hardlink",
+      "sha256": "fa4db3cb3b715ed1a360e6373689261f9d721945eb5d8d86eb590c1991aa6cdc",
+      "size_in_bytes": 115
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/entry_points.txt",
+      "path_type": "hardlink",
+      "sha256": "241fed6f1ab1e3704e7d9b616ecc006b2802c1ef71c8c3cbea76f8eb96a0eefa",
+      "size_in_bytes": 56
+    },
+    {
+      "_path": "site-packages/sequenoscope-0.0.1.dist-info/top_level.txt",
+      "path_type": "hardlink",
+      "sha256": "d6260e968acecb3076e05b95ae6ebe91e3ee77c27c97457dbe3a293fdd1ddde8",
+      "size_in_bytes": 13
+    },
+    {
+      "_path": "site-packages/sequenoscope/__init__.py",
+      "path_type": "hardlink",
+      "sha256": "ff834041f8bf03b17cabd0f6ca1db95fd45c8ce3822da9a0c0e825742e4b97ba",
+      "size_in_bytes": 71
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/__init__.py",
+      "path_type": "hardlink",
+      "sha256": "a3129e77c2d5dc123e2045c6fe83b4e117e4ddb51fa3c69652a59399f8951c40",
+      "size_in_bytes": 132
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/analyze.py",
+      "path_type": "hardlink",
+      "sha256": "a071cce225af33b9faf3e38e2940689ef944a7331a837c829a5ac560d1c20c78",
+      "size_in_bytes": 12952
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/bam.py",
+      "path_type": "hardlink",
+      "sha256": "9d7ee88ac5857530cab56200e02d663529853278d6a3a4be30a243e0c14c8f8b",
+      "size_in_bytes": 7774
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/fastP.py",
+      "path_type": "hardlink",
+      "sha256": "e5f574976145264008aca713f0a1de7933952b028da1c3ce700f0ec3a28165c0",
+      "size_in_bytes": 5595
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/fastq_extractor.py",
+      "path_type": "hardlink",
+      "sha256": "9dcb4b45261b6b0e13a439af2f5a3c8c0f5884f087ca7c12d27a7b0269f8a912",
+      "size_in_bytes": 6010
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/kat.py",
+      "path_type": "hardlink",
+      "sha256": "ed63180bb58428b51e7e500a4dd0ff4216a4f7293ee9900d3a281180f068c5b0",
+      "size_in_bytes": 6867
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/mash.py",
+      "path_type": "hardlink",
+      "sha256": "fbc38919079e77d6a99dd1d4f28b7583811debb948c8903247fe6d8f9973e22a",
+      "size_in_bytes": 2081
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/minimap2.py",
+      "path_type": "hardlink",
+      "sha256": "f5489cc05c0e56e9e5c535b861c9a59cae196138d74ca622a86f54f99bba2d04",
+      "size_in_bytes": 3367
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/processing.py",
+      "path_type": "hardlink",
+      "sha256": "a398434fee951a89a0f2585f6187d6610be5145838a8391d857f1ac8bf983ff8",
+      "size_in_bytes": 5954
+    },
+    {
+      "_path": "site-packages/sequenoscope/analyze/seq_manifest.py",
+      "path_type": "hardlink",
+      "sha256": "54bb765d0971c1002fc5149ab6dd2ade38b05fa4133c3f6aadf4f107ea24167a",
+      "size_in_bytes": 18778
+    },
+    {
+      "_path": "site-packages/sequenoscope/constant.py",
+      "path_type": "hardlink",
+      "sha256": "bb8e275f2a54f28850fa0f2f4cc9a931aec50f4330b5313a0f877f6cbc215448",
+      "size_in_bytes": 490
+    },
+    {
+      "_path": "site-packages/sequenoscope/filter_ONT/__init__.py",
+      "path_type": "hardlink",
+      "sha256": "b0dea45e3b709931c058ac51466ba4b7c047115bd676603fdcd4665a4d36ab41",
+      "size_in_bytes": 214
+    },
+    {
+      "_path": "site-packages/sequenoscope/filter_ONT/filter_ONT.py",
+      "path_type": "hardlink",
+      "sha256": "6e8110c52e312885bf024c30ef6428fd414ba2e947cf3c188439ae89f3cd43f1",
+      "size_in_bytes": 6036
+    },
+    {
+      "_path": "site-packages/sequenoscope/filter_ONT/seq_summary_processing.py",
+      "path_type": "hardlink",
+      "sha256": "a2238e87a822a11b5e7856dff9a198571a668ae53a7001466b744f0dbd27eb97",
+      "size_in_bytes": 6439
+    },
+    {
+      "_path": "site-packages/sequenoscope/filter_ONT/seqtk.py",
+      "path_type": "hardlink",
+      "sha256": "2249d193c3daaf3dfa29b7832b62f2935478b87fec923f8a16a7a8315699b0a2",
+      "size_in_bytes": 2592
+    },
+    {
+      "_path": "site-packages/sequenoscope/main.py",
+      "path_type": "hardlink",
+      "sha256": "81d77b660f27c05d0d415531cc9d2c2f71c914c07f90fd54dd20f2ebdb33866f",
+      "size_in_bytes": 1456
+    },
+    {
+      "_path": "site-packages/sequenoscope/utils/__init__.py",
+      "path_type": "hardlink",
+      "sha256": "9d89d31d3420002cad9c10b42db16f6bbd96451915ca0ca0470a7171aded1525",
+      "size_in_bytes": 653
+    },
+    {
+      "_path": "site-packages/sequenoscope/utils/parser.py",
+      "path_type": "hardlink",
+      "sha256": "dd9620ecc2f5586102eba716d7ce53049c9f99b3133a12bbd9ce8e330b9988bb",
+      "size_in_bytes": 8173
+    },
+    {
+      "_path": "site-packages/sequenoscope/utils/sequence_class.py",
+      "path_type": "hardlink",
+      "sha256": "1d7bab99a36e4077ad5ea01175a3611cadc3ef1527d57f5fddcdacde9096f3b8",
+      "size_in_bytes": 1218
+    },
+    {
+      "_path": "site-packages/sequenoscope/version.py",
+      "path_type": "hardlink",
+      "sha256": "ba0cae165884aad0304261f8b1395cd7a6172986c558399fca4f3b7c4ac1f3ef",
+      "size_in_bytes": 21
+    }
+  ],
+  "paths_version": 1
+}

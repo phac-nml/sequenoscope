@@ -1,0 +1,39 @@
+{
+  "channeldata_version": 1,
+  "packages": {
+    "sequenoscope": {
+      "activate.d": false,
+      "binary_prefix": false,
+      "deactivate.d": false,
+      "description": null,
+      "dev_url": null,
+      "doc_source_url": null,
+      "doc_url": null,
+      "home": "https://github.com/phac-nml/sequenoscope",
+      "icon_hash": null,
+      "icon_url": null,
+      "identifiers": null,
+      "keywords": null,
+      "license": "Apache 2",
+      "post_link": false,
+      "pre_link": false,
+      "pre_unlink": false,
+      "recipe_origin": null,
+      "run_exports": {},
+      "source_git_url": null,
+      "source_url": "https://github.com/phac-nml/sequenoscope/archive/v0.0.1.tar.gz",
+      "subdirs": [
+        "noarch"
+      ],
+      "summary": "The following marks the first release for a versatile bioinformatic pipeline for the analysis of sequencing data. The pipeline handles different types of sequencing data and has specific tools that give insight into adaptive sampling sequencing introduced by Oxford Nanopore sequencers.",
+      "tags": null,
+      "text_prefix": true,
+      "timestamp": 1694544305,
+      "version": "v0.0.1"
+    }
+  },
+  "subdirs": [
+    "linux-64",
+    "noarch"
+  ]
+}
