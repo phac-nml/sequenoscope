@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+import warnings
+import pandas as pd
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings('ignore', category=UserWarning, module='scipy.stats.morestats')
+warnings.filterwarnings('ignore', category=RuntimeWarning, message='invalid value encountered in long_scalars')
+warnings.filterwarnings('ignore', category=RuntimeWarning, message='invalid value encountered in double_scalars')
+warnings.simplefilter(action='ignore', category=pd.core.common.SettingWithCopyWarning)
 import os
 import sys
 import argparse as ap

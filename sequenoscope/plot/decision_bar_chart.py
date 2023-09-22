@@ -60,10 +60,13 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         data = pd.read_csv(self.data_path, sep='\t')
         data['start_time'] = pd.to_datetime(data['start_time'])
         self.total_count_2 = data.groupby('start_time').size().reset_index(name='total_count')
+        all_decisions = pd.DataFrame({'decision': ['no_decision', 'stop_receiving', 'unblocked']})  # Add others if needed
+        all_times = pd.DataFrame({'start_time': data['start_time'].unique()})
+        complete_grid = all_times.assign(key=1).merge(all_decisions.assign(key=1), on='key').drop('key', axis=1)
+        data['decision'] = data['decision'].apply(lambda x: 'no_decision' if x in ['signal_negative', 'unblock_mux_change'] else x)
         decision_count = data.groupby(['start_time', 'decision']).size().reset_index(name='count')
-        decision_count['decision'] = decision_count['decision'].apply(lambda x: 'no_decision' if x in ['signal_negative', 'unblock_mux_change'] else x)
-        decision_count = decision_count.groupby(['start_time', 'decision']).sum().reset_index()
         decision_count['decision'] = decision_count['decision'].map(lambda x: next((k for k, v in self.classes.items() if x in v), x))
+        decision_count = complete_grid.merge(decision_count, on=['start_time', 'decision'], how='left').fillna({'count': 0})
         total_count = decision_count.groupby('start_time')['count'].sum().reset_index(name='total_count')
         decision_count = decision_count.merge(total_count, on='start_time')
         decision_count['percentage'] = decision_count['count'] / decision_count['total_count'] * 100
@@ -112,41 +115,13 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
         else:
             return x
         
-    def generate_x_values(self):
-        """
-        Generate x values for the chart based on the decision count.
-        """
-        self.x_values = []
-        
-        for decision in self.decision_count['decision'].unique():
-            filtered_data = self.decision_count[self.decision_count['decision'] == decision]
-            filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
-            if self.time_bin_unit == "hours":
-                filtered_data = filtered_data[
-                    (filtered_data['start_time_numeric'] % 3600 == 0) | 
-                    (filtered_data['start_time_numeric'] % 1800 == 0) | 
-                    (filtered_data['start_time_numeric'] == 0)
-                ]
-            elif self.time_bin_unit == "15m":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 900 == 0)]
-            elif self.time_bin_unit == "5m":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 300 == 0)]
-            elif self.time_bin_unit == "minutes":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
-
-            self.x_values.extend(filtered_data['start_time_numeric'].map(self.convert_time_units))
-        
-        self.x_values = list(pd.unique(self.x_values))
-        self.x_values.sort()
-
-
     def create_chart(self):
         """
         Create a stacked bar chart based on the processed data and x values.
         """
         self.process_data()
         self.create_trace()
-        self.generate_x_values()
+        self.x_values = []
     
         fig = go.Figure()
 
@@ -155,21 +130,48 @@ class IndependentDecisionStackedBarChart(DecisionBarBuilder):
             filtered_data = self.decision_count[self.decision_count['decision'] == decision]
             filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
             if self.time_bin_unit == "hours":
-                filtered_data = filtered_data[
-                    (filtered_data['start_time_numeric'] % 3600 == 0) | (filtered_data['start_time_numeric'] % 1800 == 0) | (filtered_data['start_time_numeric'] == 0)
-                    ]
-            elif self.time_bin_unit == "15m":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 900 == 0)]
-            elif self.time_bin_unit == "5m":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 300 == 0)]
+                filtered_data['hourly_bins'] = (filtered_data['start_time_numeric'] // 3600) * 3600
+                aggregated_df = filtered_data.groupby('hourly_bins').agg({'count': 'sum', 'total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['count'] / aggregated_df['total_count']) * 100
+                x_data = aggregated_df['hourly_bins']
+                y_data = aggregated_df['percentage']
+                
             elif self.time_bin_unit == "minutes":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
+                offset = filtered_data['start_time_numeric'].min() % 60
+                filtered_data['minute_bins'] = ((filtered_data['start_time_numeric'] - offset) // 60) * 60
+                aggregated_df = filtered_data.groupby('minute_bins').agg({'count': 'sum', 'total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['count'] / aggregated_df['total_count']) * 100
+                x_data = aggregated_df['minute_bins']
+                y_data = aggregated_df['percentage']
+                
+            elif self.time_bin_unit == "5m":
+                filtered_data['5m_bins'] = (filtered_data['start_time_numeric'] // 300) * 300
+                aggregated_df = filtered_data.groupby('5m_bins').agg({'count': 'sum', 'total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['count'] / aggregated_df['total_count']) * 100
+                x_data = aggregated_df['5m_bins']
+                y_data = aggregated_df['percentage']
+                
+            elif self.time_bin_unit == "15m":
+                filtered_data['15m_bins'] = (filtered_data['start_time_numeric'] // 900) * 900
+                aggregated_df = filtered_data.groupby('15m_bins').agg({'count': 'sum', 'total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['count'] / aggregated_df['total_count']) * 100
+                x_data = aggregated_df['15m_bins']
+                y_data = aggregated_df['percentage']
+                
+            elif self.time_bin_unit == "seconds":
+                x_data = filtered_data['start_time_numeric']
+                y_data = filtered_data['percentage']
 
-            fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(self.convert_time_units),
-                                 y=filtered_data['percentage'],
+            self.x_values.extend(x_data.map(self.convert_time_units))
+
+
+            fig.add_trace(go.Bar(x=x_data.map(self.convert_time_units),
+                                 y=y_data,
                                  name=decision,
                                  marker_color=color_palette[idx],
                                  yaxis='y'))
+        
+        self.x_values= list(pd.unique(self.x_values))
 
         if self.time_bin_unit == 'hours' or self.time_bin_unit == 'minutes' or self.time_bin_unit == '5m' or self.time_bin_unit == '15m':
             fig.add_trace(go.Scatter(x=self.x_values,
@@ -273,10 +275,13 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
         data = pd.read_csv(self.data_path, sep='\t')
         data['start_time'] = pd.to_datetime(data['start_time'])
         self.total_count_2 = data.groupby('start_time').size().reset_index(name='total_count')
+        all_decisions = pd.DataFrame({'decision': ['no_decision', 'stop_receiving', 'unblocked']})
+        all_times = pd.DataFrame({'start_time': data['start_time'].unique()})
+        complete_grid = all_times.assign(key=1).merge(all_decisions.assign(key=1), on='key').drop('key', axis=1)
+        data['decision'] = data['decision'].apply(lambda x: 'no_decision' if x in ['signal_negative', 'unblock_mux_change'] else x)
         decision_count = data.groupby(['start_time', 'decision']).size().reset_index(name='count')
-        decision_count['decision'] = decision_count['decision'].apply(lambda x: 'no_decision' if x in ['signal_negative', 'unblock_mux_change'] else x)
-        decision_count = decision_count.groupby(['start_time', 'decision']).sum().reset_index()
         decision_count['decision'] = decision_count['decision'].map(lambda x: next((k for k, v in self.classes.items() if x in v), x))
+        decision_count = complete_grid.merge(decision_count, on=['start_time', 'decision'], how='left').fillna({'count': 0})
         decision_count['cumulative_count'] = decision_count.groupby('decision')['count'].cumsum()
         decision_count['cumulative_total_count'] = decision_count.groupby('start_time')['cumulative_count'].transform('sum')
         decision_count['percentage'] = decision_count['cumulative_count'] / decision_count['cumulative_total_count'] * 100
@@ -342,18 +347,40 @@ class CumulativeDecisionBarChart(DecisionBarBuilder):
             filtered_data['start_time_numeric'] = filtered_data['start_time'].astype(int)
 
             if self.time_bin_unit == "hours":
-                filtered_data = filtered_data[
-                    (filtered_data['start_time_numeric'] % 3600 == 0) | (filtered_data['start_time_numeric'] % 1800 == 0) | (filtered_data['start_time_numeric'] == 0)
-                    ]
-            elif self.time_bin_unit == "15m":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 900 == 0)]
-            elif self.time_bin_unit == "5m":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 300 == 0)]
+                filtered_data['hourly_bins'] = (filtered_data['start_time_numeric'] // 3600) * 3600
+                aggregated_df = filtered_data.groupby('hourly_bins').agg({'cumulative_count': 'sum', 'cumulative_total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['cumulative_count'] / aggregated_df['cumulative_total_count']) * 100
+                x_data = aggregated_df['hourly_bins']
+                y_data = aggregated_df['percentage']
+                
             elif self.time_bin_unit == "minutes":
-                filtered_data = filtered_data[(filtered_data['start_time_numeric'] % 60 == 0)]
-            
-            fig.add_trace(go.Bar(x=filtered_data['start_time_numeric'].map(self.convert_time_units),
-                                 y=filtered_data['percentage'],
+                offset = filtered_data['start_time_numeric'].min() % 60
+                filtered_data['minute_bins'] = ((filtered_data['start_time_numeric'] - offset) // 60) * 60
+                aggregated_df = filtered_data.groupby('minute_bins').agg({'cumulative_count': 'sum', 'cumulative_total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['cumulative_count'] / aggregated_df['cumulative_total_count']) * 100
+                x_data = aggregated_df['minute_bins']
+                y_data = aggregated_df['percentage']
+                
+            elif self.time_bin_unit == "5m":
+                filtered_data['5m_bins'] = (filtered_data['start_time_numeric'] // 300) * 300
+                aggregated_df = filtered_data.groupby('5m_bins').agg({'cumulative_count': 'sum', 'cumulative_total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['cumulative_count'] / aggregated_df['cumulative_total_count']) * 100
+                x_data = aggregated_df['5m_bins']
+                y_data = aggregated_df['percentage']
+                
+            elif self.time_bin_unit == "15m":
+                filtered_data['15m_bins'] = (filtered_data['start_time_numeric'] // 900) * 900
+                aggregated_df = filtered_data.groupby('15m_bins').agg({'cumulative_count': 'sum', 'cumulative_total_count': 'sum'}).reset_index()
+                aggregated_df['percentage'] = (aggregated_df['cumulative_count'] / aggregated_df['cumulative_total_count']) * 100
+                x_data = aggregated_df['15m_bins']
+                y_data = aggregated_df['percentage']
+                
+            elif self.time_bin_unit == "seconds":
+                x_data = filtered_data['start_time_numeric']
+                y_data = filtered_data['percentage']
+
+            fig.add_trace(go.Bar(x=x_data.map(self.convert_time_units),
+                                 y=y_data,
                                  name=decision,
                                  marker_color=color_palette[idx],
                                  yaxis='y'))
