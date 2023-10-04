@@ -42,52 +42,48 @@ class MakeStatsTable:
                                                'Statistical_Test', 'P-Value', 'Significance', 'taxon_id'])
 
     def generate_stats(self):
-        """
-        Generates statistical comparisons between test data and control data for specified parameters.
-        """
-        # Iterate over each row in the test data
         for index, test_row in self.test_data.iterrows():
-            # Extract the taxon ID for the current row
             taxon_id = test_row['taxon_id']
             sample_id = test_row['sample_id']
-
-            # Iterate over each parameter
             for param in self.parameters:
-                # Extract the parameter values from the test and control data
                 test_value = test_row[param]
                 control_value = self.control_data.iloc[index][param]
-
-                # Compute the ratio of test to control
                 ratio = test_value / control_value
 
-                # Perform Shapiro-Wilk normality test
-                test_normality = stats.shapiro(self.test_data[param])
-                control_normality = stats.shapiro(self.control_data[param])
+                try:
+                    test_normality = stats.shapiro(self.test_data[param])
+                    control_normality = stats.shapiro(self.control_data[param])
+                except ValueError:
+                    # Setting the values as undefined in case of an error
+                    test_normality = ('undefined', 'N/A')
+                    control_normality = ('undefined', 'N/A')
 
-                # Check if both samples pass the normality assumption
-                if test_normality[1] > 0.05 and control_normality[1] > 0.05:
-                    # Perform independent t-test
-                    t_statistic, p_value = stats.ttest_ind(self.test_data[param], self.control_data[param])
-                    statistical_test = 't-test'
+                # If undefined, skip statistical tests
+                if test_normality[1] == 'N/A' or control_normality[1] == 'N/A':
+                    statistical_test = 'undefined'
+                    p_value = 'N/A'
+                    significance = 'undefined'
                 else:
-                    # Perform Mann-Whitney U test
-                    u_statistic, p_value = stats.mannwhitneyu(self.test_data[param], self.control_data[param])
-                    statistical_test = 'Mann-Whitney U'
+                    if test_normality[1] > 0.05 and control_normality[1] > 0.05:
+                        t_statistic, p_value = stats.ttest_ind(self.test_data[param], self.control_data[param])
+                        statistical_test = 't-test'
+                    else:
+                        u_statistic, p_value = stats.mannwhitneyu(self.test_data[param], self.control_data[param])
+                        statistical_test = 'Mann-Whitney U'
+                    significance = 'Significant' if p_value < 0.05 else 'Not Significant'
 
-                # Determine the significance based on the p-value
-                significance = 'Significant' if p_value < 0.05 else 'Not Significant'
-                
                 new_row = pd.DataFrame([{'taxon_id': taxon_id,
-                                         'sample_id': sample_id,
-                                         'Parameter': param,
-                                         'Test_Value': test_value,
-                                         'Control_Value': control_value,
-                                         'Ratio': ratio,
-                                         'Statistical_Test': statistical_test,
-                                         'P-Value': p_value,
-                                         'Significance': significance,}])
-                
+                                        'sample_id': sample_id,
+                                        'Parameter': param,
+                                        'Test_Value': test_value,
+                                        'Control_Value': control_value,
+                                        'Ratio': ratio,
+                                        'Statistical_Test': statistical_test,
+                                        'P-Value': p_value,
+                                        'Significance': significance}])
+
                 self.result_df = pd.concat([self.result_df, new_row], ignore_index=True)
+
 
     def save_to_csv(self, filename='stat_results.csv'):
         """

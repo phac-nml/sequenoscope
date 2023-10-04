@@ -20,7 +20,7 @@ class FastPRunner:
     paired = False
 
     def __init__(self, read_set, out_dir, out_prefix, qualified_quality_phred=15, min_read_len=15, max_read_len=0, 
-    trim_front_bp=0, trim_tail_bp=0, report_only=True, dedup=False, threads=1):
+    trim_front_bp=0, trim_tail_bp=0, report_only=True, dedup=True, threads=1):
         """
         Initalize the class with read_set, out_dir, and out_prefix
 

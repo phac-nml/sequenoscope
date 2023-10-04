@@ -61,6 +61,7 @@ class BamProcessor:
         """
         for contig_id in self.ref_stats:
             contig_len = self.ref_stats[contig_id]['length']
+            covered_positions = set()
             num_reads = 0
             total_bases = 0
             lengths = []
@@ -84,8 +85,9 @@ class BamProcessor:
                 start_pos = read.reference_start
                 aln_len = read.query_alignment_length
                 for i in range(start_pos,start_pos+aln_len):
-                    if i < contig_len:
+                    if i < contig_len and i not in covered_positions:
                         self.ref_coverage[contig_id][i]+=1
+                        covered_positions.add(i)
 
             lengths = sorted(lengths,reverse=True)
             if len(self.ref_coverage[contig_id]) > 0:
@@ -117,12 +119,16 @@ class BamProcessor:
         """
         target_len = int(total_length / 2)
         s = 0
-        global l
-        for l in lengths:
-            if s >= target_len:
-                return l
-            s+=l
-        return l
+        try:
+            global l
+            for l in lengths:
+                if s >= target_len:
+                    return l
+                s+=l
+            return l
+        except NameError:
+            l = 0
+            return l
 
     def count_cov_bases(self,list_of_values,min_value=1,max_value=9999999999999):
         """

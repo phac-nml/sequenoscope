@@ -219,9 +219,13 @@ class SeqManifest:
 
             if read_id not in read_set:
               continue
-
-            read_len = row_data['sequence_length_template']
-            read_qual = row_data['mean_qscore_template']
+            try:
+                read_len = row_data['sequence_length_template']
+                read_qual = row_data['mean_qscore_template']
+            except KeyError:
+                read_len = 0
+                read_qual = 0
+            
             is_uniq = True
             is_mapped = False
             start_time = row_data['start_time']

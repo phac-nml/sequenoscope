@@ -92,9 +92,11 @@ class FastqExtractor:
             split_delimitor: str
                 delimitor that is located by the read id before stripping the lines
         """
+        line_count = 0
         with open(file, 'r') as f:
             for line in f:
-                if line.startswith(DefaultValues.fastq_line_starter):
+                line_count += 1
+                if line.startswith(DefaultValues.fastq_line_starter) and (line_count % 4 == 1):
                     if len(line.strip().split(split_delimiter)) >= DefaultValues.fastq_sample_row_number:
                         read_id = line.strip().split(read_delimiter)[0][1:]
                         read_list.append(read_id)

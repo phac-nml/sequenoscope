@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 
 class SeqManifestPlotter:
@@ -128,31 +129,36 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "box_plot.html")
 
     def generate_ratio_bar_chart(self):
-        """
-        Generate a bar chart that visualizes the ratio between test and control samples.
-        """
-        test_data = self.read_data_csv(self.test_file_path).sort_values(by='sample_id')
-        control_data = self.read_data_csv(self.control_file_path).sort_values(by='sample_id')
-
-        parameter_names = test_data.columns[1:].difference(['sample_id', 'taxon_id'])
-        ratio_values = test_data[parameter_names] / control_data[parameter_names]
+        test_data = self.read_data_csv(self.test_file_path)
+        control_data = self.read_data_csv(self.control_file_path)
+        
+        # Exclude unwanted columns for calculation
+        parameter_names = test_data.columns.difference(['sample_id', 'taxon_id'])
+        
+        # Calculate the average for each parameter
+        avg_test_values = test_data[parameter_names].mean()
+        avg_control_values = control_data[parameter_names].mean()
+        
+        # Calculate the ratio of averages, handling zero in denominator
+        ratio_values = avg_test_values / avg_control_values.where(avg_control_values != 0, np.nan)
+        
         fig = go.Figure()
         for i, parameter in enumerate(parameter_names):
             fig.add_trace(go.Bar(
                 x=[parameter],
-                y=[ratio_values.loc[0, parameter]],
+                y=[ratio_values[parameter]],
                 name='Ratio',
                 marker=dict(color=self.color_scale[i % len(self.color_scale)]),
                 hovertemplate='<b>Parameter:</b> %{x}<br>' +
-                              '<b>Ratio:</b> %{y:.2f}<br>' +
-                              '<b>Test Value:</b> %{customdata[0]:.2f}<br>' +
-                              '<b>Control Value:</b> %{customdata[1]:.2f}',
-                customdata=[[test_data.loc[0, parameter], control_data.loc[0, parameter]]],
+                            '<b>Ratio:</b> %{y:.2f}<br>' +
+                            '<b>Average Test Value:</b> %{customdata[0]:.2f}<br>' +
+                            '<b>Average Control Value:</b> %{customdata[1]:.2f}',
+                customdata=[[avg_test_values[parameter], avg_control_values[parameter]]],
                 showlegend=False
             ))
         fig.update_layout(
             xaxis_title='Parameter',
-            yaxis_title='Ratio (Test/Control)',
+            yaxis_title='Ratio (Average Test / Average Control)',
             font_family='Arial',
             font_color='rgb(64, 64, 64)',
             margin=dict(l=80, r=80, t=40, b=50),
@@ -161,29 +167,29 @@ class SeqManifestPlotter:
         self.save_plot_to_html(fig, "ratio_bar_chart.html")
 
     def generate_single_ratio_bar_chart(self, parameter):
-        """
-        Generate a bar chart visualizing the ratio of a single parameter between test and control samples.
+        test_data = self.read_data_csv(self.test_file_path)
+        control_data = self.read_data_csv(self.control_file_path)
         
-        Arguments:
-            parameter: str
-                Parameter/column name from the data to be visualized
-        """
-        test_data = self.read_data_csv(self.test_file_path).sort_values(by='sample_id')
-        control_data = self.read_data_csv(self.control_file_path).sort_values(by='sample_id')
-        ratio_values = test_data[parameter] / control_data[parameter]
+        # Calculate the average for the specified parameter
+        avg_test_value = test_data[parameter].mean()
+        avg_control_value = control_data[parameter].mean()
+        
+        # Calculate the ratio of averages, handling zero in denominator
+        ratio_value = avg_test_value / avg_control_value if avg_control_value != 0 else np.nan
+        
         fig = go.Figure()
         fig.add_trace(go.Bar(
             x=[parameter],
-            y=[ratio_values[0]],
+            y=[ratio_value],
             name='Ratio',
             marker_color='#1f77b4',
             hovertemplate='<b>Parameter:</b> %{x}<br><b>Ratio:</b> %{y:.2f}',
         ))
         fig.update_layout(
             xaxis_title='Parameter',
-            yaxis_title='Ratio (Test/Control)',
+            yaxis_title='Ratio (Average Test / Average Control)',
             title={
-                'text': 'Ratio of Test to Control for ' + parameter,
+                'text': 'Ratio of Average Test to Average Control for ' + parameter,
                 'y': 0.95,
                 'x': 0.5,
                 'xanchor': 'center',

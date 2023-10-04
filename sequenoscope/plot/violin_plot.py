@@ -116,8 +116,8 @@ class ViolinPlotter(ViolinBuilder):
 
         # Set the title and labels
         fig.update_layout(
-            xaxis_title='Sequencing Type',
-            yaxis_title='Read Quality Score'
+            xaxis_title='Source',
+            yaxis_title= self.quality_metric
         )
 
         # Show the plot

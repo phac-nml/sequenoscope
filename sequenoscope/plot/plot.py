@@ -33,6 +33,8 @@ def parse_args():
     # Plotting Options Group
     plotting_group = parser.add_argument_group('Plotting Options', 'Customize the appearance and data for plots.\n\n')
     plotting_group.add_argument('-o_pre', '--output_prefix', type=str, default='sample', help="Output prefix added before plot names. Default is 'sample'.\n\n")
+    plotting_group.add_argument('-AS', '--adaptive_sampling', type=bool, default=False, help="Generate decision bar charts for adaptive sampling if utilized during sequencing.\n\n")
+    plotting_group.add_argument('-single', '--single_charts', type=bool, default=False, help="Generate charts for data based on selected comparison metric.\n\n")
     plotting_group.add_argument('--comparison_metric', default='taxon_%_covered_bases', choices=['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases', 'mean_read_length', 'taxon_length', 'taxon_covered_bases', 'taxon_%_covered_bases', 'taxon_mean_read_length'], type=str, help='Type of parameter for the box plot and single ratio bar chart. Default parameter is taxon_%%_covered_bases.\n\n')
     plotting_group.add_argument('-VP', '--violin_data_percent', default=0.1, type=float, help='Fraction of the data to use for the violin plot.\n\n')
     plotting_group.add_argument('-bin', '--time_bin_unit', default="minutes", choices=['seconds', 'minutes', '5m', '15m', 'hours'], type=str, help='Time bin used for decision bar charts.\n\n')
@@ -46,6 +48,8 @@ def run():
     control_dir = args.control_dir
     output_dir = args.output_dir
     output_prefix = args.output_prefix
+    adaptive_sampling = args.adaptive_sampling
+    single_charts = args.single_charts
     force = args.force
     summary_comp_parameter = args.comparison_metric
     violin_data_precent = args.violin_data_percent
@@ -81,36 +85,44 @@ def run():
     print("-"*40)
 
     taxon_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
-    box_plot = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
     ratio_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
-    single_ratio_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
     stats_table = MakeStatsTable(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
 
     taxon_bar_chart.generate_source_file_taxon_covered_bar_chart()
-    box_plot.generate_box_plot(summary_comp_parameter)
     ratio_bar_chart.generate_ratio_bar_chart()
-    single_ratio_bar_chart.generate_single_ratio_bar_chart(summary_comp_parameter)
+
     stats_table.generate_stats()
     stats_table.save_to_csv()
+    
+    if single_charts:
+        box_plot = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
+        single_ratio_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
+
+        box_plot.generate_box_plot(summary_comp_parameter)
+        single_ratio_bar_chart.generate_single_ratio_bar_chart(summary_comp_parameter)
+
+    
 
     print("-"*40)
     print("Plotting seq manifest plots")
     print("-"*40)
 
-    test_independent_decision_bar_chart = IndependentDecisionStackedBarChart(test_manifest, output_dir, "test_" + output_prefix, time_bin_unit)
-    control_independent_decision_bar_chart = IndependentDecisionStackedBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
-    test_cumulative_decision_bar_chart = CumulativeDecisionBarChart(test_manifest, output_dir, "test_" + output_prefix, time_bin_unit)
-    control_cumulative_decision_bar_chart = CumulativeDecisionBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
     violin_plot_read_qscore = ViolinPlotter(test_manifest, control_manifest, output_dir, "read_qscore_" + output_prefix, quality_metric='read_qscore', fraction=violin_data_precent)
     violin_plot_read_length = ViolinPlotter(test_manifest, control_manifest, output_dir, "read_len_" + output_prefix, quality_metric='read_len', fraction=violin_data_precent)
-
-
-    test_independent_decision_bar_chart.generate_chart()
-    control_independent_decision_bar_chart.generate_chart()
-    test_cumulative_decision_bar_chart.generate_chart()
-    control_cumulative_decision_bar_chart.generate_chart()
+        
     violin_plot_read_qscore.generate_chart()
     violin_plot_read_length.generate_chart()
+
+    if adaptive_sampling:
+        test_independent_decision_bar_chart = IndependentDecisionStackedBarChart(test_manifest, output_dir, "test_" + output_prefix, time_bin_unit)
+        control_independent_decision_bar_chart = IndependentDecisionStackedBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
+        test_cumulative_decision_bar_chart = CumulativeDecisionBarChart(test_manifest, output_dir, "test_" + output_prefix, time_bin_unit)
+        control_cumulative_decision_bar_chart = CumulativeDecisionBarChart(control_manifest, output_dir, "control_" + output_prefix, time_bin_unit)
+
+        test_independent_decision_bar_chart.generate_chart()
+        control_independent_decision_bar_chart.generate_chart()
+        test_cumulative_decision_bar_chart.generate_chart()
+        control_cumulative_decision_bar_chart.generate_chart()
 
     print("-"*40)
     print("All Done")
