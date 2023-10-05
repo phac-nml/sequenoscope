@@ -395,7 +395,7 @@ class SeqManifest:
     
 class SeqManifestSummary:
     fields = [
-        'sample_id','est_genome_size','est_kmer_coverage_depth','total_bases','total_fastp_bases',
+        'sample_id','est_genome_size','est_coverage','total_bases','total_fastp_bases',
         'mean_read_length','taxon_id','taxon_length','taxon_covered_bases',
         'taxon_%_covered_bases','taxon_mean_read_length'
     ]
@@ -423,8 +423,10 @@ class SeqManifestSummary:
                 a designation of what the output files will be named
             out_dir: str
                 a designation of the output directory
-            kmer_json_file: str
-                a designation to the path of the json file generated from kat hist.
+            genome_size: int
+                a designation of genome size based on mash distance calcualtion.
+            coverage: int
+                a designation of coverage based on mash distance calcualtion.
             fastp_json_file: str
                 a designation to the path of the json file generated from fastp.
             paired: bool
@@ -471,7 +473,7 @@ class SeqManifestSummary:
         for contig_id in self.bam_obj.ref_stats:
             out_row["sample_id"] = self.sample_id
             out_row["est_genome_size"] = self.genome_size
-            out_row["est_kmer_coverage_depth"] = self.coverage
+            out_row["est_coverage"] = self.coverage
             out_row["total_bases"] = self.fastp_json_file["summary"]["before_filtering"]["total_bases"]
             out_row["total_fastp_bases"] = self.fastp_json_file["summary"]["after_filtering"]["total_bases"]
             out_row["mean_read_length"] = self.fastp_json_file["summary"]["after_filtering"]["read1_mean_length"]

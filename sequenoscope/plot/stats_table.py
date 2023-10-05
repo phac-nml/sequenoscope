@@ -34,7 +34,7 @@ class MakeStatsTable:
         self.test_data = pd.read_csv(test_file, delimiter='\t')
         self.control_data = pd.read_csv(control_file, delimiter='\t')
 
-        self.parameters = ['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases',
+        self.parameters = ['est_genome_size', 'est_coverage', 'total_bases', 'total_fastp_bases',
                            'mean_read_length', 'taxon_length',
                            'taxon_%_covered_bases', 'taxon_mean_read_length']
         

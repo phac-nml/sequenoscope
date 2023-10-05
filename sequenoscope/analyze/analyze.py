@@ -151,7 +151,7 @@ def run():
     bam_to_fastq_process.run_samtools_fastq()
 
     print("-"*40)
-    print("Analyzing kmers...")
+    print("Calculating distances...")
     print("-"*40)
 
     # using kat hist to analyze kmers
