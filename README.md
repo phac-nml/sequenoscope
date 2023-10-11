@@ -48,12 +48,14 @@ Install using pip:
 **Coming soon**
 
 If you wish to install sequenoscope from source, please first ensure these dependencies are installed and configured on your system:
-`fastp==0.23.2`
-`kat==2.4.2`
-`minimap2==2.24`
-`seqtk==1.3`
-`samtools==1.6`
-`pysam==0.16.0.1`
+`python==3.7.12`
+`fastp >=0.22.0`
+`mash >=2.3`
+`minimap2 >=2.26`
+`seqtk >=1.4`
+`samtools >=1.6`
+`pysam >=0.16.0`
+`plotly >=5.16.1`
 
 Install the latest master branch version directly from Github:
 
