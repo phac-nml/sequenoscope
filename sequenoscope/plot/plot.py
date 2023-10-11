@@ -33,7 +33,7 @@ def parse_args():
     # Plotting Options Group
     plotting_group = parser.add_argument_group('Plotting Options', 'Customize the appearance and data for plots.\n\n')
     plotting_group.add_argument('-o_pre', '--output_prefix', type=str, default='sample', help="Output prefix added before plot names. Default is 'sample'.\n\n")
-    plotting_group.add_argument('-AS', '--adaptive_sampling', type=bool, default=False, help="Generate decision bar charts for adaptive sampling if utilized during sequencing.\n\n")
+    plotting_group.add_argument('-AS', '--adaptive_sampling', type=bool, default=False, help="Generate decision bar charts for adaptive sampling if utilized during sequencing. Specify as True or False.\n\n")
     plotting_group.add_argument('-single', '--single_charts', type=bool, default=False, help="Generate charts for data based on selected comparison metric.\n\n")
     plotting_group.add_argument('--comparison_metric', default='taxon_%_covered_bases', choices=['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases', 'mean_read_length', 'taxon_length', 'taxon_covered_bases', 'taxon_%_covered_bases', 'taxon_mean_read_length'], type=str, help='Type of parameter for the box plot and single ratio bar chart. Default parameter is taxon_%%_covered_bases.\n\n')
     plotting_group.add_argument('-VP', '--violin_data_percent', default=0.1, type=float, help='Fraction of the data to use for the violin plot.\n\n')
