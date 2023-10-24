@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import argparse as ap
 import os
 import sys
+import time
+import argparse as ap
+from sequenoscope.utils.__init__ import format_time
 from sequenoscope.constant import SequenceTypes
 from sequenoscope.version import __version__
 from sequenoscope.utils.parser import GeneralSeqParser 
@@ -24,14 +26,14 @@ def parse_args():
 
     parser._optionals.title = "Arguments"
 
-    parser.add_argument("--input_fastq", metavar="", required=True, nargs="+", help="[REQUIRED] Path to fastq files to process.")
-    parser.add_argument("--input_reference", metavar="", required=True, help="[REQUIRED] Path to reference database to process")
+    parser.add_argument("--input_fastq", metavar="", required=True, nargs="+", help="[REQUIRED] Path to ***EITHER 1 or 2*** fastq files to process.")
+    parser.add_argument("--input_reference", metavar="", required=True, help="[REQUIRED] Path to a single reference FASTA file to process. the single FASTA file may contain several sequences.")
     parser.add_argument("-seq_sum", "--sequencing_summary", metavar="", help="Path to sequencing summary for manifest creation")
     parser.add_argument("-start", "--start_time", default=0, metavar="", help="Start time when no seq summary is provided")
     parser.add_argument("-end", "--end_time", default=100, metavar="", help="End time when no seq summary is provided")
     parser.add_argument("-o", "--output", metavar="", required=True, help="[REQUIRED] Output directory designation")
     parser.add_argument("-o_pre", "--output_prefix", metavar="", default= "sample", help="Output file prefix designation. default is [sample]")
-    parser.add_argument("-seq_type", "--sequencing_type", required=True, metavar="", type= str, choices=['SE', 'PE'], help="A designation of the type of sequencing utilized for the input fastq files")
+    parser.add_argument("-seq_type", "--sequencing_type", required=True, metavar="", type= str, choices=['SE', 'PE'], help="[REQUIRED] A designation of the type of sequencing utilized for the input fastq files. SE = single-end reads and PE = paired-end reads.")
     parser.add_argument("-t", "--threads", default= 1, metavar="", type=int, help="A designation of the number of threads to use")
     parser.add_argument("-min_len", "--minimum_read_length", default= 15, metavar="", type=int, help="A designation of the minimum read length. reads shorter than the integer specified required will be discarded, default is 15")
     parser.add_argument("-max_len", "--maximum_read_length", default= 0, metavar="", type=int, help="A designation of the maximum read length. reads longer than the integer specified required will be discarded, default is 0 meaning no limitation")
@@ -66,9 +68,35 @@ def run():
     #exclude = args.exclude
     force = args.force
 
+    
+
+    # Create a list of tuples for easy printing
+
+
+    params_list = [
+        ("Input(s)", ', '.join(input_fastq)),
+        ("Outputs folder", out_directory),
+        ("Reference", input_reference),
+        ("Mode", "Analyze"),
+        ("Sequencing Type", seq_class),
+    ]
+
+    if seq_summary:
+        params_list.append(("Sequencing Summary", seq_summary))
+
+    print("-" * 40)
+    print("Input Parameters Summary:")
+    print("-" * 40)
+
+    for param_name, param_value in params_list:
+        print(f"{param_name}: {param_value}")
+
+
     print("-"*40)
-    print(f"sequenoscope analyze version {__version__}: processing and analyzing reads based on given paramters")
+    print(f"sequenoscope analyze version {__version__}: Analyzing reads...")
     print("-"*40)
+
+    start_time = time.time()
 
     ## intializing directory for files
 
@@ -233,9 +261,13 @@ def run():
                                     )
         
         seq_summary_no_sum_run.generate_summary()
-        
 
+    
+        
+    end_time = time.time()
+    total_runtime_minutes = end_time - start_time
 
     print("-"*40)
     print("All Done!")
+    print(f"total runtime: {format_time(total_runtime_minutes)}")
     print("-"*40)

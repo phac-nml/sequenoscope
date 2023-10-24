@@ -19,3 +19,12 @@ def compute_sha256(file_name):
         for chunk in iter(lambda: f.read(5000), b""):
             hash_sha256.update(chunk)
     return hash_sha256.hexdigest()  
+
+def format_time(seconds):
+    """Returns time in the most appropriate unit."""
+    if seconds < 60:
+        return f"{seconds:.2f} seconds"
+    elif seconds < 3600:
+        return f"{seconds / 60:.2f} minutes"
+    else:
+        return f"{seconds / 3600:.2f} hours"

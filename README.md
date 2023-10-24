@@ -48,7 +48,7 @@ Install using pip:
 **Coming soon**
 
 If you wish to install sequenoscope from source, please first ensure these dependencies are installed and configured on your system:
-`python==3.7.12`
+`python>=3.7.12,<4`
 `fastp >=0.22.0`
 `mash >=2.3`
 `minimap2 >=2.26`
