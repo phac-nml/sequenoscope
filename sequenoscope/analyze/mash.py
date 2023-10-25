@@ -50,7 +50,11 @@ class MashSketcher:
             dict: Dictionary containing genome size and coverage.
         """
         out_file_hash = os.path.join(self.out_directory, f"{file_prefix}_mash_hash")
-        cmd = ["mash", "sketch", "-r", "-C", file_prefix, input_file, "-o", out_file_hash, "-k", "27"]
+        cmd = ["mash", "sketch", "-r", input_file, "-o", out_file_hash, "-k", "27"]
+        if file_prefix != "sample":
+            cmd.insert(3, "-C")
+            cmd.insert(4, file_prefix)
+    
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         mash_results = {}
