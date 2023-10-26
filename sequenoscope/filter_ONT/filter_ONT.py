@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import argparse as ap
 import os
 import sys
+import time
+import argparse as ap
+from sequenoscope.utils.__init__ import format_time
 from sequenoscope.version import __version__
 from sequenoscope.utils.parser import GeneralSeqParser 
 from sequenoscope.utils.sequence_class import Sequence
@@ -11,7 +13,7 @@ from sequenoscope.filter_ONT.seqtk import SeqtkRunner
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
                                usage="sequenoscope filter_ONT --input_fastq <file.fq> --input_summary <seq_summary.txt> -o <out.fastq> [options]\nFor help use: sequenoscope filter_ONT -h or sequenoscope filter_ONT --help", 
-                                description="%(prog)s version {}: a tool for analyzing and processing sequencing data.".format(__version__), 
+                                description="%(prog)s version {}: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.".format(__version__), 
                                 formatter_class= ap.RawTextHelpFormatter)
 
     parser._optionals.title = "Arguments"
@@ -19,7 +21,7 @@ def parse_args():
     parser.add_argument("--input_fastq", metavar="", required=True, nargs="+", help="[REQUIRED] Path to adaptive sequencing fastq files to process.")
     parser.add_argument("--input_summary", metavar="", required=True, help="[REQUIRED] Path to ONT sequencing summary file.")
     parser.add_argument("-o", "--output", metavar="", required=True, help="[REQUIRED] Output directory designation")
-    parser.add_argument("-o_pre", "--output_prefix", metavar="", default= "sample", help="Output file prefix designation. default is [sample]")
+    parser.add_argument("-op", "--output_prefix", metavar="", default= "sample", help="Output file prefix designation. default is [sample]")
     parser.add_argument("-cls", "--classification", default= "all", metavar="", type= str, choices=['all', 'unblocked', 'stop_receiving', 'no_decision'], help="a designation of the adaptive-sampling sequencing decision classification ['unblocked', 'stop_receiving', or 'no_decision']")
     parser.add_argument("-min_ch", "--minimum_channel", default= 1, metavar="", type=int, help="a designation of the minimum channel/pore number for filtering reads")
     parser.add_argument("-max_ch", "--maximum_channel", default= 512, metavar="", type=int, help="a designation of the maximum channel/pore number for filtering reads")
@@ -54,9 +56,25 @@ def run():
     max_len = args.maximum_length
     force = args.force
 
+    params_list = [
+        ("Mode", "Filter_ONT"),
+        ("Input(s)", ', '.join(input_fastq)),
+        ("Outputs folder", out_directory),
+        ("Sequenicing summary", input_summary)
+    ]
+
+    print("-" * 40)
+    print("Input Parameters Summary:")
+    print("-" * 40)
+
+    for param_name, param_value in params_list:
+        print(f"{param_name}: {param_value}")
+
     print("-"*40)
-    print("sequenoscope filter_ONT version {}: filtering ONT reads based on paramters".format(__version__))
+    print("sequenoscope filter_ONT version {}: Filtering reads...".format(__version__))
     print("-"*40)
+
+    start_time = time.time()
 
     ## intializing directory for files
 
@@ -69,7 +87,7 @@ def run():
     ## parsing seq summary file
 
     print("-"*40)
-    print("Processing seq summary file and extracting reads based on input parameters...")
+    print("Extracting reads...")
     print("-"*40)
 
     seq_summary_parsed = GeneralSeqParser(input_summary, "seq_summary")
@@ -86,13 +104,17 @@ def run():
     ## producing fastq via seqtk
 
     print("-"*40)
-    print("Subsetting fastq file based on extracted reads...")
+    print("Subsetting fastq file...")
     print("-"*40)
 
     sequencing_sample = Sequence("ONT", input_fastq)
     seqtk_subset = SeqtkRunner(sequencing_sample, seq_summary_process.result_files["filtered_read_id_list"], out_directory, "{}_filtered_fastq".format(out_prefix))
     seqtk_subset.subset_fastq()
 
+    end_time = time.time()
+    total_runtime_minutes = end_time - start_time
+
     print("-"*40)
     print("All Done!")
+    print(f"total runtime: {format_time(total_runtime_minutes)}")
     print("-"*40)

@@ -21,7 +21,7 @@ from sequenoscope.analyze.mash import MashSketcher
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
                                usage="sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.fasta> -o <out> -seq_type <sr>[options]\nFor help use: sequenoscope analyze -h or sequenoscope analyze --help", 
-                                description="%(prog)s version {}: a tool for analyzing and processing sequencing data.".format(__version__), 
+                                description="%(prog)s version {}: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.".format(__version__), 
                                 formatter_class= ap.RawTextHelpFormatter)
 
     parser._optionals.title = "Arguments"
@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument("-start", "--start_time", default=0, metavar="", help="Start time when no seq summary is provided")
     parser.add_argument("-end", "--end_time", default=100, metavar="", help="End time when no seq summary is provided")
     parser.add_argument("-o", "--output", metavar="", required=True, help="[REQUIRED] Output directory designation")
-    parser.add_argument("-o_pre", "--output_prefix", metavar="", default= "sample", help="Output file prefix designation. default is [sample]")
+    parser.add_argument("-op", "--output_prefix", metavar="", default= "sample", help="Output file prefix designation. default is [sample]")
     parser.add_argument("-seq_type", "--sequencing_type", required=True, metavar="", type= str, choices=['SE', 'PE'], help="[REQUIRED] A designation of the type of sequencing utilized for the input fastq files. SE = single-end reads and PE = paired-end reads.")
     parser.add_argument("-t", "--threads", default= 1, metavar="", type=int, help="A designation of the number of threads to use")
     parser.add_argument("-min_len", "--minimum_read_length", default= 15, metavar="", type=int, help="A designation of the minimum read length. reads shorter than the integer specified required will be discarded, default is 15")
@@ -41,7 +41,7 @@ def parse_args():
     parser.add_argument("-trm_tail", "--trim_tail_bp", default= 0,metavar="", type=int, help="A designation of the how many bases to trim from the tail of the sequence, default is 0")
     parser.add_argument("-q", "--quality_threshold", default= 15, metavar="", type=int, help="Quality score threshold for filtering reads. Reads with an average quality score below this threshold will be discarded. If not specified, no quality filtering will be performed.")
     #parser.add_argument('--exclude', required=False, help='Choose to exclude reads based on reference instead of including them', action='store_true')
-    parser.add_argument('--kat_hist_kmer', default= 27, metavar="", type=int, help="A designation of the kmer size when running kat hist")
+    #parser.add_argument('--kat_hist_kmer', default= 27, metavar="", type=int, help="A designation of the kmer size when running kat hist")
     parser.add_argument('--minimap2_kmer', default= 15, metavar="", type=int, help="A designation of the kmer size when running minimap2")
     parser.add_argument('--force', required=False, help='Force overwite of existing results directory', action='store_true')
     parser.add_argument('-v', '--version', action='version', version="%(prog)s " + __version__)
@@ -58,13 +58,13 @@ def run():
     out_prefix = args.output_prefix
     seq_class= args.sequencing_type
     threads = args.threads
-    kat_hist_kmer_size = args.kat_hist_kmer
     minimap_kmer_size = args.minimap2_kmer
     min_len = args.minimum_read_length
     max_len = args.maximum_read_length
     trim_front = args.trim_front_bp
     trim_tail = args.trim_tail_bp
     quality_threshold = args.quality_threshold
+    #kat_hist_kmer_size = args.kat_hist_kmer
     #exclude = args.exclude
     force = args.force
 
@@ -74,11 +74,11 @@ def run():
 
 
     params_list = [
+        ("Mode", "analyze"),
         ("Input(s)", ', '.join(input_fastq)),
         ("Outputs folder", out_directory),
         ("Reference", input_reference),
-        ("Mode", "Analyze"),
-        ("Sequencing Type", seq_class),
+        ("Sequencing Type", seq_class)
     ]
 
     if seq_summary:

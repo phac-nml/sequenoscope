@@ -49,7 +49,7 @@ setup(
     install_requires=[
         'biopython',
         'numpy',
-        'pandas',
+        'pandas>=1.5',
         'plotly',
         'psutil',
         'pysam',
