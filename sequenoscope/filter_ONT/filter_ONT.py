@@ -9,6 +9,7 @@ from sequenoscope.utils.parser import GeneralSeqParser
 from sequenoscope.utils.sequence_class import Sequence
 from sequenoscope.filter_ONT.seq_summary_processing import SeqSummaryProcesser
 from sequenoscope.filter_ONT.seqtk import SeqtkRunner
+from sequenoscope.filter_ONT.barcode_statistics import BarcodeStatistics
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
@@ -18,7 +19,7 @@ def parse_args():
 
     parser._optionals.title = "Arguments"
 
-    parser.add_argument("--input_fastq", metavar="", required=True, nargs="+", help="[REQUIRED] Path to adaptive sequencing fastq files to process.")
+    parser.add_argument("--input_fastq", metavar="", nargs="+", help="Path to adaptive sequencing fastq files to process. Not required when using --summarize.")
     parser.add_argument("--input_summary", metavar="", required=True, help="[REQUIRED] Path to ONT sequencing summary file.")
     parser.add_argument("-o", "--output", metavar="", required=True, help="[REQUIRED] Output directory designation")
     parser.add_argument("-op", "--output_prefix", metavar="", default= "sample", help="Output file prefix designation. default is [sample]")
@@ -34,6 +35,7 @@ def parse_args():
     parser.add_argument("-min_len", "--minimum_length", metavar="", default= 0, type=int, help="a designation of the minimum read length for filtering reads")
     parser.add_argument("-max_len", "--maximum_length", metavar="", default= 50000,type=int, help="a designation of the maximum read length for filtering reads")
     parser.add_argument('--force', required=False, help='Force overwite of existing results directory', action='store_true')
+    parser.add_argument('--summarize', required=False, help='Generate barcode statistics. Must specify an input summary and output directory', action='store_true')
     parser.add_argument('-v', '--version', action='version', version="%(prog)s " + __version__)
     return parser.parse_args()
 
@@ -54,7 +56,39 @@ def run():
     max_q = args.maximum_q_score
     min_len = args.minimum_length
     max_len = args.maximum_length
+    summarize = args.summarize
     force = args.force
+
+    
+    if summarize:
+        expected_output_file = os.path.join(out_directory, "{}_barcode_statistics.csv".format(out_prefix))
+        if os.path.exists(expected_output_file) and not force:
+            print(f"Warning: File {expected_output_file} already exists. Use '--force' option to overwrite.")
+            sys.exit()
+
+        if not args.input_summary or not args.output:
+            print("Error: When using --summarize, you must specify both --input_summary and --output.")
+            sys.exit()
+        if args.input_fastq:
+            print("-"*40)
+            print("WARNING: When using --summarize, the --input_fastq is ignored.")
+            print("-"*40)
+
+        print("-"*40)
+        print("sequenoscope filter_ONT version {}: Generating barcode statistics...".format(__version__))
+        print("-"*40)
+
+        barcode_stats = BarcodeStatistics(input_summary, out_directory, out_prefix)
+        barcode_stats.generate_statistics()
+
+        print("Barcode statistics saved to:", barcode_stats.result_files["output_csv_file"])
+        print("-"*40)
+
+        sys.exit()
+    else:
+        if not args.input_fastq:
+            print("Error: You must specify --input_fastq for the original workflow.")
+            sys.exit()
 
     params_list = [
         ("Mode", "Filter_ONT"),
@@ -69,7 +103,7 @@ def run():
 
     for param_name, param_value in params_list:
         print(f"{param_name}: {param_value}")
-
+       
     print("-"*40)
     print("sequenoscope filter_ONT version {}: Filtering reads...".format(__version__))
     print("-"*40)

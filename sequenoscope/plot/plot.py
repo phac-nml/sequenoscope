@@ -16,8 +16,11 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.filterwarnings('ignore', category=UserWarning, module='scipy.stats.morestats')
 warnings.filterwarnings('ignore', category=RuntimeWarning, message='invalid value encountered in long_scalars')
 warnings.filterwarnings('ignore', category=RuntimeWarning, message='invalid value encountered in double_scalars')
-#warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning)
-warnings.simplefilter(action='ignore', category=pd.core.common.SettingWithCopyWarning)
+
+try:
+    warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning)
+except:
+    warnings.simplefilter(action='ignore', category=pd.core.common.SettingWithCopyWarning)
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
