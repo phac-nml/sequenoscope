@@ -17,6 +17,8 @@ from sequenoscope.analyze.seq_manifest import SeqManifest
 from sequenoscope.utils.parser import FastqPairedEndRenamer
 from sequenoscope.analyze.seq_manifest import SeqManifestSummary
 from sequenoscope.analyze.mash import MashSketcher
+import warnings
+warnings.simplefilter('always', UserWarning)
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
@@ -196,7 +198,7 @@ def run():
     print("Creating manifest files...")
     print("-"*40)
 
-    if seq_summary is not None:
+    if seq_summary is not None and GeneralSeqParser.check_seq_summary(seq_summary):
         
         manifest_with_sum_run = SeqManifest(out_prefix,
                                sam_to_bam_process.result_files["bam_output"], 

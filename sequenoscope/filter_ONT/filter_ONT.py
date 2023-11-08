@@ -5,11 +5,13 @@ import time
 import argparse as ap
 from sequenoscope.utils.__init__ import format_time
 from sequenoscope.version import __version__
-from sequenoscope.utils.parser import GeneralSeqParser 
+from sequenoscope.utils.parser import GeneralSeqParser
 from sequenoscope.utils.sequence_class import Sequence
 from sequenoscope.filter_ONT.seq_summary_processing import SeqSummaryProcesser
 from sequenoscope.filter_ONT.seqtk import SeqtkRunner
 from sequenoscope.filter_ONT.barcode_statistics import BarcodeStatistics
+import warnings
+warnings.simplefilter('always', UserWarning)
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
@@ -124,7 +126,22 @@ def run():
     print("Extracting reads...")
     print("-"*40)
 
-    seq_summary_parsed = GeneralSeqParser(input_summary, "seq_summary")
+# Define the required columns based on command-line arguments
+    required_columns = [
+        "read_id",
+        "channel" if min_ch or max_ch else None,
+        "start_time" if min_start or max_start else None,
+        "duration" if min_dur or max_dur else None,
+        "sequence_length_template" if min_len or max_len else None,
+        "mean_qscore_template" if min_q or max_q else None,
+        "end_reason" if as_class else None,
+    ]
+    required_columns = [col for col in required_columns if col]  # Remove None values
+
+    # Initialize the parser and parse the summary
+    seq_summary_parsed = GeneralSeqParser(input_summary, "seq_summary", required_columns)
+    # seq_summary_parsed.required_columns = required_columns
+    # seq_summary_parsed.parse_seq_summary()
 
     ## producing read list
 

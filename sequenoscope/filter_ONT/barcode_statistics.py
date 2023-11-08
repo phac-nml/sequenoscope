@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import pandas as pd
+import sys
 
 class BarcodeStatistics:
     input_csv_file = None
@@ -34,11 +35,23 @@ class BarcodeStatistics:
         Returns:
             None, but raises a ValueError if there's an issue generating or saving the statistics.
         """
+        
         df = pd.read_csv(self.input_csv_file, delimiter='\t')
 
+        if 'barcode_arrangement' not in df.columns:
+            try:
+                raise ValueError("The 'barcode_arrangement' column was not found in the sequencing summary. Please check your input file.")
+            except:
+                print("-"*40)
+                print("Error: The 'barcode_arrangement' column was not found in the sequencing summary. Please check your input file.")
+                print("-"*40)
+                sys.exit()
+
         columns_of_interest = ["channel", "start_time", "duration", 
-                               "sequence_length_template", "mean_qscore_template"
-                               ]
+                            "sequence_length_template", "mean_qscore_template"]
+        
+        # Filter out columns that are not in the DataFrame
+        available_columns = [col for col in columns_of_interest if col in df.columns]
 
         all_stats = []
         unique_barcodes = [barcode for barcode in df['barcode_arrangement'].unique() if barcode != 'unclassified']
@@ -54,13 +67,13 @@ class BarcodeStatistics:
                 "read_number": len(filtered_df)
             }
             
-            for col in columns_of_interest:
+            for col in available_columns:
                 col_name = col.replace("mean_qscore_template", "qscore").replace("sequence_length_template", "sequence_length")
                 
-                stats_dict[f"{col_name}_min"] = filtered_df[col].min()
-                stats_dict[f"{col_name}_max"] = filtered_df[col].max()
+                stats_dict[f"{col_name}_min"] = filtered_df[col].min() if col in filtered_df else None
+                stats_dict[f"{col_name}_max"] = filtered_df[col].max() if col in filtered_df else None
                 
-                if col != "channel":
+                if col != "channel" and col in filtered_df:
                     stats_dict[f"{col_name}_mean"] = filtered_df[col].mean()
             
             all_stats.append(stats_dict)

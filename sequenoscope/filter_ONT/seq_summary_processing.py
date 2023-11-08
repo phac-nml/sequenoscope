@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 from sequenoscope.constant import DefaultValues
+import sys
 
 class SeqSummaryProcesser:
     parsed_report_object = None
@@ -67,27 +68,60 @@ class SeqSummaryProcesser:
         self.min_ch = min_ch
         self.max_ch = max_ch
         self.min_dur = min_dur
-        self.max_dur = max_dur or max(self.parsed_report_object.duration)
+        self.max_dur = max_ch
+        # if max_dur is None and 'duration' in self.parsed_report_object.columns:
+        #     self.max_ch = max_dur or max(self.parsed_report_object.channel)
+
         self.min_start_time = min_start_time
-        self.max_start_time = max_start_time or max(self.parsed_report_object.start_time)
+        self.max_start_time = max_start_time
+        # if max_start_time is None and 'start_time' in self.parsed_report_object.columns:
+        #     self.max_start_time = max_start_time or max(self.parsed_report_object.start_time)
+        
         self.min_q = min_q
-        self.max_q = max_q or max(self.parsed_report_object.mean_qscore_template)
+        self.max_q = max_q
+        # if max_q is None and 'mean_qscore_template' in self.parsed_report_object.columns:
+        #     self.max_q = max_q or max(self.parsed_report_object.mean_qscore_template)
+        
         self.min_len = min_len
-        self.max_len = max_len or max(self.parsed_report_object.sequence_length_template)
-        pass
+        self.max_len = max_len
+        # if max_len is None and 'sequence_length_template' in self.parsed_report_object.columns:
+        #     self.max_len = max_len or max(self.parsed_report_object.sequence_length_template)
 
     def generate_read_ids(self):
 
         read_id_list = os.path.join(self.out_dir,"{}.csv".format(self.out_prefix))
-
         self.result_files["filtered_read_id_list"] = read_id_list
 
-        filtered_reads = self.parsed_report_object[(self.parsed_report_object["end_reason"].isin(self.classification)) & 
-                             (self.parsed_report_object.channel.between(self.min_ch, self.max_ch)) & 
-                             (self.parsed_report_object.duration.between(self.min_dur, self.max_dur)) &
-                             (self.parsed_report_object.start_time.between(self.min_start_time, self.max_start_time)) &
-                             (self.parsed_report_object.mean_qscore_template.between(self.min_q, self.max_q)) & 
-                             (self.parsed_report_object.sequence_length_template.between(self.min_len, self.max_len))]
+        filtered_reads = self.parsed_report_object
+
+        if 'read_id' not in filtered_reads.columns:
+            try:
+                raise ValueError("The 'read_id' column was not found in the sequencing summary. Please check your input file.")
+            except ValueError:
+                print("-"*40)
+                print("Error: The 'read_id' column was not found in the sequencing summary. Please check your input file.")
+                print("-"*40)
+                sys.exit()
+                
+
+        # Apply filters one by one, only if the corresponding column is present
+        if "end_reason" in filtered_reads.columns:
+            filtered_reads = filtered_reads[filtered_reads["end_reason"].isin(self.classification)]
+
+        if 'channel' in filtered_reads.columns:
+            filtered_reads = filtered_reads[filtered_reads.channel.between(self.min_ch, self.max_ch)]
+
+        if 'duration' in filtered_reads.columns:
+            filtered_reads = filtered_reads[filtered_reads.duration.between(self.min_dur, self.max_dur)]
+
+        if 'start_time' in filtered_reads.columns:
+            filtered_reads = filtered_reads[filtered_reads.start_time.between(self.min_start_time, self.max_start_time)]
+
+        if 'mean_qscore_template' in filtered_reads.columns:
+            filtered_reads = filtered_reads[filtered_reads.mean_qscore_template.between(self.min_q, self.max_q)]
+
+        if 'sequence_length_template' in filtered_reads.columns:
+            filtered_reads = filtered_reads[filtered_reads.sequence_length_template.between(self.min_len, self.max_len)]
         
         filtered_reads[["read_id"]].to_csv(read_id_list, index=False)
 

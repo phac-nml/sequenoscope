@@ -2,29 +2,42 @@
 from __future__ import print_function
 from sequenoscope.utils.__init__ import is_non_zero_file
 import pandas as pd
+import warnings
 import json
 import re
 import os
 import sys
+import warnings
+warnings.simplefilter('always', UserWarning)
+
+def custom_formatwarning(msg, category, *args, **kwargs):
+    # Only return the message and the category name
+    return str(category.__name__) + ': ' + str(msg) + '\n'
+
+# Set the format for the warnings
+warnings.formatwarning = custom_formatwarning
 
 class GeneralSeqParser:
     file = None
     file_type = None
     parsed_file = None
     
-    def __init__(self, file, file_type):
+    def __init__(self, file, file_type, required_columns=None):
         self.file = file
         self.file_type = file_type
+        self.required_columns = required_columns
+
         if file_type == "tsv":
             self.parse_tsv()
-        if file_type == "json":
+        elif file_type == "json":
             self.parse_json()
-        if file_type == "csv":
+        elif file_type == "csv":
             self.parse_csv()
-        if file_type == "seq_summary":
-            self.file_parsing_precheck(file, list_of_headers=["read_id", "channel", "start_time", "duration", "sequence_length_template", "mean_qscore_template", "end_reason"] )
+        elif file_type == "seq_summary":
             self.parse_seq_summary()
-        pass
+        else:
+            raise ValueError(f"Unrecognized file type: {file_type}")
+
 
     def parse_tsv(self):
         self.parsed_file = pd.read_csv(self.file, sep='\t', header=0, index_col=0)
@@ -36,10 +49,52 @@ class GeneralSeqParser:
     def parse_csv(self):
         self.parsed_file = pd.read_csv(self.file)
 
+    @staticmethod
+    def check_seq_summary(file_path):  # Added sep as a parameter for flexibility
+        try:
+            parsed_file = pd.read_csv(file_path, sep='\t')  # Use a local variable instead of self.parsed_file
+            desired_columns = set([
+                "read_id", "channel", "start_time", "duration", 
+                "sequence_length_template", "mean_qscore_template", "end_reason"
+            ])
+            available_columns = set(parsed_file.columns)
+
+            # Check if desired columns are a subset of the available columns
+            if desired_columns.issubset(available_columns):
+                return True
+            else:
+                missing_columns = desired_columns - available_columns
+                warnings.warn(
+                "The following required columns are missing from the sequencing summary file:"
+                "{}".format(", ".join(missing_columns)),
+                UserWarning
+            )
+                print("defaulting to regular workflow...")
+                return False
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return False
+
     def parse_seq_summary(self):
-        self.parsed_file = pd.read_csv(self.file, sep='\t', index_col=0)
-        self.parsed_file = self.parsed_file[["read_id", "channel", "start_time", "duration", "sequence_length_template", "mean_qscore_template", "end_reason"]]
+        # Assuming the file has been checked to exist and is readable
+        temp_df = pd.read_csv(self.file, sep='\t')
+        # Validate and filter columns
+        self.parsed_file = self.validate_columns(temp_df, self.required_columns)
         self.parsed_file.reset_index(drop=True, inplace=True)
+
+    @staticmethod
+    def validate_columns(df, required_columns):
+        # Identify missing columns
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            # Issue a warning for the missing columns
+            warnings.warn(
+                "The following required columns are missing from the file and will not be filtered: "
+                "{}".format(", ".join(missing_columns)),
+                UserWarning
+            )
+        # Return only the columns that are present
+        return df[df.columns.intersection(required_columns)]
 
     def file_parsing_precheck(self, file_path, delemiter="\t", list_of_headers=None):
         if not is_non_zero_file(file_path):
