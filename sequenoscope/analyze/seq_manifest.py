@@ -482,12 +482,10 @@ class SeqManifestSummary:
             out_row["taxon_covered_bases"] = self.bam_obj.ref_stats[contig_id]['covered_bases']
             if self.bam_obj.ref_stats[contig_id]['length'] != 0:
                 out_row["taxon_%_covered_bases"] = ((self.bam_obj.ref_stats[contig_id]['covered_bases']/self.bam_obj.ref_stats[contig_id]['length']) * 100)
+                out_row["taxon_mean_read_length"] = self.bam_obj.ref_stats[contig_id]['mean_len']
             else:
                 out_row["taxon_%_covered_bases"] = 0
-            out_row["taxon_mean_read_length"] = self.bam_obj.ref_stats[contig_id]['mean_len']
-
-            # if self.paired:
-            #     out_row["mean_read_length_reverse"] = self.fastp_json_file["summary"]["after_filtering"]["read2_mean_length"]
+                out_row["taxon_mean_read_length"] = 0
 
             fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
         

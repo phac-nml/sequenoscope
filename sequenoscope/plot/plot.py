@@ -4,6 +4,7 @@ import sys
 import time
 import warnings
 import pandas as pd
+pd.options.mode.chained_assignment = None
 import argparse as ap
 from sequenoscope.utils.__init__ import format_time
 from sequenoscope.plot.seq_manifest_plots import SeqManifestPlotter
@@ -16,11 +17,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.filterwarnings('ignore', category=UserWarning, module='scipy.stats.morestats')
 warnings.filterwarnings('ignore', category=RuntimeWarning, message='invalid value encountered in long_scalars')
 warnings.filterwarnings('ignore', category=RuntimeWarning, message='invalid value encountered in double_scalars')
-
-try:
-    warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning)
-except:
-    warnings.simplefilter(action='ignore', category=pd.core.common.SettingWithCopyWarning)
 
 def parse_args():
     parser = ap.ArgumentParser(prog="sequenoscope",
