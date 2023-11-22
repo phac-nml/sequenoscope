@@ -30,7 +30,7 @@ class SeqManifest:
     raw_reads = {}
     error_messages = None
 
-    def __init__(self,sample_id,in_bam,out_prefix, out_dir, in_fastq=None, fastp_fastq=None,in_seq_summary=None,
+    def __init__(self,sample_id,in_bam,out_prefix, out_dir, min_coverage, in_fastq=None, fastp_fastq=None,in_seq_summary=None,
                   read_list=None,start_time=None,end_time=None,delim="\t"):
         """
         Initalize the class with sample_id, in_bam, out_prefix, and out_dir. Analyze reads based on seq summary and 
@@ -68,6 +68,7 @@ class SeqManifest:
         self.start_time = start_time
         self.end_time = end_time
         self.read_list = read_list
+        self.min_coverage = min_coverage
 
         if self.in_seq_summary is None:
             if self.start_time is None or self.end_time is None:
@@ -79,7 +80,7 @@ class SeqManifest:
                 self.error_msg = 'Error no sequence summary specified, please add a the intial fastq file for calculations'
                 return
 
-        self.bam_obj = BamProcessor(input_file=in_bam)
+        self.bam_obj = BamProcessor(input_file=in_bam, min_coverage=self.min_coverage)
 
         if self.fastp_fastq is not None:
             self.process_fastq(self.fastp_fastq, self.filtered_reads)
@@ -440,9 +441,18 @@ class SeqManifestSummary:
         self.genome_size = genome_size
         self.coverage = coverage
         self.paired = paired
-        # if self.paired:
-        #     self.fields.insert(6, "mean_read_length_reverse")
-        pass
+
+        # Define the dynamic field name and store it as an instance attribute
+        min_cov = self.bam_obj.min_coverage
+        self.taxon_coverage_field = f"taxon_covered_bases_{min_cov}X"
+
+        # Use the dynamic field name in the fields list
+        self.fields = [
+            'sample_id', 'est_genome_size', 'est_coverage', 'total_bases', 'total_fastp_bases',
+            'mean_read_length', 'taxon_id', 'taxon_length', 
+            self.taxon_coverage_field,  # Using the dynamic field name
+            'taxon_%_covered_bases', 'taxon_mean_read_length'
+        ]
     
     def create_row(self):
         """
@@ -479,7 +489,7 @@ class SeqManifestSummary:
             out_row["mean_read_length"] = self.fastp_json_file["summary"]["after_filtering"]["read1_mean_length"]
             out_row["taxon_id"] = contig_id
             out_row["taxon_length"] = self.bam_obj.ref_stats[contig_id]['length']
-            out_row["taxon_covered_bases"] = self.bam_obj.ref_stats[contig_id]['covered_bases']
+            out_row[self.taxon_coverage_field] = self.bam_obj.ref_stats[contig_id]['covered_bases']
             if self.bam_obj.ref_stats[contig_id]['length'] != 0:
                 out_row["taxon_%_covered_bases"] = ((self.bam_obj.ref_stats[contig_id]['covered_bases']/self.bam_obj.ref_stats[contig_id]['length']) * 100)
                 out_row["taxon_mean_read_length"] = self.bam_obj.ref_stats[contig_id]['mean_len']

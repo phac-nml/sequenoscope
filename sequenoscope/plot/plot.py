@@ -41,7 +41,7 @@ def parse_args():
     plotting_group.add_argument('--comparison_metric', default='taxon_%_covered_bases', choices=['est_genome_size', 'est_kmer_coverage_depth', 'total_bases', 'total_fastp_bases', 'mean_read_length', 'taxon_length', 'taxon_covered_bases', 'taxon_%_covered_bases', 'taxon_mean_read_length'], type=str, help='Type of parameter for the box plot and single ratio bar chart. Default parameter is taxon_%%_covered_bases.\n\n')
     plotting_group.add_argument('-VP', '--violin_data_percent', default=0.1, type=float, help='Fraction of the data to use for the violin plot.\n\n')
     plotting_group.add_argument('-bin', '--time_bin_unit', default="minutes", choices=['seconds', 'minutes', '5m', '15m', 'hours'], type=str, help='Time bin used for decision bar charts.\n\n')
-
+    plotting_group.add_argument('-legend', '--taxon_chart_legend', type=bool, default=False, help="Generate a legend for the source file taxon covered bar chart.\n\n")
     return parser.parse_args()
 
 def run():
@@ -57,6 +57,7 @@ def run():
     summary_comp_parameter = args.comparison_metric
     violin_data_precent = args.violin_data_percent
     time_bin_unit = args.time_bin_unit
+    taxon_legend = args.taxon_chart_legend
 
     params_list = [
         ("Mode", "plot"),
@@ -108,7 +109,7 @@ def run():
     ratio_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
     stats_table = MakeStatsTable(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
 
-    taxon_bar_chart.generate_source_file_taxon_covered_bar_chart()
+    taxon_bar_chart.generate_source_file_taxon_covered_bar_chart(show_legend=taxon_legend)
     ratio_bar_chart.generate_ratio_bar_chart()
 
     stats_table.generate_stats()

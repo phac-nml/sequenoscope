@@ -31,7 +31,28 @@ class SeqManifestPlotter:
         self.output_prefix = output_prefix
         self.test_file_path = test_file_path
         self.control_file_path = control_file_path
-        self.color_scale = ['#FF7F0E', '#1F77B4', '#FFC0CB', '#2CA02C', '#D62728', '#9467BD']
+        self.color_scale = [
+        '#FF7F0E',  # Original
+        '#1F77B4',  # Original
+        '#FFC0CB',  # Original
+        '#2CA02C',  # Original
+        '#D62728',  # Original
+        '#9467BD',  # Original
+        '#8C564B',  # Brown
+        '#E377C2',  # Pink
+        '#7F7F7F',  # Gray
+        '#BCBD22',  # Lime
+        '#17BECF',  # Cyan
+        '#1A55FF',  # Blue
+        '#FF991A',  # Orange
+        '#B2912F',  # Bronze
+        '#197319',  # Dark Green
+        '#DB2727',  # Red
+        '#9C27B0',  # Purple
+        '#03A9F4',  # Light Blue
+        '#FFEB3B',  # Yellow
+        '#009688'   # Teal
+        ]
 
     def read_data_csv(self, path):
         """
@@ -70,7 +91,7 @@ class SeqManifestPlotter:
         df['source_file'] = source_name
         return df
 
-    def generate_source_file_taxon_covered_bar_chart(self):
+    def generate_source_file_taxon_covered_bar_chart(self, show_legend=False):
         """
         Generate a bar chart that visualizes taxon covered bases for test and control files.
         """
@@ -95,12 +116,13 @@ class SeqManifestPlotter:
                 customdata=[[row['taxon_length'], row['est_genome_size']]],
                 text=[row['taxon_id']]
             ))
+        
         fig.update_layout(
             xaxis_title='Source File',
             yaxis_title='Taxon % Covered Bases',
-            xaxis=dict(showgrid=True, gridcolor='lightgray'),
+            xaxis=dict(tickmode='array', tickvals=[-0.2, 1.2], ticktext=['test_file', 'control_file']),
             yaxis=dict(showgrid=True, gridcolor='lightgray'),
-            showlegend=False
+            showlegend=show_legend
         )
         self.save_plot_to_html(fig, "source_file_taxon_covered_bar_chart.html")
 

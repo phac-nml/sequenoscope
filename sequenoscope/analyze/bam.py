@@ -20,7 +20,7 @@ class BamProcessor:
     status = True
     error_msg = ''
 
-    def __init__(self,input_file):
+    def __init__(self,input_file, min_coverage):
         """
         Initalize the class with an input bam file
 
@@ -29,6 +29,7 @@ class BamProcessor:
                 a string that designates the path of the bam file to be analyzed
         """
         self.alignment_file = input_file
+        self.min_coverage = min_coverage
         if not is_non_zero_file(input_file):
             self.status = False
             self.error_msg = "Error bam file {} does not exist".format(input_file)
@@ -61,7 +62,7 @@ class BamProcessor:
         """
         for contig_id in self.ref_stats:
             contig_len = self.ref_stats[contig_id]['length']
-            covered_positions = set()
+            #covered_positions = set()
             num_reads = 0
             total_bases = 0
             lengths = []
@@ -85,9 +86,9 @@ class BamProcessor:
                 start_pos = read.reference_start
                 aln_len = read.query_alignment_length
                 for i in range(start_pos,start_pos+aln_len):
-                    if i < contig_len and i not in covered_positions:
+                    if i < contig_len: #and i not in covered_positions:
                         self.ref_coverage[contig_id][i]+=1
-                        covered_positions.add(i)
+                        #covered_positions.add(i)
 
             lengths = sorted(lengths,reverse=True)
             if len(self.ref_coverage[contig_id]) > 0:
@@ -130,7 +131,7 @@ class BamProcessor:
             l = 0
             return l
 
-    def count_cov_bases(self,list_of_values,min_value=1,max_value=9999999999999):
+    def count_cov_bases(self,list_of_values, min_value=None, max_value=9999999999999):
         """
         Counts positions where the count is >=min and <= max
 
@@ -146,6 +147,9 @@ class BamProcessor:
             int:
                 int number of positions meeting this threshold
         """
+        if min_value is None:
+            min_value = self.min_coverage
+        
         total = 0
         for v in list_of_values:
             if v >= min_value and v<=max_value:

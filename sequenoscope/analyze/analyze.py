@@ -42,8 +42,7 @@ def parse_args():
     parser.add_argument("-trm_fr", "--trim_front_bp", default= 0, metavar="", type=int, help="A designation of the how many bases to trim from the front of the sequence, default is 0.")
     parser.add_argument("-trm_tail", "--trim_tail_bp", default= 0,metavar="", type=int, help="A designation of the how many bases to trim from the tail of the sequence, default is 0")
     parser.add_argument("-q", "--quality_threshold", default= 15, metavar="", type=int, help="Quality score threshold for filtering reads. Reads with an average quality score below this threshold will be discarded. If not specified, no quality filtering will be performed.")
-    #parser.add_argument('--exclude', required=False, help='Choose to exclude reads based on reference instead of including them', action='store_true')
-    #parser.add_argument('--kat_hist_kmer', default= 27, metavar="", type=int, help="A designation of the kmer size when running kat hist")
+    parser.add_argument("-min_cov", "--minimum_coverage", default= 1, metavar="", type=int, help="A designation of the minimum coverage for each taxon. Only bases equal to or higher then the designated value will be considered. default is 1")
     parser.add_argument('--minimap2_kmer', default= 15, metavar="", type=int, help="A designation of the kmer size when running minimap2")
     parser.add_argument('--force', required=False, help='Force overwite of existing results directory', action='store_true')
     parser.add_argument('-v', '--version', action='version', version="%(prog)s " + __version__)
@@ -66,14 +65,10 @@ def run():
     trim_front = args.trim_front_bp
     trim_tail = args.trim_tail_bp
     quality_threshold = args.quality_threshold
-    #kat_hist_kmer_size = args.kat_hist_kmer
-    #exclude = args.exclude
+    min_cov = args.minimum_coverage
     force = args.force
 
-    
-
     # Create a list of tuples for easy printing
-
 
     params_list = [
         ("Mode", "analyze"),
@@ -204,6 +199,7 @@ def run():
                                sam_to_bam_process.result_files["bam_output"], 
                                f"{out_prefix}_manifest",
                                out_dir=out_directory,
+                               min_coverage= min_cov,
                                fastp_fastq=fastp_run_process.result_files["output_files_fastp"],
                                read_list=extractor_run.result_files["read_list_file"],
                                in_seq_summary=seq_summary
@@ -229,6 +225,7 @@ def run():
                                sam_to_bam_process.result_files["bam_output"], 
                                f"{out_prefix}_manifest",
                                out_dir=out_directory,
+                               min_coverage= min_cov,
                                fastp_fastq=fastp_run_process.result_files["output_files_fastp"],
                                read_list=extractor_run.result_files["read_list_file"],
                                in_fastq=input_fastq,
