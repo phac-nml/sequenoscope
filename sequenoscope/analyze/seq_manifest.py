@@ -449,9 +449,9 @@ class SeqManifestSummary:
         # Use the dynamic field name in the fields list
         self.fields = [
             'sample_id', 'est_genome_size', 'est_coverage', 'total_bases', 'total_fastp_bases',
-            'mean_read_length', 'taxon_id', 'taxon_length', 
+            'mean_read_length', 'taxon_id', 'taxon_length', 'taxon_mean_coverage',
             self.taxon_coverage_field,  # Using the dynamic field name
-            'taxon_%_covered_bases', 'taxon_mean_read_length'
+            'taxon_%_covered_bases', 'total_taxon_mapped_bases', 'taxon_mean_read_length' 
         ]
     
     def create_row(self):
@@ -492,11 +492,15 @@ class SeqManifestSummary:
             out_row[self.taxon_coverage_field] = self.bam_obj.ref_stats[contig_id]['covered_bases']
             if self.bam_obj.ref_stats[contig_id]['length'] != 0:
                 out_row["taxon_%_covered_bases"] = ((self.bam_obj.ref_stats[contig_id]['covered_bases']/self.bam_obj.ref_stats[contig_id]['length']) * 100)
+                out_row["total_taxon_mapped_bases"] = self.bam_obj.ref_stats[contig_id]['total_mapped_bases']
                 out_row["taxon_mean_read_length"] = self.bam_obj.ref_stats[contig_id]['mean_len']
+                out_row["taxon_mean_coverage"] = self.bam_obj.ref_stats[contig_id]['mean_cov']
             else:
                 out_row["taxon_%_covered_bases"] = 0
+                out_row["total_taxon_mapped_bases"] = 0
                 out_row["taxon_mean_read_length"] = 0
-
+                out_row["taxon_mean_coverage"] = 0
+                
             fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
         
         self.status = self.check_files([summary_manifest_file])

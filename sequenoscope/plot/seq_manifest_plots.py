@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -153,6 +154,10 @@ class SeqManifestPlotter:
     def generate_ratio_bar_chart(self):
         test_data = self.read_data_csv(self.test_file_path)
         control_data = self.read_data_csv(self.control_file_path)
+
+        if not test_data.columns.equals(control_data.columns):
+            print("ERROR: columns for test and control are not equivalent. Please Re-run analyze module with the same parameters.")
+            sys.exit()
         
         # Exclude unwanted columns for calculation
         parameter_names = test_data.columns.difference(['sample_id', 'taxon_id'])

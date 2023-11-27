@@ -94,6 +94,7 @@ class BamProcessor:
             if len(self.ref_coverage[contig_id]) > 0:
                 self.ref_stats[contig_id]['mean_cov'] = statistics.mean(self.ref_coverage[contig_id])
                 self.ref_stats[contig_id]['covered_bases'] = self.count_cov_bases(self.ref_coverage[contig_id])
+                self.ref_stats[contig_id]['total_mapped_bases'] = sum(self.ref_coverage[contig_id])
             self.ref_stats[contig_id]['n50'] = self.calc_n50(lengths,total_bases)
             self.ref_stats[contig_id]['num_reads'] = num_reads
             if len(lengths) > 0:
