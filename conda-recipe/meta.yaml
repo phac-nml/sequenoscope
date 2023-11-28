@@ -1,4 +1,4 @@
-{% set version = "v0.0.1" %}
+{% set version = "v0.0.5" %}
 
 package:
     name: sequenoscope
@@ -6,7 +6,7 @@ package:
 
 source:
     url: https://github.com/phac-nml/sequenoscope/archive/{{ version }}.tar.gz
-    sha256: 458721feff52c49a5d44b982a3c6fe83096d9cb065c57efe2c6be6f7a62d9c05   
+    sha256: fc9f4cab412c823b678aa0e93a65a5fe54f2f3c4420c119320cc949f987d184d   
 
 build:
     number: 1
