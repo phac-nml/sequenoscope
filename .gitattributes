@@ -1,4 +1,4 @@
-conda_recipe/ export-ignore
+/home/ameknas/sequenoscope/conda-recipe export-ignore
 /home/ameknas/sequenoscope/sequenoscope/plot/pytest_test.py export-ignore
 /home/ameknas/sequenoscope/sequenoscope/analyze/pytest_test.py export-ignore
 /home/ameknas/sequenoscope/sequenoscope/filter_ONT/pytest_test.py export-ignore
