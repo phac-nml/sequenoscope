@@ -24,6 +24,7 @@ A tool for analyzing sequencing output.
   -  [analyze](#analyze-module-outputs)
   -  [filter_ONT](#filter_ONT-module-outputs)
   -  [plot](#plot-module-outputs)
+- [Benchmarks](#Benchmarks)
 - [FAQ](#faq)
 - [Citation](#citation)
 - [Legal](#legal)
@@ -223,13 +224,13 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 
 | File | Description | Triggered by Command |
 |------|-------------|----------------------|
-| `<prefix>_ratio_bar_chart.html` | An HTML file containing a bar chart that displays the ratio statistics of the source file taxon coverage. | Default behavior |
+| `<prefix>_ratio_bar_chart.html` | An HTML file containing a bar chart that displays the ratio statistics of the manifest summary file. | Default behavior |
 | `<prefix>_source_file_taxon_covered_bar_chart.html` | An HTML file containing a bar chart displaying the coverage of taxa in the source files. | Default behavior |
 | `<prefix>_stat_results.csv` | A CSV file with statistical results of the analysis, such as taxa coverage percentages. | Default behavior |
-| `<prefix>_cumulative_decision_bar_chart.html` | An HTML file containing a bar chart with cumulative decision metrics over time for the control dataset. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`)|
-| `<prefix>_independent_decision_bar_chart.html` | An HTML file containing a bar chart with independent decision metrics over time for the control dataset. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`) |
-| `<prefix>_log_violin_comparison_plot.html` | An HTML file containing a violin plot comparing log-transformed data between the test and control datasets. | Default behavior and `--violin_data_percent` specifying the fraction of data to plot |
-| `<prefix>_qscore_log_violin_comparison_plot.html` | An HTML file containing a violin plot comparing q-score distributions between test and control datasets. | Default behavior and `--violin_data_percent` specifying the fraction of data to plot |
+| `<prefix>_cumulative_decision_bar_chart.html` | An HTML file containing a bar chart with cumulative decision metrics over time for either test or control datasets. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`)|
+| `<prefix>_independent_decision_bar_chart.html` | An HTML file containing a bar chart with independent decision metrics over time for either test or control datasets. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`) |
+| `read_len_<prefix>_violin_comparison_plot.html` | An HTML file containing a violin plot comparing log-transformed data between the test and control datasets. | Default behavior and `--violin_data_percent` specifying the fraction of data to plot |
+| `read_qscore_<prefix>_violin_comparison_plot.html` | An HTML file containing a violin plot comparing q-score distributions between test and control datasets. | Default behavior and `--violin_data_percent` specifying the fraction of data to plot |
 | `<prefix>_box_plot.html` | Generate a box plot comparing a specific parameter from test and control files. |  `--comparison_metric` specified with `--single_charts` enabled |
 | `<prefix>_single_ratio_bar_chart.html` | Generate a single bar chart comparing a specific parameter from test and control files. |  `--comparison_metric` specified with `--single_charts` enabled |
 
