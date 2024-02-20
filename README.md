@@ -17,6 +17,13 @@ A tool for analyzing sequencing output.
 - [Installation](#installation)
 - [Usage](#usage)
 - [Quick Start](#quick-start)
+  -  [analyze](#analyze-module)
+  -  [filter_ONT](#filter_ONT-module)
+  -  [plot](#plot-module)
+- [Outputs](#Outputs)
+  -  [analyze](#analyze-module-outputs)
+  -  [filter_ONT](#filter_ONT-module-outputs)
+  -  [plot](#plot-module-outputs)
 - [FAQ](#faq)
 - [Citation](#citation)
 - [Legal](#legal)
@@ -160,7 +167,7 @@ To quickly get started with the `plot` module, follow the instructions below:
 
 1. **Required Paths:** Ensure you have designated the necessary directories:
 - **Test Directory:** Provide the path to the test directory that contains the __seq manifest__ files from the analyze module. `-T` or `--test_dir` `<test_dir_path>`
-- **Control Directory:** Specify the path to the control directory that contains the seq __manifest__ files from the analyze module. `-C` or `--control_dir` `<control_dir_path>`
+- **Control Directory:** Specify the path to the control directory that contains the __seq manifest__ files from the analyze module. `-C` or `--control_dir` `<control_dir_path>`
 - **Output Directory:** Choose an output directory for the plots. `-o` or `--output_dir` `<out_path>`
 
 2. **Plotting Options:** Customize your plots with various options:
@@ -185,9 +192,18 @@ If you encounter any issues or need further assistance, refer to the full docume
 
 ## Outputs
 
-## analyze module
+## analyze module outputs
 
 test1
+
+## filter_ONT module outputs
+
+test1
+
+## plot module outputs
+
+test1
+
 
 ## Benchmarks
 
