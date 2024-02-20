@@ -235,6 +235,7 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 | `<prefix>_single_ratio_bar_chart.html` | Generate a single bar chart comparing a specific parameter from test and control files. |  `--comparison_metric` specified with `--single_charts` enabled |
 
 Note: Replace `<prefix>` with the user-specified prefix that precedes all output filenames from the `plot` module. This prefix is set with the `--output_prefix` option when running the command.
+
 Note: For the adaptive sampling plots specified with `AS` there will be 2 files, test and control, for each type of bar chart, independent and cumulative.
 
 ## Benchmarks
