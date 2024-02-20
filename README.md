@@ -50,15 +50,21 @@ By providing a comprehensive suite of modules, our bioinformatics pipeline offer
 
 ## Installation
 
+## Option 1: As a conda package (Recomended)
+
 Install the latest released version from conda:
 
         conda create -c bioconda -c conda-forge -n sequenoscope
+
+## Option 2: As a PyPI package
 
 **Coming soon**
 
 Install using pip:
 
         pip install sequenoscope
+
+## Option 3: Install from source
 
 **Coming soon**
 
