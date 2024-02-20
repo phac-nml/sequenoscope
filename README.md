@@ -13,6 +13,7 @@ A tool for analyzing sequencing output.
 ## Contents
 
 - [Introduction](#introduction)
+- [Dependencies](#Dependencies)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Quick Start](#quick-start)
@@ -34,6 +35,18 @@ To further enhance the versatility of our pipeline, we have developed the "filte
 To demonstrate the practical application of our pipeline, consider a scenario where a researcher conducts adaptive sampling using an ONT sequencer. In this example, the researcher divides the sequencer pores into two sets: one half for adaptive sampling enrichment and the other half for regular sequencing as a control. Utilizing our "filter_ONT" module, the researcher can create two distinct sets of FASTQ files, each representing the minimum and maximum channels of the sequencing data. These files are then processed separately through our "analyze" module, generating two datasets – one for the test (adaptive sampling) and one for the control (regular sequencing). Finally, by employing the "plot" module, the researcher can visually assess the effectiveness of the adaptive sampling enrichment in their experiment. This practical illustration highlights how our pipeline facilitates comprehensive data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their MinION sequencing data.
 
 By providing a comprehensive suite of modules, our bioinformatics pipeline offers a powerful tool for researchers working with adaptive sampling MinION sequencing data. Whether you are exploring metagenomics sample composition, investigating adaptive sampling for your project, or conducting a comparative analysis of different methods in your lab, our pipeline can streamline your analyses and provide valuable insights into your genomic datasets.
+
+## Dependencies
+- Python: `>=3.7.12, <4`
+- fastp: `>=0.22.0`
+- mash: `>=2.3`
+- minimap2: `>=2.26`
+- seqtk: `>=1.4`
+- samtools: `>=1.6`
+
+## Python Packages
+- pysam: `>=0.16.0`
+- plotly: `>=5.16.1`
 
 ## Installation
 
