@@ -123,7 +123,7 @@ To quickly get started with the `analyze` module, follow the instructions below:
 
 3. Run the command with the basic required options:
 
-        sequenoscope analyze --input_FASTQ <file.fq> --input_reference <ref.FASTA> -o <output_directory> -seq_type <sr>
+        sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.FASTA> -o <output_directory> -seq_type <sr>
 
 This command will initiate the analysis process using default settings. The FASTQ files will be processed, and the results will be saved in the specified output directory.
 
@@ -155,7 +155,7 @@ To quickly get started with the `filter_ONT` module, follow the instructions bel
 
 4. Run the command with the basic required options:
 
-        sequenoscope filter_ONT --input_FASTQ <file.fq> --input_summary <seq_summary.txt> -o <output.FASTQ>
+        sequenoscope filter_ONT --input_fastq <file.fq> --input_summary <seq_summary.txt> -o <output.FASTQ>
 
 This command will initiate the filtering process based on the specified criteria and save the filtered reads to the output file.
 
