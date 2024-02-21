@@ -180,6 +180,7 @@ To quickly get started with the `plot` module, follow the instructions below:
 - **Adaptive Sampling:** Generate decision bar charts for adaptive sampling if utilized during sequencing using the `-AS` option. *Default designation is False*
 - **Violin Data Fraction:** Set a fraction of the data to use for the violin plot. `-VP` or `--violin_data_percent` `<0.1 - 1>`. *Default fraction is 0.1*
 - **Time Bin Unit:** Designate a time bin used for decision bar charts. `-bin` or `--time_bin_unit` `{seconds,minutes,5m,15m,hours}`. *Default bin is minutes*
+- **Taxon Legend:** Generate a legend for the source file taxon covered bar chart. `-legend` or `--taxon_chart_legend` `{TRUE, FALSE}`. *Default designation is False*
 
 3. **Run the Command:** With the basic required options:
 
@@ -253,6 +254,8 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 | `taxon_mean_read_length` | Mean read length of the reads mapped to the taxon. |
 
 
+Note: Replace `<prefix>` with the user-specified threshold coverage.
+
 ## filter_ONT module outputs
 
 | File | Description |
@@ -267,7 +270,7 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 | File | Description | Triggered by Command |
 |------|-------------|----------------------|
 | `<prefix>_ratio_bar_chart.html` | An HTML file containing a bar chart that displays the ratio statistics of the manifest summary file. | Default behavior |
-| `<prefix>_source_file_taxon_covered_bar_chart.html` | An HTML file containing a bar chart displaying the coverage of taxa in the source files. | Default behavior |
+| `<prefix>_source_file_taxon_covered_bar_chart.html` | An HTML file containing a bar chart displaying the coverage of taxa in the source files. | Default behavior and `--taxon_chart_legend` specifying the inclusion of a legend|
 | `<prefix>_stat_results.csv` | A CSV file with statistical results of the analysis, such as taxa coverage percentages. | Default behavior |
 | `<prefix>_cumulative_decision_bar_chart.html` | An HTML file containing a bar chart with cumulative decision metrics over time for either test or control datasets. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`)|
 | `<prefix>_independent_decision_bar_chart.html` | An HTML file containing a bar chart with independent decision metrics over time for either test or control datasets. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`) |
