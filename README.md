@@ -17,13 +17,15 @@ A tool for analyzing sequencing output.
 - [Installation](#installation)
 - [Usage](#usage)
 - [Quick Start](#quick-start)
-  -  [analyze](#analyze-module)
-  -  [filter_ONT](#filter_ONT-module)
-  -  [plot](#plot-module)
+  -  [Analyze](#analyze-module)
+  -  [Filter_ONT](#filter_ONT-module)
+  -  [Plot](#plot-module)
 - [Outputs](#Outputs)
-  -  [analyze](#analyze-module-outputs)
-  -  [filter_ONT](#filter_ONT-module-outputs)
-  -  [plot](#plot-module-outputs)
+  -  [Analyze](#analyze-module-outputs)
+    -  [Manifest file report structure](#sample-manifest-report-format)
+    -  [Manifest summary file report structure](#sample-manifest-summary-report-format)
+  -  [Filter_ONT](#filter_ONT-module-outputs)
+  -  [Plot](#plot-module-outputs)
 - [Benchmarks](#Benchmarks)
 - [FAQ](#faq)
 - [Citation](#citation)
@@ -210,6 +212,46 @@ If you encounter any issues or need further assistance, refer to the full docume
 | `<prefix>_read_list.txt` | A text file list of reads, potentially used for further downstream analysis. |
 
 Note: Replace `<prefix>` with the user-specified prefix that precedes all output filenames.
+
+### sample manifest report format
+
+| Column ID | Description |
+|-----------|-------------|
+| `sample_id` | Identifier for the sample to which the read belongs. |
+| `read_id` | Unique identifier for the sequencing read. |
+| `read_len` | Length of the sequencing read in base pairs. |
+| `read_qscore` | Quality score of the sequencing read. |
+| `channel` | The channel on the sequencing device from which the read was recorded. |
+| `start_time` | Time when the sequencing of the read started. |
+| `end_time` | Time when the sequencing of the read ended. |
+| `decision` | Indicates the final decision on the sequencing read, such as 'signal_positive'. |
+| `fastp_status` | Indicates whether the read passed the filtering and trimming process by `fastp`. |
+| `is_mapped` | Indicates whether the read is mapped to any sequence in the provided multi-sequence FASTA reference file (`TRUE` if mapped, also see note 1 below). |
+| `is_uniq` | Indicates whether the read is unique within the sample manifest file (`TRUE` if unique, also see note 2 below). |
+| `contig_id` | Identifier for the contig to which the read is mapped, if applicable. |
+
+**Notes:**
+1. `is_mapped` refers to whether or not a read is mapped to any sequence in the multi-sequence FASTA reference file provided by the user. If true, the `contig_id` is provided.
+2. `is_uniq` refers to whether or not a read is unique throughout the sample manifest file. In ONT sequencing, a read may be processed multiple times if the decision is labelled as `signal_negative` or `No_decision` before a final decision is made on whether to allow the read to continue sequencing or not.
+
+### sample manifest summary report format
+
+| Column ID | Description |
+|-----------|-------------|
+| `sample_id` | Identifier for the sample. |
+| `est_genome_size` | Estimated size of the genome. |
+| `est_coverage` | Estimated coverage of the genome. |
+| `total_bases` | Total number of bases in the sample. |
+| `total_fastp_bases` | Total number of bases after processing with `fastp`. |
+| `mean_read_length` | Mean read length of the sequencing reads. |
+| `taxon_id` | Identifier for the taxon. Obtained from the user-provided FASTA file. |
+| `taxon_length` | Length of the taxon's genome. |
+| `taxon_mean_coverage` | Mean coverage across the taxon's genome. |
+| `taxon_covered_bases_<prefix>X` | Number of bases in the taxon's genome covered at user-specified coverage threshold. |
+| `taxon_%_covered_bases` | Percentage of the taxon's genome that is covered by reads at the user-specified coverage threshold . |
+| `total_taxon_mapped_bases` | Total number of bases mapped to the taxon. |
+| `taxon_mean_read_length` | Mean read length of the reads mapped to the taxon. |
+
 
 ## filter_ONT module outputs
 
