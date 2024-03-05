@@ -121,26 +121,27 @@ Finally, by employing the [plot](#plot-module) module, the researcher can visual
 
 ## analyze module
 
-To quickly get started with the `analyze` module, follow the instructions below:
+To quickly get started with the `analyze` module:
 
 1. Ensure that you have the necessary input files and reference database prepared:
    - **Input FASTQ files:** Provide the path to the FASTQ files you want to process using the `--input_FASTQ` option.
    - **Reference database:** Specify the path to the reference database in FASTA format using the `--input_reference` option.
 
 2. Choose an output directory for the results:
-   - Specify the output directory using the `--output` option. This is a required parameter.
+   - Specify the output directory using the `--output` option.
+  
+3. Sprcify the sequencing type
+   - Specify the sequencing type `-seq_type` as either Paired-end `PE` or Single-end `SE`
 
-3. Run the command with the basic required options:
+4. Run the module with the minimally required options:
 
         sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.FASTA> -o <output_directory> -seq_type <sr>
 
-This command will initiate the analysis process using default settings. The FASTQ files will be processed, and the results will be saved in the specified output directory.
+This command will initiate the analysis module using the default settings. The input FASTQ file(s) will be processed, and the results will be saved in the specified output directory.
 
-Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run `sequenoscope analyze -h` or `sequenoscope analyze --help`.
+Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For additional customization options and more detailed information on available options please run  `sequenoscope analyze -h` or `sequenoscope analyze --help`.
 
-Remember to replace `<file.fq>` with the actual path to your FASTQ file, `<ref.FASTA>` with the path to your reference database, `<output_directory>` with the desired location for the output files and `<sr>` with your sequencing type (SE for single-end and PE for paired-end).
-
-If you encounter any issues or need further assistance, refer to the full documentation or consult the available resources for troubleshooting.
+Note: remember to replace `<file.fq>` with the actual path to your FASTQ file, `<ref.FASTA>` with the path to your reference database, `<output_directory>` with the desired location for the output files and `<sr>` with your sequencing type (SE for single-end and PE for paired-end).
 
 ## filter_ONT module
 
