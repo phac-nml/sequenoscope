@@ -25,7 +25,7 @@ requirements:
         - pysam >=0.16.0
         - minimap2 >=2.26
         - mash >=2.3
-        - fastp >=0.22.0
+        - fastp >=0.22.0,<=0.23.2
         - seqtk >=1.4
         - plotly >=5.16.1
         - biopython >=1.79
