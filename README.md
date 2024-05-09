@@ -115,7 +115,7 @@ These files are then processed separately through our [analyze](#analyze-module)
 
 Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling enrichment in their experiment. This practical illustration highlights how our pipeline facilitates comprehensive data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
 
-## Handling Multiple FASTQ or FASTQ GZ Files
+## Handling Multiple FASTQ or FASTQ GZ Files (Single End Sequencing Runs)
 ### Concatenating FASTQ Files
 To concatenate multiple FASTQ files into a single FASTQ file, you can use the following command:
 
@@ -131,6 +131,18 @@ concatenate:
 uncompress:
 
     gzip -d combined.fastq.gz
+
+#### Paired End Read Sets
+
+For paired end read sets, you should have two FASTQ files. For example `Illumina_file_R1.fastq` and `Illumina_file_R2.fastq`
+
+if the files are compressed, you can uncompress them as follows: 
+
+    gzip -d Illumina_file_R1.fastq.gz
+
+and
+
+    gzip -d Illumina_file_R2.fastq.gz
 
 ## Quick start
 
