@@ -115,7 +115,7 @@ These files are then processed separately through our [analyze](#analyze-module)
 
 Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling enrichment in their experiment. This practical illustration highlights how our pipeline facilitates comprehensive data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
 
-## Handling Multiple FASTQ or FASTQ GZ Files (Single End Sequencing Runs)
+## Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)
 ### Concatenating FASTQ Files
 To concatenate multiple FASTQ files into a single FASTQ file, you can use the following command:
 
