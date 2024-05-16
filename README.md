@@ -166,6 +166,8 @@ To quickly get started with the `analyze` module:
 
 This command will initiate the analysis module using the default settings. The input FASTQ file(s) will be processed, and the results will be saved in the specified output directory.
 
+**Note:** Taxon IDs are used as a naming convention, reflecting the sequence name in the FASTA file. The pipeline can process genes, subspecies, and other identifiers; it doesn't have to be a taxon.
+
 Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For additional customization options and more detailed information on available options please run  `sequenoscope analyze -h` or `sequenoscope analyze --help`.
 
 Note: remember to replace `<file.fq>` with the actual path to your FASTQ file, `<ref.FASTA>` with the path to your reference database, `<output_directory>` with the desired location for the output files and `<sr>` with your sequencing type (SE for single-end and PE for paired-end).
