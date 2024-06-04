@@ -7,7 +7,6 @@ from sequenoscope.utils.parser import fastq_parser
 from sequenoscope.analyze.bam import BamProcessor
 from sequenoscope.utils.__init__ import is_non_zero_file
 
-
 class SeqManifest:
     fields = [
         'sample_id','read_id','read_len','read_qscore','channel',
@@ -187,106 +186,99 @@ class SeqManifest:
 
 
     def create_manifest_with_sum(self):
-        """
-        Create a manifest file with various statistics when a sequencing summary is present
+        manifest_file = os.path.join(self.out_dir, f"{self.out_prefix}.txt")
 
-        Returns: 
-            bool: 
-                True if the summary manifest file was created, False otherwise.
-        """
-        manifest_file = os.path.join(self.out_dir,f"{self.out_prefix}.txt")
-        fout = open(manifest_file,'w')
-        fout.write("{}\n".format("\t".join(self.fields)))
+        with open(manifest_file, 'w') as fout:
+            fout.write("{}\n".format("\t".join(self.fields)))
 
-        fin = open(self.in_seq_summary,'r')
-        header = next(fin).strip().split(self.delim)
+            with open(self.in_seq_summary, 'r') as fin:
+                header = next(fin).strip().split(self.delim)
 
-        read_set = set()
-        with open(self.read_list, 'r') as file:
-            lines = file.readlines()
+                read_set = set()
+                with open(self.read_list, 'r') as file:
+                    lines = file.readlines()
 
-        for line in lines:
-            line = line.strip()
-            if line != 'read_id':
-                read_set.add(line)
+                for line in lines:
+                    line = line.strip()
+                    if line != 'read_id':
+                        read_set.add(line)
 
-        for line in fin:
-            row = line.strip().split(self.delim)
-            row_data = {}
-            for i in range(0,len(row)) :
-                row_data[header[i]] = row[i]
+                for line in fin:
+                    row = line.strip().split(self.delim)
+                    row_data = {header[i]: row[i] for i in range(len(row))}
+                    read_id = row_data['read_id']
 
-            read_id = row_data['read_id']
+                    if read_id not in read_set:
+                        continue
+                    try:
+                        read_len = row_data['sequence_length_template']
+                        read_qual = row_data['mean_qscore_template']
+                    except KeyError:
+                        read_len = 0
+                        read_qual = 0
 
-            if read_id not in read_set:
-              continue
-            try:
-                read_len = row_data['sequence_length_template']
-                read_qual = row_data['mean_qscore_template']
-            except KeyError:
-                read_len = 0
-                read_qual = 0
-            
-            is_uniq = True
-            is_mapped = False
-            start_time = row_data['start_time']
-            end_time = ''
-            duration = row_data['duration']
-            if start_time == '':
-                start_time = self.start_time
-                end_time = self.end_time
-            else:
-                start_time = float(start_time)
-                if duration != '':
-                    end_time = start_time + float(duration)
+                    is_uniq = True
+                    is_mapped = False
+                    start_time = row_data['start_time']
+                    end_time = ''
+                    duration = row_data['duration']
+                    if start_time == '':
+                        start_time = self.start_time
+                        end_time = self.end_time
+                    else:
+                        start_time = float(start_time)
+                        if duration != '':
+                            end_time = start_time + float(duration)
 
-            out_row = self.create_row()
-            for field_id in self.fields:
-                if field_id in row_data:
-                    out_row[field_id] = row_data[field_id]
-            mapped_contigs = []
-            for contig_id in self.bam_obj.ref_stats:
-                if read_id in self.bam_obj.ref_stats[contig_id]['reads']:
-                    pass
-                    if contig_id != '*':
-                        mapped_contigs.append(contig_id)
+                    out_row = self.create_row()
+                    for field_id in self.fields:
+                        if field_id in row_data:
+                            out_row[field_id] = row_data[field_id]
 
-            if len(mapped_contigs) > 0:
-                is_mapped = True
-            if len(mapped_contigs) > 1:
-                is_uniq = False
-            
+                    mapped_contigs = [
+                        contig_id for contig_id in self.bam_obj.ref_stats
+                        if read_id in self.bam_obj.ref_stats[contig_id]['reads'] and contig_id != '*'
+                    ]
 
-            fastp_status = False
-            if read_id in self.filtered_reads:
-                fastp_status = True
+                    if mapped_contigs:
+                        is_mapped = True
+                        if len(mapped_contigs) > 1:
+                            is_uniq = False
 
-            out_row['fastp_status'] = fastp_status
-            out_row['sample_id'] = self.sample_id
-            out_row['read_id'] = read_id
-            out_row['is_mapped'] = is_mapped
-            out_row['is_uniq'] = is_uniq
-            out_row['read_len'] = read_len
-            out_row['read_qscore'] = read_qual
-            out_row['start_time'] = start_time
-            out_row['end_time'] = end_time
-            out_row['decision'] = row_data['end_reason']
+                    fastp_status = read_id in self.filtered_reads
 
-            if len(mapped_contigs) == 0:
-                out_row['contig_id'] = ''
-                fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
+                    out_row.update({
+                        'fastp_status': fastp_status,
+                        'sample_id': self.sample_id,
+                        'read_id': read_id,
+                        'is_mapped': is_mapped,
+                        'is_uniq': is_uniq,
+                        'read_len': read_len,
+                        'read_qscore': read_qual,
+                        'start_time': start_time,
+                        'end_time': end_time,
+                        'decision': row_data['end_reason']
+                    })
 
-            for contig_id in mapped_contigs:
-                out_row['contig_id'] = contig_id
-                fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
+                    if not mapped_contigs:
+                        out_row['contig_id'] = ''
+                        fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
+                    else:
+                        for contig_id in mapped_contigs:
+                            out_row['contig_id'] = contig_id
+                            fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
 
+        # Perform the file check after closing the file
         self.status = self.check_files([manifest_file])
-        if self.status == False:
-            self.error_messages = "one or more files was not created or was empty"
+
+        # Check status and raise error if needed
+        if not self.status:
+            self.error_messages = "One or more files were not created or were empty"
+            print(self.error_messages)
             raise ValueError(str(self.error_messages))
 
-        fin.close()
-        fout.close()
+        with open(self.in_seq_summary, 'r') as fin:
+            fin.close()
 
     def create_manifest_no_sum(self):
         """
