@@ -115,7 +115,7 @@ These files are then processed separately through our [analyze](#analyze-module)
 
 Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling enrichment in their experiment. This practical illustration highlights how our pipeline facilitates comprehensive data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
 
-## Handling Multiple FASTQ or FASTQ GZ Files
+## Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)
 ### Concatenating FASTQ Files
 To concatenate multiple FASTQ files into a single FASTQ file, you can use the following command:
 
@@ -131,6 +131,18 @@ concatenate:
 uncompress:
 
     gzip -d combined.fastq.gz
+
+#### Paired End Read Sets
+
+For paired end read sets, you should have two FASTQ files. For example `Illumina_file_R1.fastq` and `Illumina_file_R2.fastq`
+
+if the files are compressed, you can uncompress them as follows: 
+
+    gzip -d Illumina_file_R1.fastq.gz
+
+and
+
+    gzip -d Illumina_file_R2.fastq.gz
 
 ## Quick start
 
@@ -153,6 +165,8 @@ To quickly get started with the `analyze` module:
         sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.FASTA> -o <output_directory> -seq_type <sr>
 
 This command will initiate the analysis module using the default settings. The input FASTQ file(s) will be processed, and the results will be saved in the specified output directory.
+
+**Note:** Taxon IDs are used as a naming convention, reflecting the sequence name in the FASTA file. The pipeline can process genes, subspecies, and other identifiers; it doesn't have to be a taxon.
 
 Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For additional customization options and more detailed information on available options please run  `sequenoscope analyze -h` or `sequenoscope analyze --help`.
 
