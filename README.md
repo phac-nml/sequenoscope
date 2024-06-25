@@ -110,11 +110,11 @@ If you run ``sequenoscope``, you should see the following usage statement:
 ## Use-case example
 To demonstrate the practical application of our pipeline, consider a scenario where a researcher conducts adaptive sampling using an ONT sequencer. In this example, the researcher divides the sequencer channels into two sets: one half for adaptive sampling enrichment and the other half for regular sequencing as a control.
 
-Utilizing our [filter_ONT](#filter_ONT-module) module, the researcher can create two distinct sets of FASTQ files, each representing the minimum and maximum channels of the sequencing data.
+- Utilizing our [filter_ONT](#filter_ONT-module) module, the researcher can create two distinct sets of FASTQ files, each representing the minimum and maximum channels of the sequencing data.
 
-These files are then processed separately through our [analyze](#analyze-module) module, generating two datasets – one for the test (adaptive sampling) and one for the control (regular sequencing).
+- These files are then processed separately through our [analyze](#analyze-module) module, generating two datasets – one for the test (adaptive sampling) and one for the control (regular sequencing).
 
-Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling enrichment in their experiment. This practical illustration highlights how our pipeline facilitates comprehensive data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
+- Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling enrichment in their experiment. This practical illustration highlights how our pipeline facilitates comprehensive data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
 
 ## Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)
 ### Concatenating FASTQ Files
