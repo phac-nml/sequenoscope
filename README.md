@@ -2,7 +2,7 @@
 [![Bioconda](https://img.shields.io/badge/Install%20with-bioconda-green)](https://anaconda.org/bioconda/sequenoscope)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/sequenoscope/badges/downloads.svg)](https://anaconda.org/bioconda/sequenoscope)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/sequenoscope/badges/license.svg)](https://anaconda.org/bioconda/sequenoscope)
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://github.com/ameknas-phac/nf-sequenoscope)
 
 
 ## Sequenoscope
