@@ -106,15 +106,143 @@ If you run ``sequenoscope``, you should see the following usage statement:
         plot        generate plots based on directories with seq manifest files
         filter_ONT  filter reads from a FASTQ file based on a sequencing summary file
 
+If you run ``sequenoscope analyze -h`` or ``sequenoscope analyze --help``, you should see the following options and usage guidleines:
+
+        usage: sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.fasta> -o <out> -seq_type <sr>[options]
+        For help use: sequenoscope analyze -h or sequenoscope analyze --help
+        
+        sequenoscope version 0.0.5: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
+        
+        Arguments:
+          -h, --help            show this help message and exit
+          --input_fastq  [ ...]
+                                [REQUIRED] Path to ***EITHER 1 or 2*** fastq files to process.
+          --input_reference     [REQUIRED] Path to a single reference FASTA file to process. the single FASTA file may contain several sequences.
+          -seq_sum , --sequencing_summary 
+                                Path to sequencing summary for manifest creation
+          -start , --start_time 
+                                Start time when no seq summary is provided
+          -end , --end_time     End time when no seq summary is provided
+          -o , --output         [REQUIRED] Output directory designation
+          -op , --output_prefix 
+                                Output file prefix designation. default is [sample]
+          -seq_type , --sequencing_type 
+                                [REQUIRED] A designation of the type of sequencing utilized for the input fastq files. SE = single-end reads and PE = paired-end reads.
+          -t , --threads        A designation of the number of threads to use
+          -min_len , --minimum_read_length 
+                                A designation of the minimum read length. reads shorter than the integer specified required will be discarded, default is 15
+          -max_len , --maximum_read_length 
+                                A designation of the maximum read length. reads longer than the integer specified required will be discarded, default is 0 meaning no limitation
+          -trm_fr , --trim_front_bp 
+                                A designation of the how many bases to trim from the front of the sequence, default is 0.
+          -trm_tail , --trim_tail_bp 
+                                A designation of the how many bases to trim from the tail of the sequence, default is 0
+          -q , --quality_threshold 
+                                Quality score threshold for filtering reads. Reads with an average quality score below this threshold will be discarded. If not specified, no quality filtering will be performed.
+          -min_cov , --minimum_coverage 
+                                A designation of the minimum coverage for each taxon. Only bases equal to or higher then the designated value will be considered. default is 1
+          --minimap2_kmer       A designation of the kmer size when running minimap2
+          --force               Force overwite of existing results directory
+
+If you run ``sequenoscope filter_ONT -h`` or ``sequenoscope filter_ONT --help``, you should see the following options and usage guidleines:
+
+        usage: sequenoscope filter_ONT --input_fastq <file.fq> --input_summary <seq_summary.txt> -o <out.fastq> [options]
+        For help use: sequenoscope filter_ONT -h or sequenoscope filter_ONT --help
+        
+        sequenoscope version 0.0.5: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
+        
+        Arguments:
+          -h, --help            show this help message and exit
+          --input_fastq  [ ...]
+                                Path to adaptive sequencing fastq files to process. Not required when using --summarize.
+          --input_summary       [REQUIRED] Path to ONT sequencing summary file.
+          -o , --output         [REQUIRED] Output directory designation
+          -op , --output_prefix 
+                                Output file prefix designation. default is [sample]
+          -cls , --classification 
+                                a designation of the adaptive-sampling sequencing decision classification ['unblocked', 'stop_receiving', or 'no_decision']
+          -min_ch , --minimum_channel 
+                                a designation of the minimum channel/pore number for filtering reads
+          -max_ch , --maximum_channel 
+                                a designation of the maximum channel/pore number for filtering reads
+          -min_dur , --minimum_duration 
+                                a designation of the minimum duration of the sequencing run in SECONDS for filtering reads
+          -max_dur , --maximum_duration 
+                                a designation of the maximum duration of the sequencing run in SECONDS for filtering reads
+          -min_start , --minimum_start_time 
+                                a designation of the minimum start time of the sequencing run in SECONDS for filtering reads
+          -max_start , --maximum_start_time 
+                                a designation of the maximum start time of the sequencing run in SECONDS for filtering reads
+          -min_q , --minimum_q_score 
+                                a designation of the minimum q score for filtering reads
+          -max_q , --maximum_q_score 
+                                a designation of the maximum q score for filtering reads
+          -min_len , --minimum_length 
+                                a designation of the minimum read length for filtering reads
+          -max_len , --maximum_length 
+                                a designation of the maximum read length for filtering reads
+          --force               Force overwite of existing results directory
+          --summarize           Generate barcode statistics. Must specify an input summary and output directory
+          -v, --version         show program's version number and exit
+
+If you run ``sequenoscope plot -h`` or ``sequenoscope plot --help``, you should see the following options and usage guidleines:
+
+        usage: sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
+        For help use: sequenoscope plot -h or sequenoscope plot --help
+        
+        sequenoscope version 0.0.5: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
+        
+        Optional Arguments:
+          -h, --help            show this help message and exit
+        
+        Required Paths:
+          Specify the necessary directories for the tool.
+        
+          -T TEST_DIR, --test_dir TEST_DIR
+                                Path to test directory.
+                                
+          -C CONTROL_DIR, --control_dir CONTROL_DIR
+                                Path to control directory.
+                                
+          -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                                Output directory designation.
+                                
+          --force               Force overwrite of existing results directory.
+                                
+        
+        Plotting Options:
+          Customize the appearance and data for plots.
+          
+        
+          -op OUTPUT_PREFIX, --output_prefix OUTPUT_PREFIX
+                                Output prefix added before plot names. Default is 'sample'.
+                                
+          -AS ADAPTIVE_SAMPLING, --adaptive_sampling ADAPTIVE_SAMPLING
+                                Generate decision bar charts for adaptive sampling if utilized during sequencing. Specify as True or False.
+                                
+          -single SINGLE_CHARTS, --single_charts SINGLE_CHARTS
+                                Generate charts for data based on selected comparison metric.
+                                
+          --comparison_metric {est_genome_size,est_kmer_coverage_depth,total_bases,total_fastp_bases,mean_read_length,taxon_length,taxon_%_covered_bases,taxon_mean_read_length}
+                                Type of parameter for the box plot and single ratio bar chart. Default parameter is taxon_%_covered_bases.
+                                
+          -VP VIOLIN_DATA_PERCENT, --violin_data_percent VIOLIN_DATA_PERCENT
+                                Fraction of the data to use for the violin plot.
+                                
+          -bin {seconds,minutes,5m,15m,hours}, --time_bin_unit {seconds,minutes,5m,15m,hours}
+                                Time bin used for decision bar charts.
+                                
+          -legend TAXON_CHART_LEGEND, --taxon_chart_legend TAXON_CHART_LEGEND
+                                Generate a legend for the source file taxon covered bar chart.
 
 ## Use-case example
 To demonstrate the practical application of our pipeline, consider a scenario where a researcher conducts adaptive sampling using an ONT sequencer. In this example, the researcher divides the sequencer channels into two sets: one half for adaptive sampling enrichment and the other half for regular sequencing as a control.
 
-- Utilizing our [filter_ONT](#filter_ONT-module) module, the researcher can create two distinct sets of FASTQ files, each representing the minimum and maximum channels of the sequencing data.
+- Utilizing our [filter_ONT](#filter_ONT-module) module, the researcher can create two distinct sets of FASTQ files (a 1-256 FASTQ file and a 257-512 FASTQ file), each representing the minimum and maximum channels of the sequencing data.
 
 - These files are then processed separately through our [analyze](#analyze-module) module, generating two datasets – one for the test (adaptive sampling) and one for the control (regular sequencing).
 
-- Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling enrichment in their experiment. This practical illustration highlights how our pipeline facilitates comprehensive data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
+- Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling in their experiment. This example shows how Sequenoscope facilitates data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
 
 ## Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)
 ### Concatenating FASTQ Files
