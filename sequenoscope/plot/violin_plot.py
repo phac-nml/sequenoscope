@@ -117,16 +117,17 @@ class ViolinPlotter(ViolinBuilder):
         # Set the title and labels
         fig.update_layout(
             xaxis_title='Source',
-            yaxis_title= self.quality_metric
+            yaxis_title=self.quality_metric
         )
 
-        # Show the plot
-        output_file_path = os.path.join(self.output_dir, self.output_prefix + "_violin_comparison_plot.html")
+        # Construct the output filename: <prefix>_<quality_metric>_comparison_plot.html
+        output_filename = f"{self.output_prefix}_{self.quality_metric}_comparison_plot.html"
+        output_file_path = os.path.join(self.output_dir, output_filename)
         fig.write_html(output_file_path)
 
         self.status = self.check_files(output_file_path)
-        if self.status == False:
-            self.error_messages = "one or more files was not created or was empty, check error message\n{}".format(self.stderr)
+        if not self.status:
+            self.error_messages = "One or more files was not created or was empty, check error message\n{}".format(self.stderr)
             raise ValueError(str(self.error_messages))
 
     def check_files(self, files_to_check):
