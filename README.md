@@ -16,6 +16,7 @@ A tool for analyzing sequencing run outputs primarily from adaptive sampling exp
 - [Introduction](#introduction)
 - [Dependencies](#Dependencies)
 - [Installation](#installation)
+- [Workflow Example](#Workflow-Example)
 - [Usage](#usage)
 - [Use-case Example](#Use-case-example)
 - [Quick Start](#quick-start)
@@ -89,6 +90,190 @@ If you wish to install sequenoscope from source, please first ensure these depen
 Install the latest commit from the master branch directly from Github:
 
         pip install git+https://github.com/phac-nml/sequenoscope.git
+
+## Workflow Example
+
+In this section, we will walk through a simple workflow using mock data to demonstrate how to use each module of **sequenoscope**. The mock data directory contains the following files:
+
+```
+mock_data/
+├── mock_adaptive_sampling.fastq
+├── mock_control.fastq
+├── mock_sequencing_summary.txt
+├── mock.fastq
+└── mock_reference.fasta
+```
+
+Our goal is to:
+
+1. Use the `filter_ONT` module to subset raw FASTQ reads into two sets representing different channel ranges.  
+2. Run the `analyze` module on both sets (treated as control and adaptive sampling datasets).
+3. Use the `plot` module to visualize and compare the results.
+
+This workflow is meant to provide a hands-on example that you can easily follow with your own data.
+
+---
+
+### Step 1: Filtering Reads with `filter_ONT`
+
+First, we will create a dataset that simulates an adaptive sampling scenario by filtering reads by channel. Let’s start by extracting reads from channel 1 to 256 from our `mock.fastq` dataset using the `filter_ONT` module. This will give us a subset similar to `mock_adaptive_sampling.fastq`.
+
+**Command:**
+```bash
+sequenoscope filter_ONT --input_fastq mock.fastq \
+                        --input_summary mock_sequencing_summary.txt \
+                        -o mock_filter_ONT \
+                        -min_ch 1 \
+                        -max_ch 256
+```
+
+**What this does:**
+- Takes reads from `mock.fastq` that come from channels 1 to 256.
+- Outputs a filtered subset in `mock_filter_ONT/sample_filtered_fastq_subset.fastq` which should be identical to `mock_adaptive_sampling.fastq`.
+
+If desired, you could similarly generate the control dataset by adjusting the channel range (e.g., `-min_ch 257 -max_ch 512`) to create a `mock_control.fastq`. However, since we already have `mock_control.fastq` available, we’ll skip that step for now to keep things simple.
+
+**Output Directory Structure:**
+
+#### filter_ONT module (mock_filter_ONT)
+```
+mock_filter_ONT/
+├── filter.log
+├── sample_filtered_fastq_subset.fastq
+└── sample_read_id_list.csv
+```
+
+---
+
+### Step 2: Running the `analyze` Module
+
+Next, we run the `analyze` module on both the control and adaptive sampling datasets. This step will generate various output files including manifest files, BAM alignments, and summary statistics.
+
+**Command for Control Dataset:**
+```bash
+sequenoscope analyze --input_fastq mock_control.fastq \
+                     --input_reference mock_reference.fasta \
+                     -seq_sum mock_sequencing_summary.txt \
+                     -o mock_control_results \
+                     -seq_type SE \
+                     -op control
+```
+
+**Explanation:**
+- `--input_fastq mock_control.fastq`: The control dataset FASTQ file.
+- `--input_reference mock_reference.fasta`: Reference genome or sequence.
+- `-seq_sum mock_sequencing_summary.txt`: The sequencing summary file from ONT.
+- `-o mock_control_results`: Output directory.
+- `-seq_type SE`: Single-end sequencing.
+- `-op control`: A prefix for output files.
+
+**Control Output Directory Structure:**
+
+#### analyze module (mock_control_results)
+```
+mock_control_results/
+├── analyze.log
+├── control_fastp_output.fastp.fastq
+├── control_fastp_output.html
+├── control_fastp_output.json
+├── control_manifest_summary.txt
+├── control_manifest.txt
+├── control_mapped_bam.bam
+├── control_mapped_bam.bam.bai
+├── control_mapped_fastq.fastq
+├── control_mapped_sam.sam
+├── control_mash_hash.msh
+└── control_read_list.txt
+```
+
+---
+
+**Command for Adaptive Sampling Dataset:**
+```bash
+sequenoscope analyze --input_fastq mock_adaptive_sampling.fastq \
+                     --input_reference mock_reference.fasta \
+                     -seq_sum mock_sequencing_summary.txt \
+                     -o mock_adaptive_sampling_results \
+                     -seq_type SE \
+                     -op adaptive_sampling
+```
+
+**Explanation:**
+- `mock_adaptive_sampling.fastq` represents the dataset filtered by `filter_ONT` (or provided).
+- The rest of the parameters are analogous to the control dataset.
+- `-op adaptive_sampling` tags output files with "adaptive_sampling" for clarity.
+
+**Adaptive Sampling Output Directory Structure:**
+
+#### analyze module (mock_adaptive_sampling_results)
+```
+mock_adaptive_sampling_results/
+├── adaptive_sampling_fastp_output.fastp.fastq
+├── adaptive_sampling_fastp_output.html
+├── adaptive_sampling_fastp_output.json
+├── adaptive_sampling_manifest_summary.txt
+├── adaptive_sampling_manifest.txt
+├── adaptive_sampling_mapped_bam.bam
+├── adaptive_sampling_mapped_bam.bam.bai
+├── adaptive_sampling_mapped_fastq.fastq
+├── adaptive_sampling_mapped_sam.sam
+├── adaptive_sampling_mash_hash.msh
+├── adaptive_sampling_read_list.txt
+└── analyze.log
+```
+
+---
+
+### Step 3: Visualizing Results with the `plot` Module
+
+Finally, we use the `plot` module to compare the control and adaptive sampling datasets. For this example, we will use `hours` as the time bin due to truncated data in the mock dataset.
+
+**Command:**
+```bash
+sequenoscope plot -T mock_adaptive_sampling_results/ \
+                  -C mock_control_results/ \
+                  -o mock_comparison_plots \
+                  -op mock \
+                  -AS \
+                  -bin hours
+```
+
+**Explanation:**
+- `-T mock_adaptive_sampling_results/`: Test (adaptive sampling) directory.
+- `-C mock_control_results/`: Control directory.
+- `-o mock_comparison_plots`: Output directory for plots.
+- `-op mock`: Prefix for output files.
+- `-AS`: Enable adaptive sampling decision charts.
+- `-bin hours`: Use hourly bins for time-based decision charts.
+
+**Plot Output Directory Structure:**
+
+#### plot module (mock_comparison_plots)
+```
+mock_comparison_plots/
+├── mock_control_cumulative_decision_bar_chart.html
+├── mock_control_independent_decision_bar_chart.html
+├── mock_ratio_bar_chart.html
+├── mock_read_len_comparison_plot.html
+├── mock_read_qscore_comparison_plot.html
+├── mock_source_file_taxon_covered_bar_chart.html
+├── mock_stat_results.csv
+├── mock_test_cumulative_decision_bar_chart.html
+├── mock_test_independent_decision_bar_chart.html
+└── plot.log
+```
+
+---
+
+### Summary
+
+In this workflow example, we:
+
+1. Used `filter_ONT` to subset reads from a mock dataset by channel number.
+2. Applied `analyze` to both the control and adaptive sampling datasets, generating manifest files and alignment statistics.
+3. Visualized and compared the results using `plot`, focusing on adaptive sampling decisions and coverage metrics.
+
+By following these steps, you can quickly get started with **sequenoscope** and adapt the workflow to suit your own data and research needs.
 
 ## Usage
 If you run ``sequenoscope``, you should see the following usage statement:
