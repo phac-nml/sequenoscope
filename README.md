@@ -17,8 +17,8 @@ A tool for analyzing sequencing run outputs primarily from adaptive sampling exp
 - [Dependencies](#Dependencies)
 - [Installation](#installation)
 - [Workflow Example](#Workflow-Example)
-- [Usage](#usage)
 - [Use-case Example](#Use-case-example)
+- [Usage](#usage)
 - [Quick Start](#quick-start)
   -  [Analyze](#analyze-module)
   -  [Filter_ONT](#filter_ONT-module)
@@ -275,6 +275,15 @@ In this workflow example, we:
 
 By following these steps, you can quickly get started with **sequenoscope** and adapt the workflow to suit your own data and research needs.
 
+## Use-case example
+To demonstrate the practical application of our pipeline, consider a scenario where a researcher conducts adaptive sampling using an ONT sequencer. In this example, the researcher divides the sequencer channels into two sets: one half for adaptive sampling enrichment and the other half for regular sequencing as a control.
+
+- Utilizing our [filter_ONT](#filter_ONT-module) module, the researcher can create two distinct sets of FASTQ files (a 1-256 FASTQ file and a 257-512 FASTQ file), each representing the minimum and maximum channels of the sequencing data.
+
+- These files are then processed separately through our [analyze](#analyze-module) module, generating two datasets – one for the test (adaptive sampling) and one for the control (regular sequencing).
+
+- Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling in their experiment. This example shows how Sequenoscope facilitates data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
+
 ## Usage
 If you run ``sequenoscope``, you should see the following usage statement:
 
@@ -419,15 +428,6 @@ If you run ``sequenoscope plot -h`` or ``sequenoscope plot --help``, you should 
                                 
           -legend TAXON_CHART_LEGEND, --taxon_chart_legend TAXON_CHART_LEGEND
                                 Generate a legend for the source file taxon covered bar chart.
-
-## Use-case example
-To demonstrate the practical application of our pipeline, consider a scenario where a researcher conducts adaptive sampling using an ONT sequencer. In this example, the researcher divides the sequencer channels into two sets: one half for adaptive sampling enrichment and the other half for regular sequencing as a control.
-
-- Utilizing our [filter_ONT](#filter_ONT-module) module, the researcher can create two distinct sets of FASTQ files (a 1-256 FASTQ file and a 257-512 FASTQ file), each representing the minimum and maximum channels of the sequencing data.
-
-- These files are then processed separately through our [analyze](#analyze-module) module, generating two datasets – one for the test (adaptive sampling) and one for the control (regular sequencing).
-
-- Finally, by employing the [plot](#plot-module) module, the researcher can visually assess the effectiveness of the adaptive sampling in their experiment. This example shows how Sequenoscope facilitates data processing and analysis, enhancing the researcher's ability to draw meaningful conclusions from their ONT sequencing data.
 
 ## Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)
 
