@@ -275,7 +275,7 @@ In this workflow example, we:
 
 By following these steps, you can quickly get started with **sequenoscope** and adapt the workflow to suit your own data and research needs.
 
-## Use-case example
+## Use-case Example
 To demonstrate the practical application of our pipeline, consider a scenario where a researcher conducts adaptive sampling using an ONT sequencer. In this example, the researcher divides the sequencer channels into two sets: one half for adaptive sampling enrichment and the other half for regular sequencing as a control.
 
 - Utilizing our [filter_ONT](#filter_ONT-module) module, the researcher can create two distinct sets of FASTQ files (a 1-256 FASTQ file and a 257-512 FASTQ file), each representing the minimum and maximum channels of the sequencing data.
