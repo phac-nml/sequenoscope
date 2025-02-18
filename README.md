@@ -63,7 +63,7 @@ Our bioinformatics pipeline offers a powerful tool for researchers working with 
 
 Install the latest released version from conda:
 
-        conda create -c bioconda -c conda-forge -n sequenoscope
+        conda install -c bioconda sequenoscope
 
 ## Option 2: As a PyPI package
 
