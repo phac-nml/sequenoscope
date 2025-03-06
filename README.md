@@ -226,10 +226,10 @@ mock_adaptive_sampling_results/
 
 ### Step 3: Visualizing Results with the `plot` Module
 
-Finally, we use the `plot` module to compare the control and adaptive sampling datasets. For this example, we will use `hours` as the time bin due to truncated data in the mock dataset.
+The **plot** module is used to compare control and adaptive sampling datasets. In this example, we use **hours** as the time bin due to truncated data in the mock dataset.
 
-**Command:**
-```bash
+## Command:
+```sh
 sequenoscope plot -T mock_adaptive_sampling_results/ \
                   -C mock_control_results/ \
                   -o mock_comparison_plots \
@@ -238,30 +238,34 @@ sequenoscope plot -T mock_adaptive_sampling_results/ \
                   -bin hours
 ```
 
-**Explanation:**
-- `-T mock_adaptive_sampling_results/`: Test (adaptive sampling) directory.
-- `-C mock_control_results/`: Control directory.
-- `-o mock_comparison_plots`: Output directory for plots.
-- `-op mock`: Prefix for output files.
-- `-AS`: Enable adaptive sampling decision charts.
-- `-bin hours`: Use hourly bins for time-based decision charts.
+## Explanation:
+- **`-T mock_adaptive_sampling_results/`**: Test (adaptive sampling) directory.
+- **`-C mock_control_results/`**: Control directory.
+- **`-o mock_comparison_plots`**: Output directory for plots.
+- **`-op mock`**: Prefix for output files.
+- **`-AS`**: Enable adaptive sampling decision charts.
+- **`-bin hours`**: Use hourly bins for time-based decision charts.
 
-**Plot Output Directory Structure:**
+## Plot Output Directory Structure:
+After running the command, the output directory (`mock_comparison_plots/`) will contain standard plots plus a dedicated subdirectory for decision bar charts that reflects the chosen time bin unit.
 
-#### plot module (mock_comparison_plots)
+Example structure:
 ```
 mock_comparison_plots/
-├── mock_control_cumulative_decision_bar_chart.html
-├── mock_control_independent_decision_bar_chart.html
-├── mock_ratio_bar_chart.html
-├── mock_read_len_comparison_plot.html
-├── mock_read_qscore_comparison_plot.html
 ├── mock_source_file_taxon_covered_bar_chart.html
-├── mock_stat_results.csv
-├── mock_test_cumulative_decision_bar_chart.html
-├── mock_test_independent_decision_bar_chart.html
-└── plot.log
+├── mock_summary_table.csv
+├── mock_taxon_mean_read_length_comparison.html
+├── mock_taxon_mean_coverage_comparison.html
+├── mock_read_len_violin_comparison_plot.html
+├── mock_read_qscore_violin_comparison_plot.html
+├── plot.log
+└── decision_bar_charts_hours/
+    ├── mock_test_independent_decision_bar_chart.html
+    ├── mock_control_independent_decision_bar_chart.html
+    ├── mock_test_cumulative_decision_bar_chart.html
+    └── mock_control_cumulative_decision_bar_chart.html
 ```
+All decision bar charts (both independent and cumulative) are grouped into the `decision_bar_charts_hours/` subdirectory, where the folder name reflects the selected time bin unit.
 
 ---
 
@@ -381,53 +385,36 @@ If you run ``sequenoscope filter_ONT -h`` or ``sequenoscope filter_ONT --help``,
 
 If you run ``sequenoscope plot -h`` or ``sequenoscope plot --help``, you should see the following options and usage guidleines:
 
-        usage: sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
-        For help use: sequenoscope plot -h or sequenoscope plot --help
-        
-        sequenoscope version 0.0.5: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
-        
-        Optional Arguments:
-          -h, --help            show this help message and exit
-        
-        Required Paths:
-          Specify the necessary directories for the tool.
-        
-          -T TEST_DIR, --test_dir TEST_DIR
-                                Path to test directory.
-                                
-          -C CONTROL_DIR, --control_dir CONTROL_DIR
-                                Path to control directory.
-                                
-          -o OUTPUT_DIR, --output_dir OUTPUT_DIR
-                                Output directory designation.
-                                
-          --force               Force overwrite of existing results directory.
-                                
-        
-        Plotting Options:
-          Customize the appearance and data for plots.
-          
-        
-          -op OUTPUT_PREFIX, --output_prefix OUTPUT_PREFIX
-                                Output prefix added before plot names. Default is 'sample'.
-                                
-          -AS ADAPTIVE_SAMPLING, --adaptive_sampling ADAPTIVE_SAMPLING
-                                Generate decision bar charts for adaptive sampling if utilized during sequencing. Specify as True or False.
-                                
-          -single SINGLE_CHARTS, --single_charts SINGLE_CHARTS
-                                Generate charts for data based on selected comparison metric.
-                                
-          --comparison_metric {est_genome_size,est_kmer_coverage_depth,total_bases,total_fastp_bases,mean_read_length,taxon_length,taxon_%_covered_bases,taxon_mean_read_length}
-                                Type of parameter for the box plot and single ratio bar chart. Default parameter is taxon_%_covered_bases.
-                                
-          -VP VIOLIN_DATA_PERCENT, --violin_data_percent VIOLIN_DATA_PERCENT
-                                Fraction of the data to use for the violin plot.
-                                
-          -bin {seconds,minutes,5m,15m,hours}, --time_bin_unit {seconds,minutes,5m,15m,hours}
-                                Time bin used for decision bar charts.
-                                
-          -legend TAXON_CHART_LEGEND, --taxon_chart_legend TAXON_CHART_LEGEND
-                                Generate a legend for the source file taxon covered bar chart.
+usage: sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
+For help use: sequenoscope plot -h or sequenoscope plot --help
+
+sequenoscope version <version>: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
+
+Optional Arguments:
+  -h, --help            show this help message and exit
+
+Required Paths:
+  -T TEST_DIR, --test_dir TEST_DIR
+                        Path to test directory.
+  -C CONTROL_DIR, --control_dir CONTROL_DIR
+                        Path to control directory.
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        Output directory designation.
+  --force               Force overwrite of existing results directory.
+
+Plotting Options:
+  -op OUTPUT_PREFIX, --output_prefix OUTPUT_PREFIX
+                        Output prefix added before plot names. Default is 'sample'.
+  -AS, --adaptive_sampling
+                        Generate decision bar charts for adaptive sampling if utilized during sequencing.
+  -VP VIOLIN_DATA_PERCENT, --violin_data_percent VIOLIN_DATA_PERCENT
+                        Fraction of the data to use for the violin plot.
+  -bin {seconds,minutes,5m,15m,hours}, --time_bin_unit {seconds,minutes,5m,15m,hours}
+                        Time bin used for decision bar charts.
+  -legend, --taxon_chart_legend
+                        Include a legend in the source file taxon covered bar chart.
+
+Note: The options --single_charts and --comparison_metric have been removed in this version. The module now automatically generates default comparison charts for both taxon mean read length and taxon mean coverage, and the summary table now includes only the columns: Parameter, Test_Value, Control_Value, and taxon_id.
 
 ## Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)
 
@@ -525,36 +512,38 @@ Please note that this is a simplified quick start guide, and additional options 
 
 **Note:** Remember to replace `<file.fq>` with the actual path to your ONT sequencing FASTQ file, `<seq_summary.txt>` with the path to your ONT sequencing summary file, and `<output.FASTQ>` with the desired path and filename for the filtered reads.
 
-## plot module
-This module is designed for comparative analysis where two testing conditions are present and can be compared.
+# Plot Module
 
-Visualize the `analyze` module test and control directories outputs using interarctive graphs. To quickly get started with the `plot` module:
+The **plot** module is designed for comparative analysis of two conditions (test and control) using outputs from the **analyze** module.
 
-1. **Required Paths:** The plot module is comparative and requires two sets of data outputs from the `analyze` module to produce meaningful results. Ensure you have provided the necessary directories:
-- **Test Directory:** Provide the path to the test directory that contains the [sequence manifest](#sample-manifest-report-format) txt files from the analyze module. `-T` or `--test_dir` `<test_dir_path>`
-- **Control Directory:** Specify the path to the control directory that contains the [sequence manifest](#sample-manifest-report-format) txt files from the analyze module. `-C` or `--control_dir` `<control_dir_path>`
-- **Output Directory:** Choose an output directory for the plots. `-o` or `--output_dir` `<out_path>`
+## What It Does:
+- Generates an **interactive Source File Taxon Covered Bar Chart** displaying the percentage of taxon covered bases from source files.
+- Creates a **Summary Table (CSV)** listing key parameters (*Parameter, Test_Value, Control_Value, taxon_id*) from the manifest summary files.
+- Produces **Violin Plots** comparing read quality scores and read lengths between test and control datasets.
+- Automatically generates two default comparison charts:
+  - **Taxon Mean Read Length Comparison**: A bar chart comparing `taxon_mean_read_length` values.
+  - **Taxon Mean Coverage Comparison**: A bar chart comparing `taxon_mean_coverage` values.
+- If **adaptive sampling** is enabled (`-AS` flag), the module produces **decision bar charts** (independent and cumulative), saved in a subdirectory named `decision_bar_charts_<time_bin_unit>`, where `<time_bin_unit>` reflects the user-selected time bin (e.g., minutes, 5m, etc.).
 
-2. **Plotting Options:** Customize your plots with various options:
-- **Output Prefix:** You can add a prefix before plot names with the `--output_prefix` option. `-op` or `--output_prefix` `<OUTPUT_PREFIX>`. *Default is 'sample'*.
-- **Comparison Metric:** Select a [parameter](#Usage) for the box plot and single ratio bar chart using the `--comparison_metric` option. *Default parameter is taxon\*_%_covered_bases*.
-- **Single Charts:** Generate an addtional box plot and single ratio bar chart based on selected comparison metric using the `--single_charts` option. `{TRUE, FALSE}`. *Default value is False*
-- **Adaptive Sampling:** Generate read classification decision bar charts for adaptive sampling runs if utilized during sequencing by specifying `-AS` option. *Default value is False*
-- **Violin Data Fraction:** Set a fraction of the sequnecing data (total number of reads) to use for the violin plot. `-VP` or `--violin_data_percent` `<0.1 - 1>`. *Default fraction is 0.1*
-- **Time Bin Unit:** Designate a time bin used for read classification decision bar charts. `-bin` or `--time_bin_unit` `{seconds,minutes,5m,15m,hours}`. *Default bin is minutes*
-- **Taxon\* Legend:** Generate a legend for the source file taxon covered bar chart. `-legend` or `--taxon_chart_legend` `{TRUE, FALSE}`. *Default designation is False*
+## Required Paths:
+- **Test Directory (`-T/--test_dir`)**: Contains manifest and manifest summary files for the test condition.
+- **Control Directory (`-C/--control_dir`)**: Contains manifest and manifest summary files for the control condition.
+- **Output Directory (`-o/--output_dir`)**: Directory where plots and summary files will be saved.
 
-3. **Run the Command:** With the basic required options:
+## Plotting Options:
+- **Output Prefix (`-op/--output_prefix`)**: Prefix added to output filenames (default: `sample`).
+- **Adaptive Sampling (`-AS/--adaptive_sampling`)**: Enable decision bar charts (default: `False`).
+- **Violin Data Fraction (`-VP/--violin_data_percent`)**: Fraction of data used for violin plots (default: `0.1`).
+- **Time Bin Unit (`-bin/--time_bin_unit`)**: Time bin used for decision bar charts; choices: `seconds`, `minutes`, `5m`, `15m`, `hours` (default: `minutes`).
+- **Taxon Chart Legend (`-legend/--taxon_chart_legend`)**: Include legend in the source file taxon covered bar chart (default: `False`).
 
-        sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
+## Run Command:
+```sh
+sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
+```
+Use `--force` to overwrite an existing output directory if needed.
 
-Use the `--force flag` if you wish to force an overwrite of an existing results directory.
-
-Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, Please consult the [usage](#Usage) section for more information on plot paramters or run `sequenoscope plot -h` or `sequenoscope plot --help`.
-
-Remember to replace `<test_dir_path>`, `<control_dir_path>`, and `<out_path>` with the actual paths for your directories.
-
-**Note:** *Taxon* is a general term that refers to the reference sequences in the user-provided FASTA file.
+**Note:** Replace `<test_dir_path>`, `<control_dir_path>`, and `<out_path>` with actual paths.
 
 ## Outputs
 
@@ -629,21 +618,22 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 
 ## plot module outputs
 
+## Plot Module Outputs:
+
 | File | Description | Triggered by Command |
-|------|-------------|----------------------|
-| `<prefix>_ratio_bar_chart.html` | An HTML file containing a bar chart that displays the ratio statistics of the manifest summary file. | Default behavior |
-| `<prefix>_source_file_taxon_covered_bar_chart.html` | An HTML file containing a bar chart displaying the coverage of taxa in the source files. | Default behavior and `--taxon_chart_legend` specifying the inclusion of a legend|
-| `<prefix>_stat_results.csv` | A CSV file with statistical results of the analysis, such as taxa coverage percentages. | Default behavior |
-| `<prefix>_cumulative_decision_bar_chart.html` | An HTML file containing a bar chart with cumulative decision metrics over time for either test or control datasets. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`)|
-| `<prefix>_independent_decision_bar_chart.html` | An HTML file containing a bar chart with independent decision metrics over time for either test or control datasets. | adaptive sampling enabled (`-AS`) and time-bin specified (`--time_bin_unit`) |
-| `read_len_<prefix>_violin_comparison_plot.html` | An HTML file containing a violin plot comparing log-transformed data between the test and control datasets. | Default behavior and `--violin_data_percent` specifying the fraction of data to plot |
-| `read_qscore_<prefix>_violin_comparison_plot.html` | An HTML file containing a violin plot comparing q-score distributions between test and control datasets. | Default behavior and `--violin_data_percent` specifying the fraction of data to plot |
-| `<prefix>_box_plot.html` | Generate a box plot comparing a specific parameter from test and control files. |  `--comparison_metric` specified with `--single_charts` enabled |
-| `<prefix>_single_ratio_bar_chart.html` | Generate a single bar chart comparing a specific parameter from test and control files. |  `--comparison_metric` specified with `--single_charts` enabled |
+|---|---|---|
+| `<prefix>_source_file_taxon_covered_bar_chart.html` | Interactive bar chart showing taxon covered percentages from source files. | Default behavior (optional legend via `--taxon_chart_legend`) |
+| `<prefix>_summary_table.csv` | CSV summary table listing: `Parameter, Test_Value, Control_Value, taxon_id` (derived from manifest summary files). | Default behavior |
+| `<prefix>_taxon_mean_read_length_comparison.html` | Interactive bar chart comparing taxon mean read length between test and control datasets. | Default behavior |
+| `<prefix>_taxon_mean_coverage_comparison.html` | Interactive bar chart comparing taxon mean coverage between test and control datasets. | Default behavior |
+| `<prefix>_independent_decision_bar_chart.html` | Interactive bar chart showing independent decision metrics over time. | Adaptive sampling enabled (`-AS`); saved in `decision_bar_charts_<time_bin_unit>` |
+| `<prefix>_cumulative_decision_bar_chart.html` | Interactive bar chart showing cumulative decision metrics over time. | Adaptive sampling enabled (`-AS`); saved in `decision_bar_charts_<time_bin_unit>` |
+| `read_len_<prefix>_violin_comparison_plot.html` | Violin plot comparing log-transformed read lengths between test and control datasets. | Default behavior |
+| `read_qscore_<prefix>_violin_comparison_plot.html` | Violin plot comparing read quality score distributions between test and control datasets. | Default behavior |
 
-Note: Replace `<prefix>` with the user-specified prefix that precedes all output filenames from the `plot` module. This prefix is set with the `--output_prefix` option when running the command.
+**Note:** Replace `<prefix>` with your output prefix (set via `--output_prefix`).
 
-Note: For the adaptive sampling plots specified with `-AS` command, there will be 2 files, test and control, for each type of bar chart, independent and cumulative.
+For **adaptive sampling** plots, two files (for test and control) are generated for each decision chart type and saved in a subdirectory named `decision_bar_charts_<time_bin_unit>`, where `<time_bin_unit>` is your selected bin (e.g., minutes, 5m, etc.).
 
 ## Citation
 
