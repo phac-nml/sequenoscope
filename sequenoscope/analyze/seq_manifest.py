@@ -7,157 +7,92 @@ from sequenoscope.utils.parser import fastq_parser
 from sequenoscope.analyze.bam import BamProcessor
 from sequenoscope.utils.__init__ import is_non_zero_file
 
+
 class SeqManifest:
+    # Fields for the manifest output
     fields = [
-        'sample_id','read_id','read_len','read_qscore','channel',
-        'start_time','end_time','decision','fastp_status',
-        'is_mapped','is_uniq','contig_id',
+        'sample_id', 'read_id', 'read_len', 'read_qscore', 'channel',
+        'start_time', 'end_time', 'decision', 'fastp_status',
+        'is_mapped', 'is_uniq', 'contig_id',
     ]
-    sample_id = ''
-    in_seq_summary = ''
-    read_list = ''
-    out_prefix = ''
-    out_dir = ''
-    bam_obj = None
-    fastp_obj = None
-    fastp_fastq = []
-    delim = "\t"
-    status = False
-    start_time = ''
-    end_time = ''
-    filtered_reads = {}
-    raw_reads = {}
-    error_messages = None
 
-    def __init__(self,sample_id,in_bam,out_prefix, out_dir, min_coverage, in_fastq=None, fastp_fastq=None,in_seq_summary=None,
-                  read_list=None,start_time=None,end_time=None,delim="\t"):
+    def __init__(self, sample_id, in_bam, out_prefix, out_dir, min_coverage,
+                 in_fastq=None, fastp_fastq=None, in_seq_summary=None, read_list=None,
+                 start_time=None, end_time=None, delim="\t"):
         """
-        Initalize the class with sample_id, in_bam, out_prefix, and out_dir. Analyze reads based on seq summary and 
-        fastp fast availbility by producing manifest files.
-
-        Arguments:
-            sample_id: str
-                a string of the name of the sample to be analyzed
-            in_bam: str
-                a string to the path where the bam file is stored
-            out_prefix: str
-                a designation of what the output files will be named
-            out_dir: str
-                a designation of the output directory
-            fastq_fastq: str
-                a designation of where the filitered fastq produced by fastp is stored.
-            in_seq_summary: str
-                a designation of where the sequencing summary produced by the Nanopore sequencers is stored
-            read_list: str
-                a designation of where the read list produced from the original fastq is stored
-            start_time: int
-                an integer representing the start time when seq summary isn't provided.
-            end_time: int
-                an integer representing the end time when seq summary isn't provided.
-            delim: str
-                a string that designates the delimiter used to parse files. default is tab delimiter
+        Initialize the SeqManifest object with sample and file information.
+        
+        Raises:
+            ValueError: if required sequencing summary or fastq inputs are missing.
         """
         self.delim = delim
         self.out_prefix = out_prefix
         self.out_dir = out_dir
-        self.in_fastq = in_fastq
         self.sample_id = sample_id
         self.in_seq_summary = in_seq_summary
+        self.in_fastq = in_fastq
         self.fastp_fastq = fastp_fastq
+        self.read_list = read_list
         self.start_time = start_time
         self.end_time = end_time
-        self.read_list = read_list
         self.min_coverage = min_coverage
+        self.filtered_reads = {}
+        self.raw_reads = {}
+        self.status = False
+        self.error_messages = None
 
+        # Require a sequencing summary or (start and end times + in_fastq)
         if self.in_seq_summary is None:
             if self.start_time is None or self.end_time is None:
-                self.status = False
-                self.error_msg = 'Error no sequence summary specified, please specify a start and end datetime'
-                return
+                raise ValueError('No sequencing summary specified; please specify a start and end datetime.')
             if self.in_fastq is None:
-                self.status = False
-                self.error_msg = 'Error no sequence summary specified, please add a the intial fastq file for calculations'
-                return
+                raise ValueError('No sequencing summary specified; please provide the initial fastq file for calculations.')
 
+        # Initialize BAM processing
         self.bam_obj = BamProcessor(input_file=in_bam, min_coverage=self.min_coverage)
 
-        if self.fastp_fastq is not None:
+        if self.fastp_fastq:
             self.process_fastq(self.fastp_fastq, self.filtered_reads)
-        if self.in_fastq is not None: 
+        if self.in_fastq:
             self.process_fastq(self.in_fastq, self.raw_reads)
 
-        if self.in_seq_summary is not None and not is_non_zero_file(self.in_seq_summary):
-            self.status = False
-            self.error_msg = f"Error specified seq summary file {self.in_seq_summary} does not exist"
-            return
-        if self.in_seq_summary is not None:
+        if self.in_seq_summary:
+            if not is_non_zero_file(self.in_seq_summary):
+                raise ValueError(f"Specified sequencing summary file {self.in_seq_summary} does not exist or is empty.")
             self.create_manifest_with_sum()
         else:
             self.create_manifest_no_sum()
-    
+
+        self.status = True
+
+    @staticmethod
     def error_prob_list_tab(n):
         """
-        generate a list of error rates for qualities less than or equal to n.
-        source: github.com/wdecoster/nanoget/blob/master/nanoget/utils.py
-
-        Arguments: 
-            n: error probability threshold
-
-        Returns:
-            list:
-                list of error rates
+        Generate a list of error probabilities for qualities 0..n.
         """
-        return [10**(q / -10) for q in range(n+1)]
+        return [10 ** (q / -10) for q in range(n + 1)]
 
-    def calc_mean_qscores(self,qual,tab=error_prob_list_tab(DefaultValues.nanoget_threshold)):
+    def calc_mean_qscores(self, qual, tab=None):
         """
-        Calculates the mean quality score for a read where they have been converted to Phred.
-        Phred scores are first converted to probabilites, then the average error probability is calculated.
-        The average is then converted back to the Phred scale.
-
-        Arguments:
-            qual: string
-                string of Phred 33 ints for quality calcualtions
-            
-            tab: list
-                list of error rates for qaulties specified
-
-        Returns:
-            float:
-                mean qscore
+        Calculates the mean quality score by converting Phred scores to error probabilities,
+        averaging them, and converting back to Phred scale.
         """
+        if tab is None:
+            tab = SeqManifest.error_prob_list_tab(DefaultValues.nanoget_threshold)
         if qual:
-            phred_score = -10 * log(sum([tab[q] for q in qual]) / len(qual) , 10)
-            return phred_score
-        else:
-            return 0
+            avg_error = sum(tab[q] for q in qual) / len(qual)
+            return -10 * log(avg_error, 10)
+        return 0
 
-
-    def convert_qscores(self,qual_string):
+    def convert_qscores(self, qual_string):
         """
-        Calculates the mean quality score for a read where they have been converted to Phred
-
-        Arguments
-            qual_string: string of phred 33 ints for quality
-
-        Returns:
-            float:
-                mean qscore
+        Convert a Phred quality string into a list of integer quality scores.
         """
-        qual_values = []
-        for c in qual_string:
-            qual_values.append(ord(c) - DefaultValues.phred_33_encoding_value)
-        return qual_values
+        return [ord(c) - DefaultValues.phred_33_encoding_value for c in qual_string]
 
     def process_fastq(self, fastq_file_list, read_dict):
         """
-        Process the fastq file and extract reads, quality, and qscores
-
-        Argument:
-            fastq_file_list:
-                list of fastq files
-            read_dict:
-                dictonary to store reads
+        Process FASTQ files and store read length and computed quality score in a dictionary.
         """
         for fastq_file in fastq_file_list:
             fastq_obj = fastq_parser(fastq_file)
@@ -167,264 +102,177 @@ class SeqManifest:
                 seq_len = len(seq)
                 qual = self.convert_qscores(record[3])
                 qscore = self.calc_mean_qscores(qual)
-                read_dict[read_id] = [seq_len,qscore]
-
+                read_dict[read_id] = [seq_len, qscore]
 
     def create_row(self):
         """
-        create rows and store them into a dictionary
-
-        Returns:
-            dict:
-                dictionary of rows produced.
+        Create an empty row dictionary with keys from fields.
         """
-        out_row = {}
-        for field_id in self.fields:
-            out_row[field_id] = ''
-        return out_row
-        
-
+        return {field: '' for field in self.fields}
 
     def create_manifest_with_sum(self):
+        """
+        Create the manifest file using a sequencing summary.
+        """
         manifest_file = os.path.join(self.out_dir, f"{self.out_prefix}.txt")
+        # Read the read IDs from the read list into a set
+        with open(self.read_list, 'r') as file:
+            read_set = {line.strip() for line in file if line.strip() != 'read_id'}
 
-        with open(manifest_file, 'w') as fout:
-            fout.write("{}\n".format("\t".join(self.fields)))
+        with open(manifest_file, 'w') as fout, open(self.in_seq_summary, 'r') as fin:
+            header = next(fin).strip().split(self.delim)
+            fout.write("\t".join(self.fields) + "\n")
+            for line in fin:
+                row = line.strip().split(self.delim)
+                if len(row) < len(header):
+                    continue
+                row_data = dict(zip(header, row))
+                read_id = row_data.get('read_id')
+                if read_id not in read_set:
+                    continue
 
-            with open(self.in_seq_summary, 'r') as fin:
-                header = next(fin).strip().split(self.delim)
+                # Get read length and quality from summary if available
+                read_len = row_data.get('sequence_length_template', 0)
+                read_qual = row_data.get('mean_qscore_template', 0)
 
-                read_set = set()
-                with open(self.read_list, 'r') as file:
-                    lines = file.readlines()
+                is_uniq = True
+                is_mapped = False
+                start_time_val = row_data.get('start_time', '')
+                duration = row_data.get('duration', '')
+                if not start_time_val:
+                    start_time_val = self.start_time
+                    end_time_val = self.end_time
+                else:
+                    start_time_val = float(start_time_val)
+                    end_time_val = start_time_val + float(duration) if duration else ''
+                out_row = self.create_row()
+                for field in self.fields:
+                    if field in row_data:
+                        out_row[field] = row_data[field]
 
-                for line in lines:
-                    line = line.strip()
-                    if line != 'read_id':
-                        read_set.add(line)
+                # Determine mapping information from bam_obj
+                mapped_contigs = [cid for cid, stats in self.bam_obj.ref_stats.items()
+                                  if read_id in stats['reads'] and cid != '*']
+                if mapped_contigs:
+                    is_mapped = True
+                    if len(mapped_contigs) > 1:
+                        is_uniq = False
 
-                for line in fin:
-                    row = line.strip().split(self.delim)
-                    row_data = {header[i]: row[i] for i in range(len(row))}
-                    read_id = row_data['read_id']
+                fastp_status = read_id in self.filtered_reads
 
-                    if read_id not in read_set:
-                        continue
-                    try:
-                        read_len = row_data['sequence_length_template']
-                        read_qual = row_data['mean_qscore_template']
-                    except KeyError:
-                        read_len = 0
-                        read_qual = 0
+                out_row.update({
+                    'fastp_status': fastp_status,
+                    'sample_id': self.sample_id,
+                    'read_id': read_id,
+                    'is_mapped': is_mapped,
+                    'is_uniq': is_uniq,
+                    'read_len': read_len,
+                    'read_qscore': read_qual,
+                    'start_time': start_time_val,
+                    'end_time': end_time_val,
+                    'decision': row_data.get('end_reason', '')
+                })
 
-                    is_uniq = True
-                    is_mapped = False
-                    start_time = row_data['start_time']
-                    end_time = ''
-                    duration = row_data['duration']
-                    if start_time == '':
-                        start_time = self.start_time
-                        end_time = self.end_time
-                    else:
-                        start_time = float(start_time)
-                        if duration != '':
-                            end_time = start_time + float(duration)
+                if not mapped_contigs:
+                    out_row['contig_id'] = ''
+                    fout.write("\t".join(str(x) for x in out_row.values()) + "\n")
+                else:
+                    for contig_id in mapped_contigs:
+                        out_row['contig_id'] = contig_id
+                        fout.write("\t".join(str(x) for x in out_row.values()) + "\n")
 
-                    out_row = self.create_row()
-                    for field_id in self.fields:
-                        if field_id in row_data:
-                            out_row[field_id] = row_data[field_id]
-
-                    mapped_contigs = [
-                        contig_id for contig_id in self.bam_obj.ref_stats
-                        if read_id in self.bam_obj.ref_stats[contig_id]['reads'] and contig_id != '*'
-                    ]
-
-                    if mapped_contigs:
-                        is_mapped = True
-                        if len(mapped_contigs) > 1:
-                            is_uniq = False
-
-                    fastp_status = read_id in self.filtered_reads
-
-                    out_row.update({
-                        'fastp_status': fastp_status,
-                        'sample_id': self.sample_id,
-                        'read_id': read_id,
-                        'is_mapped': is_mapped,
-                        'is_uniq': is_uniq,
-                        'read_len': read_len,
-                        'read_qscore': read_qual,
-                        'start_time': start_time,
-                        'end_time': end_time,
-                        'decision': row_data['end_reason']
-                    })
-
-                    if not mapped_contigs:
-                        out_row['contig_id'] = ''
-                        fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
-                    else:
-                        for contig_id in mapped_contigs:
-                            out_row['contig_id'] = contig_id
-                            fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
-
-        # Perform the file check after closing the file
-        self.status = self.check_files([manifest_file])
-
-        # Check status and raise error if needed
-        if not self.status:
-            self.error_messages = "One or more files were not created or were empty"
-            print(self.error_messages)
-            raise ValueError(str(self.error_messages))
-
-        with open(self.in_seq_summary, 'r') as fin:
-            fin.close()
+        if not self.check_files([manifest_file]):
+            raise ValueError("One or more files were not created or were empty")
 
     def create_manifest_no_sum(self):
         """
-        Create a manifest file with various statistics when a sequencing summary is NOT present. Uses read list 
-        file instead.
-
-        Returns: 
-            file object: 
-                seq manifest text file
+        Create the manifest file when no sequencing summary is provided,
+        using a read list and raw FASTQ data.
         """
-        
-        manifest_file = os.path.join(self.out_dir,f"{self.out_prefix}.txt")
-        fout = open(manifest_file,'w')
-        fout.write("{}\n".format("\t".join(self.fields)))
+        manifest_file = os.path.join(self.out_dir, f"{self.out_prefix}.txt")
+        with open(manifest_file, 'w') as fout, open(self.read_list, 'r') as fin:
+            fout.write("\t".join(self.fields) + "\n")
+            header = next(fin).strip().split(self.delim)
+            for line in fin:
+                row = line.strip().split(self.delim)
+                row_data = dict(zip(header, row))
+                read_id = row_data.get('read_id')
 
-        fin = open(self.read_list,'r')
-        header = next(fin).strip().split(self.delim)
+                # Retrieve read length and quality from raw_reads if available
+                read_len, read_qual = (0, 0)
+                if read_id in self.raw_reads:
+                    read_len, read_qual = self.raw_reads[read_id]
 
-        for line in fin:
-            row = line.strip().split(self.delim)
-            row_data = {}
-            for i in range(0,len(row)) :
-                row_data[header[i]] = row[i]
+                is_uniq = True
+                is_mapped = False
+                start_time_val = self.start_time
+                end_time_val = self.end_time
 
-            read_id = row_data['read_id']
+                out_row = self.create_row()
+                for field in self.fields:
+                    if field in row_data:
+                        out_row[field] = row_data[field]
 
-            read_len = 0
-            read_qual = 0
-            if read_id in self.raw_reads:
-                read_len = self.raw_reads[read_id][0]
-                read_qual = self.raw_reads[read_id][1]
+                mapped_contigs = []
+                for contig_id, stats in self.bam_obj.ref_stats.items():
+                    if read_id in stats['reads']:
+                        # Update read length and quality from bam stats
+                        read_len, read_qual = stats['reads'][read_id]
+                        if contig_id != '*':
+                            mapped_contigs.append(contig_id)
+                if mapped_contigs:
+                    is_mapped = True
+                if len(mapped_contigs) > 1:
+                    is_uniq = False
 
-            is_uniq = True
-            is_mapped = False
-            start_time = self.start_time
-            end_time = self.end_time
+                fastp_status = (read_id in self.filtered_reads)
+                out_row.update({
+                    'fastp_status': fastp_status,
+                    'sample_id': self.sample_id,
+                    'read_id': read_id,
+                    'is_mapped': is_mapped,
+                    'is_uniq': is_uniq,
+                    'read_len': read_len,
+                    'read_qscore': read_qual,
+                    'start_time': start_time_val,
+                    'end_time': end_time_val,
+                    'decision': "signal_positive",
+                    'channel': "1"
+                })
 
-            out_row = self.create_row()
-            for field_id in self.fields:
-                if field_id in row_data:
-                    out_row[field_id] = row_data[field_id]
-            mapped_contigs = []
-            for contig_id in self.bam_obj.ref_stats:
-                if read_id in self.bam_obj.ref_stats[contig_id]['reads']:
-                    read_len = self.bam_obj.ref_stats[contig_id]['reads'][read_id][0]
-                    read_qual = self.bam_obj.ref_stats[contig_id]['reads'][read_id][1]
-                    if contig_id != '*':
-                        mapped_contigs.append(contig_id)
+                if not mapped_contigs:
+                    out_row['contig_id'] = ''
+                    fout.write("\t".join(str(x) for x in out_row.values()) + "\n")
+                else:
+                    for contig_id in mapped_contigs:
+                        out_row['contig_id'] = contig_id
+                        fout.write("\t".join(str(x) for x in out_row.values()) + "\n")
 
-            if len(mapped_contigs) > 0:
-                is_mapped = True
-            if len(mapped_contigs) > 1:
-                is_uniq = False
-
-            fastp_status = False
-            if read_id in self.filtered_reads:
-                fastp_status = True
-            out_row['fastp_status'] = fastp_status
-            out_row['sample_id'] = self.sample_id
-            out_row['read_id'] = read_id
-            out_row['is_mapped'] = is_mapped
-            out_row['is_uniq'] = is_uniq
-            out_row['read_len'] = read_len
-            out_row['read_qscore'] = read_qual
-            out_row['start_time'] = start_time
-            out_row['end_time'] = end_time
-            out_row['decision'] = "signal_positive"
-            out_row['channel'] = "1"
-
-
-            if len(mapped_contigs) == 0:
-                out_row['contig_id'] = ''
-                fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
-
-            for contig_id in mapped_contigs:
-                out_row['contig_id'] = contig_id
-                fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
-
-        self.status = self.check_files([manifest_file])
-        if self.status == False:
-            self.error_messages = "one or more files was not created or was empty"
-            raise ValueError(str(self.error_messages))
-        
-        fin.close()
-        fout.close()
+        if not self.check_files([manifest_file]):
+            raise ValueError("One or more files were not created or were empty")
 
     def check_files(self, files_to_check):
         """
-        check if the output file exists and is not empty
-
-        Arguments:
-            files_to_check: list
-                list of file paths
-
-        Returns:
-            bool:
-                returns True if the generated output file is found and not empty, False otherwise
+        Check if each file in the list exists and is non-empty.
         """
-        if isinstance (files_to_check, str):
+        if isinstance(files_to_check, str):
             files_to_check = [files_to_check]
         for f in files_to_check:
-            if not os.path.isfile(f):
-                return False
-            elif os.path.getsize(f) == 0:
+            if not os.path.isfile(f) or os.path.getsize(f) == 0:
                 return False
         return True
-    
+
+
 class SeqManifestSummary:
+    # Default fields; note that one field is dynamic (taxon_covered_bases_<min_cov>X)
     fields = [
-        'sample_id','est_genome_size','est_coverage','total_bases','total_fastp_bases',
-        'mean_read_length','taxon_id','taxon_length','taxon_covered_bases',
-        'taxon_%_covered_bases','taxon_mean_read_length'
+        'sample_id', 'est_genome_size', 'est_coverage', 'total_bases', 'total_fastp_bases',
+        'mean_read_length', 'taxon_id', 'taxon_length', 'taxon_mean_coverage',
+        'taxon_covered_bases', 'taxon_%_covered_bases', 'total_taxon_mapped_bases', 'taxon_mean_read_length'
     ]
-    sample_id = ''
-    out_prefix = ''
-    out_dir = ''
-    genome_size = None
-    coverage = None
-    bam_obj = None
-    status = False
-    error_messages = None
 
-    def __init__(self,sample_id, bam_obj, out_prefix, out_dir, genome_size, coverage,
-                  fastp_json_file=None, paired=False):
-        """
-        Initalize the class with sample_id, bam_obj, out_prefix, and out_dir. Extract sequencing
-        statisitics from various files and append to a summary file
-
-        Arguments:
-            sample_id: str
-                a string of the name of the sample to be analyzed
-            bam_obj: str
-                an object that of the SeqManifest class that stores bam information
-            out_prefix: str
-                a designation of what the output files will be named
-            out_dir: str
-                a designation of the output directory
-            genome_size: int
-                a designation of genome size based on mash distance calcualtion.
-            coverage: int
-                a designation of coverage based on mash distance calcualtion.
-            fastp_json_file: str
-                a designation to the path of the json file generated from fastp.
-            paired: bool
-                a designation of wheather or not the files specified belong to paired-end sequencing data
-        """
+    def __init__(self, sample_id, bam_obj, out_prefix, out_dir, genome_size, coverage,
+                 fastp_json_file=None, paired=False):
         self.sample_id = sample_id
         self.fastp_json_file = fastp_json_file
         self.bam_obj = bam_obj
@@ -434,91 +282,64 @@ class SeqManifestSummary:
         self.coverage = coverage
         self.paired = paired
 
-        # Define the dynamic field name and store it as an instance attribute
+        # Dynamic field: taxon_covered_bases_<min_cov>X
         min_cov = self.bam_obj.min_coverage
         self.taxon_coverage_field = f"taxon_covered_bases_{min_cov}X"
 
-        # Use the dynamic field name in the fields list
+        # Use the dynamic field in the fields list
         self.fields = [
             'sample_id', 'est_genome_size', 'est_coverage', 'total_bases', 'total_fastp_bases',
             'mean_read_length', 'taxon_id', 'taxon_length', 'taxon_mean_coverage',
-            self.taxon_coverage_field,  # Using the dynamic field name
-            'taxon_%_covered_bases', 'total_taxon_mapped_bases', 'taxon_mean_read_length' 
+            self.taxon_coverage_field,
+            'taxon_%_covered_bases', 'total_taxon_mapped_bases', 'taxon_mean_read_length'
         ]
-    
+
     def create_row(self):
         """
-        create rows and store them into a dictionary
-
-        Returns:
-            dict:
-                dictionary of rows produced.
+        Create an empty row dictionary for the summary manifest.
         """
-        out_row = {}
-        for field_id in self.fields:
-            out_row[field_id] = ''
-        return out_row
-    
+        return {field: '' for field in self.fields}
+
     def generate_summary(self):
         """
-        Create a summary manifest file with various statistics from different file sources.
-
-        Returns: 
-            bool: 
-                True if the summary manifest file was created, False otherwise.
+        Generate the summary manifest file using BAM and fastp JSON data.
         """
-        summary_manifest_file = os.path.join(self.out_dir,f"{self.out_prefix}.txt")
-        fout = open(summary_manifest_file,'w')
-        fout.write("{}\n".format("\t".join(self.fields)))
+        summary_manifest_file = os.path.join(self.out_dir, f"{self.out_prefix}.txt")
+        with open(summary_manifest_file, 'w') as fout:
+            fout.write("\t".join(self.fields) + "\n")
+            for contig_id, stats in self.bam_obj.ref_stats.items():
+                out_row = self.create_row()
+                out_row["sample_id"] = self.sample_id
+                out_row["est_genome_size"] = self.genome_size
+                out_row["est_coverage"] = self.coverage
+                out_row["total_bases"] = self.fastp_json_file["summary"]["before_filtering"]["total_bases"]
+                out_row["total_fastp_bases"] = self.fastp_json_file["summary"]["after_filtering"]["total_bases"]
+                out_row["mean_read_length"] = self.fastp_json_file["summary"]["after_filtering"]["read1_mean_length"]
+                out_row["taxon_id"] = contig_id
+                out_row["taxon_length"] = stats['length']
+                out_row[self.taxon_coverage_field] = stats['covered_bases']
+                if stats['length'] != 0:
+                    out_row["taxon_%_covered_bases"] = (stats['covered_bases'] / stats['length']) * 100
+                    out_row["total_taxon_mapped_bases"] = stats['total_mapped_bases']
+                    out_row["taxon_mean_read_length"] = stats['mean_len']
+                    out_row["taxon_mean_coverage"] = stats['mean_cov']
+                else:
+                    out_row["taxon_%_covered_bases"] = 0
+                    out_row["total_taxon_mapped_bases"] = 0
+                    out_row["taxon_mean_read_length"] = 0
+                    out_row["taxon_mean_coverage"] = 0
+                fout.write("\t".join(str(x) for x in out_row.values()) + "\n")
 
-        out_row = self.create_row()
-        for contig_id in self.bam_obj.ref_stats:
-            out_row["sample_id"] = self.sample_id
-            out_row["est_genome_size"] = self.genome_size
-            out_row["est_coverage"] = self.coverage
-            out_row["total_bases"] = self.fastp_json_file["summary"]["before_filtering"]["total_bases"]
-            out_row["total_fastp_bases"] = self.fastp_json_file["summary"]["after_filtering"]["total_bases"]
-            out_row["mean_read_length"] = self.fastp_json_file["summary"]["after_filtering"]["read1_mean_length"]
-            out_row["taxon_id"] = contig_id
-            out_row["taxon_length"] = self.bam_obj.ref_stats[contig_id]['length']
-            out_row[self.taxon_coverage_field] = self.bam_obj.ref_stats[contig_id]['covered_bases']
-            if self.bam_obj.ref_stats[contig_id]['length'] != 0:
-                out_row["taxon_%_covered_bases"] = ((self.bam_obj.ref_stats[contig_id]['covered_bases']/self.bam_obj.ref_stats[contig_id]['length']) * 100)
-                out_row["total_taxon_mapped_bases"] = self.bam_obj.ref_stats[contig_id]['total_mapped_bases']
-                out_row["taxon_mean_read_length"] = self.bam_obj.ref_stats[contig_id]['mean_len']
-                out_row["taxon_mean_coverage"] = self.bam_obj.ref_stats[contig_id]['mean_cov']
-            else:
-                out_row["taxon_%_covered_bases"] = 0
-                out_row["total_taxon_mapped_bases"] = 0
-                out_row["taxon_mean_read_length"] = 0
-                out_row["taxon_mean_coverage"] = 0
-                
-            fout.write("{}\n".format("\t".join([str(x) for x in out_row.values()])))
-        
-        self.status = self.check_files([summary_manifest_file])
-        if self.status == False:
-            self.error_messages = "one or more files was not created or was empty"
-            raise ValueError(str(self.error_messages))
-        
-        fout.close()
+        if not self.check_files([summary_manifest_file]):
+            raise ValueError("One or more files were not created or were empty")
 
     def check_files(self, files_to_check):
         """
-        check if the output file exists and is not empty
-
-        Arguments:
-            files_to_check: list
-                list of file paths
-
-        Returns:
-            bool:
-                returns True if the generated output file is found and not empty, False otherwise
+        Check if the given file(s) exist and are non-empty.
         """
-        if isinstance (files_to_check, str):
+        if isinstance(files_to_check, str):
             files_to_check = [files_to_check]
         for f in files_to_check:
-            if not os.path.isfile(f):
-                return False
-            elif os.path.getsize(f) < 0:
+            if not os.path.isfile(f) or os.path.getsize(f) < 0:
                 return False
         return True
