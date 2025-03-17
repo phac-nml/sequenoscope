@@ -41,14 +41,12 @@ class SeqManifest:
         self.status = False
         self.error_messages = None
 
-        # Require a sequencing summary or (start and end times + in_fastq)
         if self.in_seq_summary is None:
             if self.start_time is None or self.end_time is None:
                 raise ValueError('No sequencing summary specified; please specify a start and end datetime.')
             if self.in_fastq is None:
                 raise ValueError('No sequencing summary specified; please provide the initial fastq file for calculations.')
 
-        # Initialize BAM processing
         self.bam_obj = BamProcessor(input_file=in_bam, min_coverage=self.min_coverage)
 
         if self.fastp_fastq:
@@ -67,16 +65,11 @@ class SeqManifest:
 
     @staticmethod
     def error_prob_list_tab(n):
-        """
-        Generate a list of error probabilities for qualities 0..n.
-        """
+        """Generate a list of error probabilities for qualities 0..n."""
         return [10 ** (q / -10) for q in range(n + 1)]
 
     def calc_mean_qscores(self, qual, tab=None):
-        """
-        Calculates the mean quality score by converting Phred scores to error probabilities,
-        averaging them, and converting back to Phred scale.
-        """
+        """Calculate the mean quality score using error probabilities."""
         if tab is None:
             tab = SeqManifest.error_prob_list_tab(DefaultValues.nanoget_threshold)
         if qual:
@@ -85,15 +78,11 @@ class SeqManifest:
         return 0
 
     def convert_qscores(self, qual_string):
-        """
-        Convert a Phred quality string into a list of integer quality scores.
-        """
+        """Convert a Phred quality string into a list of integer scores."""
         return [ord(c) - DefaultValues.phred_33_encoding_value for c in qual_string]
 
     def process_fastq(self, fastq_file_list, read_dict):
-        """
-        Process FASTQ files and store read length and computed quality score in a dictionary.
-        """
+        """Process FASTQ files and store read length and computed quality score in a dictionary."""
         for fastq_file in fastq_file_list:
             fastq_obj = fastq_parser(fastq_file)
             for record in fastq_obj.parse():
@@ -105,17 +94,12 @@ class SeqManifest:
                 read_dict[read_id] = [seq_len, qscore]
 
     def create_row(self):
-        """
-        Create an empty row dictionary with keys from fields.
-        """
+        """Create an empty row dictionary with keys from fields."""
         return {field: '' for field in self.fields}
 
     def create_manifest_with_sum(self):
-        """
-        Create the manifest file using a sequencing summary.
-        """
+        """Create the manifest file using a sequencing summary."""
         manifest_file = os.path.join(self.out_dir, f"{self.out_prefix}.txt")
-        # Read the read IDs from the read list into a set
         with open(self.read_list, 'r') as file:
             read_set = {line.strip() for line in file if line.strip() != 'read_id'}
 
@@ -131,7 +115,6 @@ class SeqManifest:
                 if read_id not in read_set:
                     continue
 
-                # Get read length and quality from summary if available
                 read_len = row_data.get('sequence_length_template', 0)
                 read_qual = row_data.get('mean_qscore_template', 0)
 
@@ -145,12 +128,12 @@ class SeqManifest:
                 else:
                     start_time_val = float(start_time_val)
                     end_time_val = start_time_val + float(duration) if duration else ''
+
                 out_row = self.create_row()
                 for field in self.fields:
                     if field in row_data:
                         out_row[field] = row_data[field]
 
-                # Determine mapping information from bam_obj
                 mapped_contigs = [cid for cid, stats in self.bam_obj.ref_stats.items()
                                   if read_id in stats['reads'] and cid != '*']
                 if mapped_contigs:
@@ -185,10 +168,7 @@ class SeqManifest:
             raise ValueError("One or more files were not created or were empty")
 
     def create_manifest_no_sum(self):
-        """
-        Create the manifest file when no sequencing summary is provided,
-        using a read list and raw FASTQ data.
-        """
+        """Create the manifest file when no sequencing summary is provided, using a read list and raw FASTQ data."""
         manifest_file = os.path.join(self.out_dir, f"{self.out_prefix}.txt")
         with open(manifest_file, 'w') as fout, open(self.read_list, 'r') as fin:
             fout.write("\t".join(self.fields) + "\n")
@@ -198,7 +178,6 @@ class SeqManifest:
                 row_data = dict(zip(header, row))
                 read_id = row_data.get('read_id')
 
-                # Retrieve read length and quality from raw_reads if available
                 read_len, read_qual = (0, 0)
                 if read_id in self.raw_reads:
                     read_len, read_qual = self.raw_reads[read_id]
@@ -216,7 +195,6 @@ class SeqManifest:
                 mapped_contigs = []
                 for contig_id, stats in self.bam_obj.ref_stats.items():
                     if read_id in stats['reads']:
-                        # Update read length and quality from bam stats
                         read_len, read_qual = stats['reads'][read_id]
                         if contig_id != '*':
                             mapped_contigs.append(contig_id)
@@ -252,9 +230,7 @@ class SeqManifest:
             raise ValueError("One or more files were not created or were empty")
 
     def check_files(self, files_to_check):
-        """
-        Check if each file in the list exists and is non-empty.
-        """
+        """Check if each file in the list exists and is non-empty."""
         if isinstance(files_to_check, str):
             files_to_check = [files_to_check]
         for f in files_to_check:
@@ -264,11 +240,13 @@ class SeqManifest:
 
 
 class SeqManifestSummary:
-    # Default fields; note that one field is dynamic (taxon_covered_bases_<min_cov>X)
+    # Define the default fields; updated with new dynamic field naming.
     fields = [
         'sample_id', 'est_genome_size', 'est_coverage', 'total_bases', 'total_fastp_bases',
         'mean_read_length', 'taxon_id', 'taxon_length', 'taxon_mean_coverage',
-        'taxon_covered_bases', 'taxon_%_covered_bases', 'total_taxon_mapped_bases', 'taxon_mean_read_length'
+        # Dynamic field for taxon covered bases using min_cov:
+        'taxon_covered_bases',  
+        'taxon_%_covered_bases', 'total_taxon_ref_mapped_bases', 'taxon_mean_read_length'
     ]
 
     def __init__(self, sample_id, bam_obj, out_prefix, out_dir, genome_size, coverage,
@@ -285,19 +263,21 @@ class SeqManifestSummary:
         # Dynamic field: taxon_covered_bases_<min_cov>X
         min_cov = self.bam_obj.min_coverage
         self.taxon_coverage_field = f"taxon_covered_bases_{min_cov}X"
+        # New dynamic field for taxon percentage covered:
+        self.taxon_percentage_field = f"taxon_%_covered_bases_{min_cov}X"
+        # New dynamic field for total mapped bases:
+        self.total_taxon_ref_mapped_field = "total_taxon_ref_mapped_bases"  # remains fixed
 
-        # Use the dynamic field in the fields list
+        # Update fields list to include the dynamic names.
         self.fields = [
             'sample_id', 'est_genome_size', 'est_coverage', 'total_bases', 'total_fastp_bases',
             'mean_read_length', 'taxon_id', 'taxon_length', 'taxon_mean_coverage',
             self.taxon_coverage_field,
-            'taxon_%_covered_bases', 'total_taxon_mapped_bases', 'taxon_mean_read_length'
+            self.taxon_percentage_field, self.total_taxon_ref_mapped_field, 'taxon_mean_read_length'
         ]
 
     def create_row(self):
-        """
-        Create an empty row dictionary for the summary manifest.
-        """
+        """Create an empty row dictionary for the summary manifest."""
         return {field: '' for field in self.fields}
 
     def generate_summary(self):
@@ -319,13 +299,13 @@ class SeqManifestSummary:
                 out_row["taxon_length"] = stats['length']
                 out_row[self.taxon_coverage_field] = stats['covered_bases']
                 if stats['length'] != 0:
-                    out_row["taxon_%_covered_bases"] = (stats['covered_bases'] / stats['length']) * 100
-                    out_row["total_taxon_mapped_bases"] = stats['total_mapped_bases']
+                    out_row[self.taxon_percentage_field] = (stats['covered_bases'] / stats['length']) * 100
+                    out_row[self.total_taxon_ref_mapped_field] = stats['total_mapped_bases']
                     out_row["taxon_mean_read_length"] = stats['mean_len']
                     out_row["taxon_mean_coverage"] = stats['mean_cov']
                 else:
-                    out_row["taxon_%_covered_bases"] = 0
-                    out_row["total_taxon_mapped_bases"] = 0
+                    out_row[self.taxon_percentage_field] = 0
+                    out_row[self.total_taxon_ref_mapped_field] = 0
                     out_row["taxon_mean_read_length"] = 0
                     out_row["taxon_mean_coverage"] = 0
                 fout.write("\t".join(str(x) for x in out_row.values()) + "\n")
@@ -334,9 +314,7 @@ class SeqManifestSummary:
             raise ValueError("One or more files were not created or were empty")
 
     def check_files(self, files_to_check):
-        """
-        Check if the given file(s) exist and are non-empty.
-        """
+        """Check if the given file(s) exist and are non-empty."""
         if isinstance(files_to_check, str):
             files_to_check = [files_to_check]
         for f in files_to_check:

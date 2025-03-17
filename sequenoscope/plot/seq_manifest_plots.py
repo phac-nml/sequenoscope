@@ -38,45 +38,89 @@ class SeqManifestPlotter:
         df['source_file'] = source_name
         return df
 
-    def generate_source_file_taxon_covered_bar_chart(self, show_legend=False):
+    def generate_source_file_taxon_covered_bar_chart(self):
         """
         Generate a bar chart for taxon covered bases.
+        Taxon names are removed from the bars (only shown in hover) and legend grouping is applied.
+        A horizontal log toggle button is added.
         """
         df_test = self.read_and_append_source(self.test_file_path, 'test file')
         df_control = self.read_and_append_source(self.control_file_path, 'control file')
         df = pd.concat([df_test, df_control])
         df = df[df['taxon_id'] != '*']
-        # Use .loc to avoid SettingWithCopyWarning
         df.loc[:, 'taxon_label'] = pd.factorize(df['taxon_id'])[0]
 
+        # Determine the dynamic column for taxon percentage covered (e.g., "taxon_%_covered_bases_{N}%")
+        col_covered_percentage = None
+        for col in df.columns:
+            if col.startswith("taxon_%_covered_bases_"):
+                col_covered_percentage = col
+                break
+        if col_covered_percentage is None:
+            col_covered_percentage = "taxon_%_covered_bases"
+
         fig = go.Figure()
+        shown_legend = {}
         for _, row in df.iterrows():
+            legendgroup = row['taxon_id']
+            showlegend_val = False
+            if legendgroup not in shown_legend:
+                showlegend_val = True
+                shown_legend[legendgroup] = True
+
             fig.add_trace(go.Bar(
                 x=[row['source_file']],
-                y=[row['taxon_%_covered_bases']],
-                name=row['taxon_id'],
+                y=[row[col_covered_percentage]],
+                name=legendgroup,
+                legendgroup=legendgroup,
+                showlegend=showlegend_val,
                 marker=dict(color=self.color_scale[row['taxon_label'] % len(self.color_scale)]),
-                hovertemplate='<b>Source File: %{x}</b><br>' +
-                              'Estimated Genome Size: %{customdata[1]}<br>' +
-                              'Taxon ID: %{text}<br>' +
-                              'Taxon Length: %{customdata[0]}<br>' +
-                              'Covered Bases: %{y}<br>',
-                customdata=[[row['taxon_length'], row['est_genome_size']]],
-                text=[row['taxon_id']]
+                hovertemplate=(
+                    '<b>Source File: %{x}</b><br>' +
+                    'Estimated Genome Size: %{customdata[1]}<br>' +
+                    'Taxon ID: ' + legendgroup + '<br>' +
+                    'Taxon Length: %{customdata[0]}<br>' +
+                    'Covered Bases: %{y}<br>'
+                ),
+                customdata=[[row['taxon_length'], row.get('est_genome_size', 'N/A')]]
             ))
         fig.update_layout(
             xaxis_title='Source File',
             yaxis_title='Taxon % Covered Bases',
             xaxis=dict(tickmode='array', tickvals=[-0.2, 1.2], ticktext=['test file', 'control file']),
             yaxis=dict(showgrid=True, gridcolor='lightgray'),
-            showlegend=show_legend
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    direction="right",
+                    buttons=[
+                        dict(
+                            args=[{"yaxis.type": "linear"}],
+                            label="Linear",
+                            method="relayout"
+                        ),
+                        dict(
+                            args=[{"yaxis.type": "log"}],
+                            label="Log",
+                            method="relayout"
+                        )
+                    ],
+                    pad={"r": 10, "t": 10},
+                    showactive=True,
+                    x=0.0,
+                    xanchor="left",
+                    y=1.1,
+                    yanchor="top"
+                )
+            ],
+            showlegend=True
         )
         self.save_plot_to_html(fig, "source_file_taxon_covered_bar_chart.html")
 
     def generate_mean_read_length_chart(self):
         """
         Generate a bar chart comparing the taxon mean read length for test and control.
-        This plot mimics the taxon covered bases chart, but uses the 'taxon_mean_read_length' column.
+        A single legend per taxon is created and an update menu is added to toggle y-axis scale.
         """
         df_test = self.read_and_append_source(self.test_file_path, 'test file')
         df_control = self.read_and_append_source(self.control_file_path, 'control file')
@@ -85,31 +129,64 @@ class SeqManifestPlotter:
         df.loc[:, 'taxon_label'] = pd.factorize(df['taxon_id'])[0]
 
         fig = go.Figure()
+        shown_legend = {}
         for _, row in df.iterrows():
+            legendgroup = row['taxon_id']
+            showlegend_val = False
+            if legendgroup not in shown_legend:
+                showlegend_val = True
+                shown_legend[legendgroup] = True
             fig.add_trace(go.Bar(
                 x=[row['source_file']],
                 y=[row['taxon_mean_read_length']],
-                name=row['taxon_id'],
+                name=legendgroup,
+                legendgroup=legendgroup,
+                showlegend=showlegend_val,
                 marker=dict(color=self.color_scale[row['taxon_label'] % len(self.color_scale)]),
-                hovertemplate='<b>Source File: %{x}</b><br>' +
-                              'Taxon ID: %{text}<br>' +
-                              'Taxon Length: %{customdata[0]}<br>' +
-                              'Taxon Mean Read Length: %{y}<br>',
-                customdata=[[row['taxon_length']]],
-                text=[row['taxon_id']]
+                hovertemplate=(
+                    '<b>Source File: %{x}</b><br>' +
+                    'Taxon ID: ' + legendgroup + '<br>' +
+                    'Taxon Length: %{customdata[0]}<br>' +
+                    'Taxon Mean Read Length: %{y}<br>'
+                ),
+                customdata=[[row['taxon_length']]]
             ))
         fig.update_layout(
             xaxis_title='Source File',
             yaxis_title='Taxon Mean Read Length',
             xaxis=dict(tickmode='array', tickvals=[-0.2, 1.2], ticktext=['test file', 'control file']),
-            yaxis=dict(showgrid=True, gridcolor='lightgray')
+            yaxis=dict(showgrid=True, gridcolor='lightgray'),
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    direction="right",
+                    buttons=[
+                        dict(
+                            args=[{"yaxis.type": "linear"}],
+                            label="Linear",
+                            method="relayout"
+                        ),
+                        dict(
+                            args=[{"yaxis.type": "log"}],
+                            label="Log",
+                            method="relayout"
+                        )
+                    ],
+                    pad={"r": 10, "t": 10},
+                    showactive=True,
+                    x=0.0,
+                    xanchor="left",
+                    y=1.1,
+                    yanchor="top"
+                )
+            ]
         )
         self.save_plot_to_html(fig, "taxon_mean_read_length_comparison.html")
 
     def generate_mean_coverage_chart(self):
         """
         Generate a bar chart comparing the taxon mean coverage for test and control.
-        This plot mimics the taxon covered bases chart, but uses the 'taxon_mean_coverage' column.
+        A single legend per taxon is created and an update menu is added to toggle y-axis scale.
         """
         df_test = self.read_and_append_source(self.test_file_path, 'test file')
         df_control = self.read_and_append_source(self.control_file_path, 'control file')
@@ -118,24 +195,57 @@ class SeqManifestPlotter:
         df.loc[:, 'taxon_label'] = pd.factorize(df['taxon_id'])[0]
 
         fig = go.Figure()
+        shown_legend = {}
         for _, row in df.iterrows():
+            legendgroup = row['taxon_id']
+            showlegend_val = False
+            if legendgroup not in shown_legend:
+                showlegend_val = True
+                shown_legend[legendgroup] = True
             fig.add_trace(go.Bar(
                 x=[row['source_file']],
                 y=[row['taxon_mean_coverage']],
-                name=row['taxon_id'],
+                name=legendgroup,
+                legendgroup=legendgroup,
+                showlegend=showlegend_val,
                 marker=dict(color=self.color_scale[row['taxon_label'] % len(self.color_scale)]),
-                hovertemplate='<b>Source File: %{x}</b><br>' +
-                              'Taxon ID: %{text}<br>' +
-                              'Taxon Length: %{customdata[0]}<br>' +
-                              'Taxon Mean Coverage: %{y}<br>',
-                customdata=[[row['taxon_length']]],
-                text=[row['taxon_id']]
+                hovertemplate=(
+                    '<b>Source File: %{x}</b><br>' +
+                    'Taxon ID: ' + legendgroup + '<br>' +
+                    'Taxon Length: %{customdata[0]}<br>' +
+                    'Taxon Mean Coverage: %{y}<br>'
+                ),
+                customdata=[[row['taxon_length']]]
             ))
         fig.update_layout(
             xaxis_title='Source File',
             yaxis_title='Taxon Mean Coverage',
             xaxis=dict(tickmode='array', tickvals=[-0.2, 1.2], ticktext=['test file', 'control file']),
-            yaxis=dict(showgrid=True, gridcolor='lightgray')
+            yaxis=dict(showgrid=True, gridcolor='lightgray'),
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    direction="right",
+                    buttons=[
+                        dict(
+                            args=[{"yaxis.type": "linear"}],
+                            label="Linear",
+                            method="relayout"
+                        ),
+                        dict(
+                            args=[{"yaxis.type": "log"}],
+                            label="Log",
+                            method="relayout"
+                        )
+                    ],
+                    pad={"r": 10, "t": 10},
+                    showactive=True,
+                    x=0.0,
+                    xanchor="left",
+                    y=1.1,
+                    yanchor="top"
+                )
+            ]
         )
         self.save_plot_to_html(fig, "taxon_mean_coverage_comparison.html")
 

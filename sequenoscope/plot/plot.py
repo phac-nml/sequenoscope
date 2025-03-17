@@ -43,7 +43,6 @@ def parse_args():
     plotting_group.add_argument('-AS', '--adaptive_sampling', action="store_true", help="Generate decision bar charts for adaptive sampling if utilized during sequencing.\n")
     plotting_group.add_argument('-VP', '--violin_data_percent', default=0.1, type=float, help='Fraction of the data to use for the violin plot. Default=0.1.\n')
     plotting_group.add_argument('-bin', '--time_bin_unit', default="minutes", choices=['seconds', 'minutes', '5m', '15m', 'hours'], type=str, help='Time bin used for decision bar charts.\n')
-    plotting_group.add_argument('-legend', '--taxon_chart_legend', action='store_true', help="Generate a legend for the source file taxon covered bar chart.\n")
 
     return parser.parse_args()
 
@@ -58,7 +57,6 @@ def run():
     force = args.force
     violin_data_percent = args.violin_data_percent
     time_bin_unit = args.time_bin_unit
-    taxon_legend = args.taxon_chart_legend
 
     # Setup output directory and logging
     if not os.path.isdir(output_dir):
@@ -93,7 +91,6 @@ def run():
         logger.info(f"{name}: {value}")
     logger.info(f"Violin data fraction: {violin_data_percent}")
     logger.info(f"Time bin unit: {time_bin_unit}")
-    logger.info(f"Taxon chart legend: {taxon_legend}")
     logger.info("-" * 40)
 
     print("-" * 40)
@@ -135,9 +132,9 @@ def run():
     print("-" * 40)
     logger.info("Generating taxon covered bar charts and summary table.")
 
-    # Generate taxon covered bar chart using summary files
+    # Generate taxon covered bar chart using summary files, always show legend.
     taxon_bar_chart = SeqManifestPlotter(test_manifest_summary, control_manifest_summary, output_dir, output_prefix=output_prefix)
-    taxon_bar_chart.generate_source_file_taxon_covered_bar_chart(show_legend=taxon_legend)
+    taxon_bar_chart.generate_source_file_taxon_covered_bar_chart()
 
     # Generate summary table
     from sequenoscope.plot.summary_table import SummaryTable  # ensure the correct module is imported

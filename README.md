@@ -172,18 +172,19 @@ sequenoscope analyze --input_fastq mock_control.fastq \
 #### analyze module (mock_control_results)
 ```
 mock_control_results/
-├── analyze.log
-├── control_fastp_output.fastp.fastq
-├── control_fastp_output.html
-├── control_fastp_output.json
+├── intermediates
+  ├── control_fastp_output.fastp.fastq
+  ├── control_fastp_output.html
+  ├── control_fastp_output.json
+  ├── control_mash_hash.msh
+  ├── control_read_list.txt
+  ├── control_mapped_bam.bam
+  ├── control_mapped_bam.bam.bai
+  ├── control_mapped_fastq.fastq
+  ├── control_mapped_sam.sam
 ├── control_manifest_summary.txt
 ├── control_manifest.txt
-├── control_mapped_bam.bam
-├── control_mapped_bam.bam.bai
-├── control_mapped_fastq.fastq
-├── control_mapped_sam.sam
-├── control_mash_hash.msh
-└── control_read_list.txt
+├── analyze.log
 ```
 
 ---
@@ -208,17 +209,18 @@ sequenoscope analyze --input_fastq mock_adaptive_sampling.fastq \
 #### analyze module (mock_adaptive_sampling_results)
 ```
 mock_adaptive_sampling_results/
-├── adaptive_sampling_fastp_output.fastp.fastq
-├── adaptive_sampling_fastp_output.html
-├── adaptive_sampling_fastp_output.json
+├── intermediates
+  ├── adaptive_sampling_fastp_output.fastp.fastq
+  ├── adaptive_sampling_fastp_output.html
+  ├── adaptive_sampling_fastp_output.json
+  ├── adaptive_sampling_mapped_bam.bam
+  ├── adaptive_sampling_mapped_bam.bam.bai
+  ├── adaptive_sampling_mapped_fastq.fastq
+  ├── adaptive_sampling_mapped_sam.sam
+  ├── adaptive_sampling_mash_hash.msh
+  ├── adaptive_sampling_read_list.txt
 ├── adaptive_sampling_manifest_summary.txt
 ├── adaptive_sampling_manifest.txt
-├── adaptive_sampling_mapped_bam.bam
-├── adaptive_sampling_mapped_bam.bam.bai
-├── adaptive_sampling_mapped_fastq.fastq
-├── adaptive_sampling_mapped_sam.sam
-├── adaptive_sampling_mash_hash.msh
-├── adaptive_sampling_read_list.txt
 └── analyze.log
 ```
 
@@ -292,55 +294,67 @@ To demonstrate the practical application of our pipeline, consider a scenario wh
 If you run ``sequenoscope``, you should see the following usage statement:
 
         Usage: sequenoscope <command> <required arguments>
-        
+
         To get full help for a command use one of:
         sequenoscope <command> -h
         sequenoscope <command> --help
-        
-        
+
+
         Available commands:
-        
+
         analyze     map reads to a target and produce a report with sequencing statistics
-        plot        generate plots based on directories with seq manifest files
-        filter_ONT  filter reads from a FASTQ file based on a sequencing summary file
+        plot        generate plots based on seq manifest files
+        filter_ONT  filter reads from a fastq file based on a sequencing summary file
+
+        Other options:
+
+        --check_dependencies  Check if external dependencies (fastp, minimap2, samtools, mash, seqtk) and required Python packages (pysam, plotly) are available
+        -v, --version         Show the version and exit
+        -h, --help            Show this help message and exit
+
+        
 
 If you run ``sequenoscope analyze -h`` or ``sequenoscope analyze --help``, you should see the following options and usage guidleines:
 
-        usage: sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.fasta> -o <out> -seq_type <sr>[options]
-        For help use: sequenoscope analyze -h or sequenoscope analyze --help
-        
-        sequenoscope version 0.0.5: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
-        
-        Arguments:
+        For help use: sequenoscope analyze -h or --help
+
+        sequenoscope version 1.0.0: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
+
+        optional arguments:
           -h, --help            show this help message and exit
+          --force               Force overwrite of existing results directory.
+          -v, --version         show program's version number and exit
+
+        USER OPTIONS:
+          Direct input files and basic parameters.
+
           --input_fastq  [ ...]
-                                [REQUIRED] Path to ***EITHER 1 or 2*** fastq files to process.
-          --input_reference     [REQUIRED] Path to a single reference FASTA file to process. the single FASTA file may contain several sequences.
+                                [REQUIRED] Path to 1 (SE) or 2 (PE) FASTQ files to process.
+          --input_reference     [REQUIRED] Path to a single reference FASTA file.
           -seq_sum , --sequencing_summary 
-                                Path to sequencing summary for manifest creation
-          -start , --start_time 
-                                Start time when no seq summary is provided
-          -end , --end_time     End time when no seq summary is provided
-          -o , --output         [REQUIRED] Output directory designation
+                                (Optional) Path to sequencing summary for manifest creation.
+          -o , --output         [REQUIRED] Output directory designation.
           -op , --output_prefix 
-                                Output file prefix designation. default is [sample]
+                                Output file prefix designation. Default is 'sample'.
           -seq_type , --sequencing_type 
-                                [REQUIRED] A designation of the type of sequencing utilized for the input fastq files. SE = single-end reads and PE = paired-end reads.
-          -t , --threads        A designation of the number of threads to use
-          -min_len , --minimum_read_length 
-                                A designation of the minimum read length. reads shorter than the integer specified required will be discarded, default is 15
-          -max_len , --maximum_read_length 
-                                A designation of the maximum read length. reads longer than the integer specified required will be discarded, default is 0 meaning no limitation
-          -trm_fr , --trim_front_bp 
-                                A designation of the how many bases to trim from the front of the sequence, default is 0.
-          -trm_tail , --trim_tail_bp 
-                                A designation of the how many bases to trim from the tail of the sequence, default is 0
-          -q , --quality_threshold 
-                                Quality score threshold for filtering reads. Reads with an average quality score below this threshold will be discarded. If not specified, no quality filtering will be performed.
+                                [REQUIRED] Sequencing type: 'SE' for single-end or 'PE' for paired-end.
+
+        FILTER OPTIONS:
+          Parameters to filter/trim FASTQ reads.
+
           -min_cov , --minimum_coverage 
-                                A designation of the minimum coverage for each taxon. Only bases equal to or higher then the designated value will be considered. default is 1
-          --minimap2_kmer       A designation of the kmer size when running minimap2
-          --force               Force overwite of existing results directory
+                                Minimum coverage threshold; default is 1.
+          -t , --threads        Number of threads to use.
+          -min_len , --minimum_read_length 
+                                Minimum read length; default is 15.
+          -max_len , --maximum_read_length 
+                                Maximum read length; default is 0 (no limit).
+          -trm_fr , --trim_front_bp 
+                                Bases to trim from the front; default is 0.
+          -trm_tail , --trim_tail_bp 
+                                Bases to trim from the tail; default is 0.
+          -q , --quality_threshold 
+                                Quality score threshold; default is 15.
 
 If you run ``sequenoscope filter_ONT -h`` or ``sequenoscope filter_ONT --help``, you should see the following options and usage guidleines:
 
@@ -411,8 +425,6 @@ Plotting Options:
                         Fraction of the data to use for the violin plot.
   -bin {seconds,minutes,5m,15m,hours}, --time_bin_unit {seconds,minutes,5m,15m,hours}
                         Time bin used for decision bar charts.
-  -legend, --taxon_chart_legend
-                        Include a legend in the source file taxon covered bar chart.
 
 Note: The options --single_charts and --comparison_metric have been removed in this version. The module now automatically generates default comparison charts for both taxon mean read length and taxon mean coverage, and the summary table now includes only the columns: Parameter, Test_Value, Control_Value, and taxon_id.
 
@@ -432,20 +444,10 @@ concatenate:
 
     zcat file1.fastq.gz file2.fastq.gz > combined.fastq.gz
 
-uncompress:
-
-    gzip -d combined.fastq.gz
+sequenoscope now supports gzip files, so you can directly run your gzip file in sequenoscope
 
 #### Paired End Read Sets
-Typically, paired end read sets will have a forward and a reverse compliment FASTQ that are compressed. Use these steps to uncompress them: 
-
-if the files are compressed, you can uncompress them as follows: 
-
-    gzip -d Illumina_file_R1.fastq.gz
-
-and
-
-    gzip -d Illumina_file_R2.fastq.gz
+Typically, paired end read sets will have a forward and a reverse compliment FASTQ that are compressed. Use these steps to run them: 
 
 You should end up with two FASTQ files such as `Illumina_file_R1.fastq` and `Illumina_file_R2.fastq`which can then be run through sequenoscope ``analyze`` module like this:
 
@@ -535,7 +537,6 @@ The **plot** module is designed for comparative analysis of two conditions (test
 - **Adaptive Sampling (`-AS/--adaptive_sampling`)**: Enable decision bar charts (default: `False`).
 - **Violin Data Fraction (`-VP/--violin_data_percent`)**: Fraction of data used for violin plots (default: `0.1`).
 - **Time Bin Unit (`-bin/--time_bin_unit`)**: Time bin used for decision bar charts; choices: `seconds`, `minutes`, `5m`, `15m`, `hours` (default: `minutes`).
-- **Taxon Chart Legend (`-legend/--taxon_chart_legend`)**: Include legend in the source file taxon covered bar chart (default: `False`).
 
 ## Run Command:
 ```sh
@@ -600,7 +601,7 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 | `taxon_length` | Length of the taxon's genome. |
 | `taxon_mean_coverage` | Mean coverage across the taxon's genome. |
 | `taxon_covered_bases_<prefix>X` | Number of bases in the taxon's genome covered at user-specified coverage threshold. |
-| `taxon_%_covered_bases` | Percentage of the taxon's genome that is covered by reads at the user-specified coverage threshold . |
+| `taxon_%_covered_bases_<prefix>X` | Percentage of the taxon's genome that is covered by reads at the user-specified coverage threshold . |
 | `total_taxon_mapped_bases` | Total number of bases mapped to the taxon. |
 | `taxon_mean_read_length` | Mean read length of the reads mapped to the taxon. |
 
@@ -659,5 +660,8 @@ specific language governing permissions and limitations under the License.
 
 ## Contact
 
-**Abdallah Meknas**: abdallah.meknas@phac-aspc.gc.ca
+**Kyrylo Bessonov**: kyrylo.bessonov@phac-aspc.gc.ca 
+**Abdallah Meknas**: abdallahmeknas@gmail.com
+
+
 
