@@ -91,6 +91,13 @@ Install the latest commit from the master branch directly from Github:
 
         pip install git+https://github.com/phac-nml/sequenoscope.git
 
+## Option 4: Run with Nextflow
+You can also run Sequenoscope using the Nextflow pipeline available at the following GitHub repository:
+
+👉 [nf-sequenoscope](https://github.com/ameknas-phac/nf-sequenoscope)
+
+This approach ensures better scalability and reproducibility, especially in HPC or cloud environments.
+
 ## Workflow Example
 
 In this section, we will walk through a simple workflow using mock data to demonstrate how to use each module of **sequenoscope**. The mock data directory contains the following files:
