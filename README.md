@@ -18,6 +18,7 @@ A tool for analyzing sequencing run outputs primarily from adaptive sampling exp
 - [Dependencies](#dependencies)
 - [Validated Tool Versions](#validated-tool-versions)
 - [Python Packages](#python-packages)
+- [Tool Notes and Sequencing Platforms Compatibility](#tool-notes-and-sequencing-platforms-compatibility)
 - [Installation](#installation)
   - [Option 1: As a conda package (Recomended)](#option-1-as-a-conda-package-recomended)
   - [Option 2: As a PyPI package](#option-2-as-a-pypi-package)
@@ -88,6 +89,10 @@ Other compatible versions may work but were not explicitly tested.
 ## Python Packages
 - pysam: `>=0.16.0`
 - plotly: `>=5.16.1`
+
+## Tool Notes and Sequencing Platforms Compatibility
+- **fastp vs fastplong**: currently `fastp` is used for quick basic read filtering to ensure broad compatibility across long- and short-read platforms. While `fastplong` is better optimized for ONT long-reads, it was released after initial tool development. Support for `fastplong` is planned for future releases.
+- **Illumina short-read support**: Sequenoscope is primarily designed for ONT long-read data. However, Illumina short-read datasets with test and control experimental conditions can be processed for manifest generation, summary metrics, and comparative visualizations. Because Illumina platforms do not support adaptive sampling or record pore-level adaptive sampling decision metadata, these analyses are not available for short-read inputs. Illumina support is intended for mixed, legacy, or comparative datasets and has not been systematically. benchmarked..
 
 ## Installation
 
