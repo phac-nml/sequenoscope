@@ -5,39 +5,56 @@
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://github.com/ameknas-phac/nf-sequenoscope)
 
 
-## Sequenoscope
+# Sequenoscope
 
 <img height="150" width="400" alt="logo11" src="https://user-images.githubusercontent.com/93303799/225326096-6c9de0f1-9ac0-46a4-914f-a3db51e7e97a.png">
 
 A tool for analyzing sequencing run outputs primarily from adaptive sampling experiments and Oxford Nanopore Technology sequencers.
 
-## Contents
 
+
+## Contents <!-- omit from toc -->
 - [Introduction](#introduction)
-- [Dependencies](#Dependencies)
+- [Dependencies](#dependencies)
+- [Validated Tool Versions](#validated-tool-versions)
+- [Python Packages](#python-packages)
 - [Installation](#installation)
-- [Workflow Example](#Workflow-Example)
-- [Use-case Example](#Use-case-example)
+  - [Option 1: As a conda package (Recomended)](#option-1-as-a-conda-package-recomended)
+  - [Option 2: As a PyPI package](#option-2-as-a-pypi-package)
+  - [Option 3: Install from source](#option-3-install-from-source)
+  - [Option 4: Run with Nextflow](#option-4-run-with-nextflow)
+- [Workflow Example](#workflow-example)
+  - [Step 1: Filtering Reads with `filter_ONT`](#step-1-filtering-reads-with-filter_ont)
+  - [Step 2: Running the `analyze` Module](#step-2-running-the-analyze-module)
+  - [Step 3: Visualizing Results with the `plot` Module](#step-3-visualizing-results-with-the-plot-module)
+  - [Brief summary](#brief-summary)
+- [Use-case Example](#use-case-example)
 - [Usage](#usage)
-- [Quick Start](#quick-start)
-  -  [Analyze](#analyze-module)
-  -  [Filter_ONT](#filter_ONT-module)
-  -  [Plot](#plot-module)
-- [Outputs](#Outputs)
-  -  [Analyze](#analyze-module-outputs)
-      -  [Manifest file report structure](#sample-manifest-report-format)
-      -  [Manifest summary file report structure](#sample-manifest-summary-report-format)
-  -  [Filter_ONT](#filter_ONT-module-outputs)
-  -  [Plot](#plot-module-outputs)
+- [Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)](#handling-multiple-fastq-or-fastq-gz-files-single-end-read-sets)
+  - [Concatenating FASTQ Files](#concatenating-fastq-files)
+  - [Concatenating FASTQ GZ Files and Uncompressing](#concatenating-fastq-gz-files-and-uncompressing)
+- [Quick start](#quick-start)
+  - [analyze module](#analyze-module)
+  - [filter\_ONT module](#filter_ont-module)
+  - [plot module](#plot-module)
+- [Outputs](#outputs)
+  - [analyze module outputs](#analyze-module-outputs)
+  - [sample manifest report format](#sample-manifest-report-format)
+  - [sample manifest summary report format](#sample-manifest-summary-report-format)
+  - [filter\_ONT module outputs](#filter_ont-module-outputs)
+  - [Plot Module Outputs:](#plot-module-outputs)
 - [Citation](#citation)
 - [Legal](#legal)
-- [Contact](#contact)
+- [Contacts](#contacts)
+
+
+
 
 ## Introduction
 
 Analyzing and interpreting sequencing data is a fundamental task in bioinformatics, and with the advent of ONT adaptive-sampling sequencing, specialized tools are needed to **visualize and assess** the effectiveness of enrichment or depletion in adaptive-sampling sequencing runs. Adaptive sampling data present challenges in effectively visualizing and assessing these sequencing runs in terms of key parameters, necessitating tailored analytical approaches and visual analytics. To assist with these challenges, we have developed a comprehensive bioinformatics pipeline consisting of three modules:  [analyze](#analyze-module), [plot](#plot-module), and [filter_ONT](#filter_ONT-module). Our accessible pipeline aims to provide researchers with a fast and intuitive workflow for easily processing and analyzing sequencing data especially from ONT adaptive sequencing runs, enabling them to gain interpretable insights into their datasets with minimal upfront efforts.
 
-The [analyze](#analyze-module) module serves as the core component of our pipeline. First, It takes an input FASTQ file, a reference FASTA file, and an optional sequencing summary file from ONT sequencers or base callers. Next, Leveraging tools such as `fastp`, `minimap2`, `pysam`, and `mash`, this module performs a series of essential tasks. It filters the input FASTQ file, maps it to the reference FASTA file, and finally, generates a **sequence manifest txt file** and **summary sequence manifest txt file**. These files include key sequencing statistics such as read length, read quality (Q score), mapping efficiency, and coverage depth. For an in-depth explanation of all statistics provided, please refer to the [report format section](#sample-manifest-report-format) below.
+The [analyze](#analyze-module) module serves as the core component of our pipeline. First, It takes an input FASTQ file, a reference FASTA file (which may include multiple taxa or genomes), and an optional text **sequencing summary file** from ONT sequencers or base callers (Guppy/Dorado). Next, Leveraging tools such as `fastp`, `minimap2`, `pysam`, and `mash`, this module performs a series of essential tasks. It filters the input FASTQ file, maps it to the reference FASTA file, and finally, generates a **sequence manifest txt file** and **summary sequence manifest txt file**. These files include key sequencing statistics such as read length, read quality (Q score), mapping efficiency, and coverage depth. For an in-depth explanation of all statistics provided, please refer to the [report format section](#sample-manifest-report-format) below. Sequenoscope infers adaptive sampling per-read outcomes using the **sequencing summary file** `end_reason` field. These inferred categories represent post adaptive sampling run operational approximations and do not correspond one-to-one with true ReadUntil API decisions (`stop_receiving`, `unblock`, `no_decision`). Future versions of Sequenoscope will additionally support direct parsing of adaptive sampling read decision logs generated by the ReadUntil API.
 
 The [plot](#plot-module) module complements the analysis performed by the "analyze" module by using the output to render interactive plots. It takes as input both a "test" and "control" directory, which represent different testing conditions, containing __manifest__ and __manifest summary txt files__ generated by the "analyze" module. With these files, the [plot](#plot-module) module generates visualizations that aid in the interpretation and visualization of the sequencing data. **Please Note:** This module is designed for comparative analysis where two testing conditions are present and can be compared.
 
@@ -47,11 +64,26 @@ Our bioinformatics pipeline offers a powerful tool for researchers working with 
 
 ## Dependencies
 - Python: `>=3.7.12, <4`
-- fastp: `>=0.22.0`
+- fastp: `>=0.22.0` ([`fastplong`](https://github.com/OpenGene/fastplong) support is planned for future releases to enhance long-read processing)
 - mash: `>=2.3`
 - minimap2: `>=2.26`
 - seqtk: `>=1.4`
 - samtools: `>=1.6`
+
+## Validated Tool Versions
+The analyses presented in the manuscript ([doi:10.1099/acmi.0.001059.v1
+](https://doi.org/10.1099/acmi.0.001059.v1)) and corresponding to [Bioproject PRJNA1051081](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1051081/)
+, representing the ZymoBIOMICS LOG and EVEN mock community datasets, were performed using the following tool versions: 
+- Python: 3.10.12
+- fastp: 0.23.2
+- mash: 2.3
+- minimap2: 2.24
+- seqtk: 1.4
+- samtools: 1.18
+- pysam: 0.21.0
+- plotly: 5.16.1
+
+Other compatible versions may work but were not explicitly tested.
 
 ## Python Packages
 - pysam: `>=0.16.0`
@@ -59,23 +91,18 @@ Our bioinformatics pipeline offers a powerful tool for researchers working with 
 
 ## Installation
 
-## Option 1: As a conda package (Recomended)
+### Option 1: As a conda package (Recomended)
 
 Install the latest released version from conda:
 
-        conda install -c bioconda sequenoscope
+    conda install -c bioconda sequenoscope
 
-## Option 2: As a PyPI package
+### Option 2: As a PyPI package
+Install using `pip` that will fetch the most recent version from [PyPI repo](https://pypi.org/project/sequenoscope/)
 
-**Coming soon**
+    pip install sequenoscope
 
-Install using pip:
-
-        pip install sequenoscope
-
-## Option 3: Install from source
-
-**Coming soon**
+### Option 3: Install from source
 
 If you wish to install sequenoscope from source, please first ensure these dependencies are installed and configured on your system:
 `python>=3.7.12,<4`
@@ -89,9 +116,9 @@ If you wish to install sequenoscope from source, please first ensure these depen
 
 Install the latest commit from the master branch directly from Github:
 
-        pip install git+https://github.com/phac-nml/sequenoscope.git
+    pip install git+https://github.com/phac-nml/sequenoscope.git
 
-## Option 4: Run with Nextflow
+### Option 4: Run with Nextflow
 You can also run Sequenoscope using the Nextflow pipeline available at the following GitHub repository:
 
 👉 [nf-sequenoscope](https://github.com/ameknas-phac/nf-sequenoscope)
@@ -237,7 +264,7 @@ mock_adaptive_sampling_results/
 
 The **plot** module is used to compare control and adaptive sampling datasets. In this example, we use **hours** as the time bin due to truncated data in the mock dataset.
 
-## Command:
+
 ```sh
 sequenoscope plot -T mock_adaptive_sampling_results/ \
                   -C mock_control_results/ \
@@ -247,7 +274,7 @@ sequenoscope plot -T mock_adaptive_sampling_results/ \
                   -bin hours
 ```
 
-## Explanation:
+**Explanation:**
 - **`-T mock_adaptive_sampling_results/`**: Test (adaptive sampling) directory.
 - **`-C mock_control_results/`**: Control directory.
 - **`-o mock_comparison_plots`**: Output directory for plots.
@@ -255,7 +282,7 @@ sequenoscope plot -T mock_adaptive_sampling_results/ \
 - **`-AS`**: Enable adaptive sampling decision charts.
 - **`-bin hours`**: Use hourly bins for time-based decision charts.
 
-## Plot Output Directory Structure:
+**Plot Output Directory Structure:***
 After running the command, the output directory (`mock_comparison_plots/`) will contain standard plots plus a dedicated subdirectory for decision bar charts that reflects the chosen time bin unit.
 
 Example structure:
@@ -278,7 +305,7 @@ All decision bar charts (both independent and cumulative) are grouped into the `
 
 ---
 
-### Summary
+### Brief summary
 
 In this workflow example, we:
 
@@ -462,7 +489,7 @@ You should end up with two FASTQ files such as `Illumina_file_R1.fastq` and `Ill
 
 ## Quick start
 
-## analyze module
+### analyze module
 The analyze module provides specific sequencing statistics based on the reference FASTA file provided. Refer to the [outputs](#Outputs) section below for more details.
 
 To quickly get started with the `analyze` module:
@@ -479,17 +506,22 @@ To quickly get started with the `analyze` module:
 
 4. Run the module with the minimally required options:
 
-        sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.FASTA> -o <output_directory> -seq_type <sr>
+       sequenoscope analyze --input_fastq <file.fq> --input_reference <ref.FASTA> -o <output_directory> -seq_type <sr>
 
 This command will initiate the analysis module using the default settings. The input FASTQ file(s) will be processed, and the results will be saved in the specified output directory.
 
 Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For additional customization options and more detailed information on available options please run  `sequenoscope analyze -h` or `sequenoscope analyze --help`.
 
-**Note:** remember to replace `<file.fq>` with the actual path to your FASTQ file, `<ref.FASTA>` with the path to your reference database, `<output_directory>` with the desired location for the output files and `<sr>` with your sequencing type (SE for single-end and PE for paired-end).
 
-**Note:** Taxon IDs are used as a naming convention, reflecting the sequence name in the FASTA file. The pipeline can process genes, subspecies, and other identifiers; it doesn't have to be a taxon.
+Remember to replace `<file.fq>` with the actual path to your FASTQ file, `<ref.FASTA>` with the path to your reference database, `<output_directory>` with the desired location for the output files and `<sr>` with your sequencing type (SE for single-end and PE for paired-end).
 
-## filter_ONT module
+
+Taxon IDs are used as a naming convention, reflecting the sequence name in the FASTA file. The pipeline can process genes, subspecies, and other identifiers; it doesn't have to be a taxon.
+
+
+We plan to incorporate [`fastplong`](https://github.com/OpenGene/fastplong) support in future tool releases, allowing users to select the optimal processing tool and further enhance long-read processing.
+
+### filter_ONT module
 
 To quickly get started with the `filter_ONT` module:
 
@@ -521,11 +553,11 @@ Please note that this is a simplified quick start guide, and additional options 
 
 **Note:** Remember to replace `<file.fq>` with the actual path to your ONT sequencing FASTQ file, `<seq_summary.txt>` with the path to your ONT sequencing summary file, and `<output.FASTQ>` with the desired path and filename for the filtered reads.
 
-# Plot Module
+### plot module
 
 The **plot** module is designed for comparative analysis of two conditions (test and control) using outputs from the **analyze** module.
 
-## What It Does:
+#### What It Does:
 - Generates an **interactive Source File Taxon Covered Bar Chart** displaying the percentage of taxon covered bases from source files.
 - Creates a **Summary Table (CSV)** listing key parameters (*Parameter, Test_Value, Control_Value, taxon_id*) from the manifest summary files.
 - Produces **Violin Plots** comparing read quality scores and read lengths between test and control datasets.
@@ -534,18 +566,18 @@ The **plot** module is designed for comparative analysis of two conditions (test
   - **Taxon Mean Coverage Comparison**: A bar chart comparing `taxon_mean_coverage` values.
 - If **adaptive sampling** is enabled (`-AS` flag), the module produces **decision bar charts** (independent and cumulative), saved in a subdirectory named `decision_bar_charts_<time_bin_unit>`, where `<time_bin_unit>` reflects the user-selected time bin (e.g., minutes, 5m, etc.).
 
-## Required Paths:
+#### Required Paths:
 - **Test Directory (`-T/--test_dir`)**: Contains manifest and manifest summary files for the test condition.
 - **Control Directory (`-C/--control_dir`)**: Contains manifest and manifest summary files for the control condition.
 - **Output Directory (`-o/--output_dir`)**: Directory where plots and summary files will be saved.
 
-## Plotting Options:
+#### Plotting Options:
 - **Output Prefix (`-op/--output_prefix`)**: Prefix added to output filenames (default: `sample`).
 - **Adaptive Sampling (`-AS/--adaptive_sampling`)**: Enable decision bar charts (default: `False`).
 - **Violin Data Fraction (`-VP/--violin_data_percent`)**: Fraction of data used for violin plots (default: `0.1`).
 - **Time Bin Unit (`-bin/--time_bin_unit`)**: Time bin used for decision bar charts; choices: `seconds`, `minutes`, `5m`, `15m`, `hours` (default: `minutes`).
 
-## Run Command:
+#### Run Command:
 ```sh
 sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
 ```
@@ -555,7 +587,7 @@ Use `--force` to overwrite an existing output directory if needed.
 
 ## Outputs
 
-## analyze module outputs
+### analyze module outputs
 
 | File | Description |
 |------|-------------|
@@ -615,7 +647,7 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 
 Note: Replace `<prefix>` with the user-specified threshold coverage.
 
-## filter_ONT module outputs
+### filter_ONT module outputs
 
 | File | Description |
 |------|-------------|
@@ -624,9 +656,9 @@ Note: Replace `<prefix>` with the user-specified threshold coverage.
 
 Note: Replace `<prefix>` with the user-specified prefix that precedes all output filenames.
 
-## plot module outputs
 
-## Plot Module Outputs:
+
+### Plot Module Outputs:
 
 | File | Description | Triggered by Command |
 |---|---|---|
@@ -665,7 +697,7 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
 
-## Contact
+## Contacts
 
 **Kyrylo Bessonov**: kyrylo.bessonov@phac-aspc.gc.ca 
 **Abdallah Meknas**: abdallahmeknas@gmail.com
