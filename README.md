@@ -18,7 +18,7 @@ A tool for analyzing sequencing run outputs primarily from adaptive sampling exp
 - [Dependencies](#dependencies)
 - [Validated Tool Versions](#validated-tool-versions)
 - [Python Packages](#python-packages)
-- [Tool Notes and Sequencing Platforms Compatibility](#tool-notes-and-sequencing-platforms-compatibility)
+- [Tool and Sequencing Platforms Compatibility](#tool-and-sequencing-platforms-compatibility)
 - [Installation](#installation)
   - [Option 1: As a conda package (Recomended)](#option-1-as-a-conda-package-recomended)
   - [Option 2: As a PyPI package](#option-2-as-a-pypi-package)
@@ -31,6 +31,9 @@ A tool for analyzing sequencing run outputs primarily from adaptive sampling exp
   - [Brief summary](#brief-summary)
 - [Use-case Example](#use-case-example)
 - [Usage](#usage)
+  - [Analyze module options](#analyze-module-options)
+  - [Filter\_ONT module options](#filter_ont-module-options)
+  - [Plot module options](#plot-module-options)
 - [Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)](#handling-multiple-fastq-or-fastq-gz-files-single-end-read-sets)
   - [Concatenating FASTQ Files](#concatenating-fastq-files)
   - [Concatenating FASTQ GZ Files and Uncompressing](#concatenating-fastq-gz-files-and-uncompressing)
@@ -90,9 +93,9 @@ Other compatible versions may work but were not explicitly tested.
 - pysam: `>=0.16.0`
 - plotly: `>=5.16.1`
 
-## Tool Notes and Sequencing Platforms Compatibility
+## Tool and Sequencing Platforms Compatibility
 - **fastp vs fastplong**: currently `fastp` is used for quick basic read filtering to ensure broad compatibility across long- and short-read platforms. While `fastplong` is better optimized for ONT long-reads, it was released after initial tool development. Support for `fastplong` is planned for future releases.
-- **Illumina short-read support**: Sequenoscope is primarily designed for ONT long-read data. However, Illumina short-read datasets with test and control experimental conditions can be processed for manifest generation, summary metrics, and comparative visualizations. Because Illumina platforms do not support adaptive sampling or record pore-level adaptive sampling decision metadata, these analyses are not available for short-read inputs. Illumina support is intended for mixed, legacy, or comparative datasets and has not been systematically. benchmarked..
+- **Illumina short-read support**: Sequenoscope is primarily designed for ONT long-read data. However, Illumina short-read datasets with test and control experimental conditions can be processed for sample manifest generation, comparative summary metrics and visualizations. Because Illumina short-read platform does not support adaptive sampling and does not record pore-level adaptive sampling decision metadata, some ONT-specific outputs would not be vailable for these inputs. Specifically, per-read decision metadata are set to the default read accepted value (`signal_positive`), and adaptive sampling–specific visualizations (including independent and cumulative read-decision bar charts) are not generated. Illumina support is intended for mixed, legacy, or comparative datasets and has not been systematically benchmarked.
 
 ## Installation
 
@@ -352,7 +355,7 @@ If you run ``sequenoscope``, you should see the following usage statement:
         -h, --help            Show this help message and exit
 
         
-
+### Analyze module options
 If you run ``sequenoscope analyze -h`` or ``sequenoscope analyze --help``, you should see the following options and usage guidleines:
 
         For help use: sequenoscope analyze -h or --help
@@ -395,12 +398,13 @@ If you run ``sequenoscope analyze -h`` or ``sequenoscope analyze --help``, you s
           -q , --quality_threshold 
                                 Quality score threshold; default is 15.
 
+### Filter_ONT module options
 If you run ``sequenoscope filter_ONT -h`` or ``sequenoscope filter_ONT --help``, you should see the following options and usage guidleines:
 
         usage: sequenoscope filter_ONT --input_fastq <file.fq> --input_summary <seq_summary.txt> -o <out.fastq> [options]
         For help use: sequenoscope filter_ONT -h or sequenoscope filter_ONT --help
         
-        sequenoscope version 0.0.5: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
+        sequenoscope version 1.0.0: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
         
         Arguments:
           -h, --help            show this help message and exit
@@ -436,36 +440,38 @@ If you run ``sequenoscope filter_ONT -h`` or ``sequenoscope filter_ONT --help``,
           --summarize           Generate barcode statistics. Must specify an input summary and output directory
           -v, --version         show program's version number and exit
 
+### Plot module options
 If you run ``sequenoscope plot -h`` or ``sequenoscope plot --help``, you should see the following options and usage guidleines:
 
-usage: sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
-For help use: sequenoscope plot -h or sequenoscope plot --help
+    usage: sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --output_dir <out_path>
+    For help use: sequenoscope plot -h or sequenoscope plot --help
 
-sequenoscope version <version>: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
+    sequenoscope version 1.0.0: a flexible tool for processing multiplatform sequencing data: analyze, subset/filter, compare and visualize.
 
-Optional Arguments:
-  -h, --help            show this help message and exit
+    Optional Arguments:
+      -h, --help            show this help message and exit
 
-Required Paths:
-  -T TEST_DIR, --test_dir TEST_DIR
-                        Path to test directory.
-  -C CONTROL_DIR, --control_dir CONTROL_DIR
-                        Path to control directory.
-  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
-                        Output directory designation.
-  --force               Force overwrite of existing results directory.
+    Required Paths:
+      -T TEST_DIR, --test_dir TEST_DIR
+                            Path to test directory.
+      -C CONTROL_DIR, --control_dir CONTROL_DIR
+                            Path to control directory.
+      -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                            Output directory designation.
+      --force               Force overwrite of existing results directory.
 
-Plotting Options:
-  -op OUTPUT_PREFIX, --output_prefix OUTPUT_PREFIX
-                        Output prefix added before plot names. Default is 'sample'.
-  -AS, --adaptive_sampling
-                        Generate decision bar charts for adaptive sampling if utilized during sequencing.
-  -VP VIOLIN_DATA_PERCENT, --violin_data_percent VIOLIN_DATA_PERCENT
-                        Fraction of the data to use for the violin plot.
-  -bin {seconds,minutes,5m,15m,hours}, --time_bin_unit {seconds,minutes,5m,15m,hours}
-                        Time bin used for decision bar charts.
+    Plotting Options:
+      -op OUTPUT_PREFIX, --output_prefix OUTPUT_PREFIX
+                            Output prefix added before plot names. Default is 'sample'.
+      -AS, --adaptive_sampling
+                            Generate decision bar charts for adaptive sampling if utilized during sequencing.
+      -VP VIOLIN_DATA_PERCENT, --violin_data_percent VIOLIN_DATA_PERCENT
+                            Fraction of the data to use for the violin plot.
+      -bin {seconds,minutes,5m,15m,hours}, --time_bin_unit {seconds,minutes,5m,15m,hours}
+                            Time bin used for decision bar charts.
 
-Note: The options --single_charts and --comparison_metric have been removed in this version. The module now automatically generates default comparison charts for both taxon mean read length and taxon mean coverage, and the summary table now includes only the columns: Parameter, Test_Value, Control_Value, and taxon_id.
+>[!Note] 
+>The options --single_charts and --comparison_metric have been removed in this version. The module now automatically generates default comparison charts for both taxon mean read length and taxon mean coverage, and the summary table now includes only the columns: Parameter, Test_Value, Control_Value, and taxon_id.
 
 ## Handling Multiple FASTQ or FASTQ GZ Files (Single End Read Sets)
 
@@ -485,12 +491,23 @@ concatenate:
 
 sequenoscope now supports gzip files, so you can directly run your gzip file in sequenoscope
 
-#### Paired End Read Sets
+#### Illumina Paired End Read Sets
 Typically, paired end read sets will have a forward and a reverse compliment FASTQ that are compressed. Use these steps to run them: 
 
 You should end up with two FASTQ files such as `Illumina_file_R1.fastq` and `Illumina_file_R2.fastq`which can then be run through sequenoscope ``analyze`` module like this:
 
     sequenoscope analyze --input_fastq Illumina_file_R1.fastq Illumina_file_R2.fastq --input_reference ref.fasta -o output -seq_type PE
+
+>[!Note]
+> When using Illumina short-read data, Sequenoscope will generate standard manifest files, summary metrics, and visualizations. However, because Illumina platforms do not support adaptive sampling or pore-level sequencing decisions, adaptive sampling–specific metrics are not available for paired-end short-read inputs.
+
+#### Example Illumina Mock Community Dataset
+
+To facilitate testing of Sequenoscope on short-read data, an Illumina-sequenced mock community dataset is also available. Specifically, we downloaded raw paired-end reads using accessions `ERR2935805` (log-distributed mock community) and `ERR2984773` (evenly distributed mock community). These datasets provide a practical reference for evaluating Sequenoscope’s behavior on non-ONT inputs.
+
+Sequenoscope was applied on the `analyze` and `plot` modules to compare EVEN versus LOG mock community compositions. All expected outputs and visualizations were successfully generated, including sample manifest and sample manifest summary generation, and taxonomic visualizations when applied to Illumina short-read data.  
+
+
 
 ## Quick start
 
@@ -546,7 +563,8 @@ To quickly get started with the `filter_ONT` module:
      - Q score: Determine the minimum and maximum q score for filtering using the `-min_q` and `-max_q` options.
      - Read length range: Set the minimum and maximum read length for filtering using the `-min_len` and `-max_len` options.
 
-  **Note:** Some sequence summary files lack the field specifying read classification status. A warning will be raised if this is the case.
+  >[!Note]
+  >Some sequence summary files lack the field specifying read classification status. A warning will be raised if this is the case.
 
 4. Run the command with the basic required options:
 
@@ -556,7 +574,8 @@ This command will initiate the filtering process based on the specified criteria
 
 Please note that this is a simplified quick start guide, and additional options are available for advanced usage. For more detailed information on available options, you can run `sequenoscope filter_ONT -h` or `sequenoscope filter_ONT --help`.
 
-**Note:** Remember to replace `<file.fq>` with the actual path to your ONT sequencing FASTQ file, `<seq_summary.txt>` with the path to your ONT sequencing summary file, and `<output.FASTQ>` with the desired path and filename for the filtered reads.
+>[!Note] 
+>Remember to replace `<file.fq>` with the actual path to your ONT sequencing FASTQ file, `<seq_summary.txt>` with the path to your ONT sequencing summary file, and `<output.FASTQ>` with the desired path and filename for the filtered reads.
 
 ### plot module
 
@@ -588,7 +607,8 @@ sequenoscope plot --test_dir <test_dir_path> --control_dir <control_dir_path> --
 ```
 Use `--force` to overwrite an existing output directory if needed.
 
-**Note:** Replace `<test_dir_path>`, `<control_dir_path>`, and `<out_path>` with actual paths.
+>[!Note]
+>Replace `<test_dir_path>`, `<control_dir_path>`, and `<out_path>` with actual paths.
 
 ## Outputs
 
@@ -608,7 +628,8 @@ Use `--force` to overwrite an existing output directory if needed.
 | `<prefix>_mash.hash.msh` | A MASH sketch file used for rapid genome distance estimation. |
 | `<prefix>_read_list.txt` | A text file list of reads, potentially used for further downstream analysis. |
 
-Note: Replace `<prefix>` with the user-specified prefix that precedes all output filenames.
+>[!Note]
+> Replace `<prefix>` with the user-specified prefix that precedes all output filenames.
 
 ### sample manifest report format
 
@@ -627,9 +648,9 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 | `is_uniq` | Indicates whether the read is unique within the sample manifest file (`TRUE` if unique, also see note 2 below). |
 | `contig_id` | Identifier for the contig to which the read is mapped, if applicable. |
 
-**Notes:**
-1. `is_mapped` refers to whether or not a read is mapped to any sequence in the multi-sequence FASTA reference file provided by the user. If true, the `contig_id` is provided.
-2. `is_uniq` refers to whether or not a read is unique throughout the sample manifest file. In ONT sequencing, a read may be processed multiple times if the decision is labelled as `signal_negative` or `No_decision` before a final decision is made on whether to allow the read to continue sequencing or not.
+>[!Note]
+>1. `is_mapped` refers to whether or not a read is mapped to any sequence in the multi-sequence FASTA reference file provided by the user. If true, the `contig_id` is provided.
+>2. `is_uniq` refers to whether or not a read is unique throughout the sample manifest file. In ONT sequencing, a read may be processed multiple times if the decision is labelled as `signal_negative` or `No_decision` before a final decision is made on whether to allow the read to continue sequencing or not.
 
 ### sample manifest summary report format
 
@@ -650,7 +671,8 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 | `taxon_mean_read_length` | Mean read length of the reads mapped to the taxon. |
 
 
-Note: Replace `<prefix>` with the user-specified threshold coverage.
+>[!Note]
+>Replace `<prefix>` with the user-specified threshold coverage.
 
 ### filter_ONT module outputs
 
@@ -659,7 +681,8 @@ Note: Replace `<prefix>` with the user-specified threshold coverage.
 | `<user_prefix>_filtered_fastq_subset.fastq` | The subset of FASTQ reads that have been filtered based on the user-defined criteria within the `filter_ONT` module. |
 | `<user_prefix>_read_id_list.csv` | A CSV file containing the list of read identifiers that correspond to the filtered subset. This may be used for further reference or analysis. |
 
-Note: Replace `<prefix>` with the user-specified prefix that precedes all output filenames.
+>[!Note]
+>Replace `<prefix>` with the user-specified prefix that precedes all output filenames.
 
 
 
@@ -676,7 +699,8 @@ Note: Replace `<prefix>` with the user-specified prefix that precedes all output
 | `read_len_<prefix>_violin_comparison_plot.html` | Violin plot comparing log-transformed read lengths between test and control datasets. | Default behavior |
 | `read_qscore_<prefix>_violin_comparison_plot.html` | Violin plot comparing read quality score distributions between test and control datasets. | Default behavior |
 
-**Note:** Replace `<prefix>` with your output prefix (set via `--output_prefix`).
+>[!Note]
+>Replace `<prefix>` with your output prefix (set via `--output_prefix`).
 
 For **adaptive sampling** plots, two files (for test and control) are generated for each decision chart type and saved in a subdirectory named `decision_bar_charts_<time_bin_unit>`, where `<time_bin_unit>` is your selected bin (e.g., minutes, 5m, etc.).
 
