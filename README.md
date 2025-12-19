@@ -107,7 +107,7 @@ Install the latest released version from conda:
     conda install -c bioconda sequenoscope
 
 >[!note]
->The `meta.yaml` most recent version is available at XXX
+>The `meta.yaml` most recent version is available at https://github.com/bioconda/bioconda-recipes/blob/master/recipes/sequenoscope/meta.yaml
 
 ### Option 2: As a PyPI package
 Install using `pip` that will fetch the most recent version from [PyPI repo](https://pypi.org/project/sequenoscope/)
