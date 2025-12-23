@@ -29,6 +29,10 @@ A tool for analyzing sequencing run outputs primarily from adaptive sampling exp
   - [Step 2: Running the `analyze` Module](#step-2-running-the-analyze-module)
   - [Step 3: Visualizing Results with the `plot` Module](#step-3-visualizing-results-with-the-plot-module)
   - [Brief summary](#brief-summary)
+- [Limitations](#limitations)
+  - [Read mapping ambiguity](#read-mapping-ambiguity)
+  - [Post run approximate inference of early adaptive sampling decisions](#post-run-approximate-inference-of-early-adaptive-sampling-decisions)
+  - [Reference database dependence](#reference-database-dependence)
 - [Use-case Example](#use-case-example)
 - [Usage](#usage)
   - [Analyze module options](#analyze-module-options)
@@ -339,6 +343,30 @@ In this workflow example, we:
 3. Visualized and compared the results using `plot`, focusing on adaptive sampling decisions and coverage metrics.
 
 By following these steps, you can quickly get started with **sequenoscope** and adapt the workflow to suit your own data and research needs.
+
+## Limitations
+### Read mapping ambiguity
+
+In the current release v1.0.0, read mapping is performed using `minimap2` with default primary alignment behavior. Reads that map equally well to multiple reference sequences (i.e., multi-mapped reads) are not explicitly tracked or reported in downstream analyses.
+
+As a result, ambiguous multi-taxa mappings may be assigned to a single taxon, which can affect closely related organisms with shared genomic regions (e.g., Enterococcus/Listeria).
+
+Future versions of sequenoscope will introduce explicit handling of multi-mapped reads, including:
+
+- Optional suppression or reporting of secondary alignments (`minimap2 --secondary=no`)
+
+- Configurable scoring thresholds for ambiguous mappings for read filtering
+
+- Reporting of the proportion of multi-mapped reads per taxon
+
+This enhancement will improve result accuracy, interpretability and quality control when analyzing closely related microbial communities.
+
+### Post run approximate inference of early adaptive sampling decisions
+Sequenoscope infers per-read adaptive sampling outcomes using the `end_reason` field recorded in *sequencing summary file*. Because true ReadUntil API decision logs are not always generated or available, these classifications represent post run approximations rather than direct adaptive sampling control signals. Future versions will support direct incorporation of *adaptive sampling summary files**, when available, to leverage per-read ReadUntil API decisions for more precise adaptive sampling read classification.
+
+### Reference database dependence
+Taxonomic classification accuracy depends on the completeness and quality of the provided reference database. Sequenoscope does not perform de novo taxa mappings, and organisms absent from the reference set may be underrepresented or assigned at higher taxonomic levels.
+
 
 ## Use-case Example
 To demonstrate the practical application of our pipeline, consider a scenario where a researcher conducts adaptive sampling using an ONT sequencer. In this example, the researcher divides the sequencer channels into two sets: one half for adaptive sampling enrichment and the other half for regular sequencing as a control.
@@ -762,6 +790,3 @@ specific language governing permissions and limitations under the License.
 
 **Kyrylo Bessonov**: kyrylo.bessonov@phac-aspc.gc.ca 
 **Abdallah Meknas**: abdallahmeknas@gmail.com
-
-
-

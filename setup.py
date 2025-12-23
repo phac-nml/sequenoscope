@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 import os
-from distutils.core import setup
-from setuptools import find_packages
+#from distutils.core import setup
+from setuptools import find_packages, setup
 
 author = 'Abdallah Meknas'
 
 classifiers = """
 Development Status :: 3 - Alpha
 Environment :: Console
-License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+License :: OSI Approved :: Apache Software License",
 Intended Audience :: Science/Research
 Topic :: Scientific/Engineering
 Topic :: Scientific/Engineering :: Bio-Informatics
@@ -27,16 +27,16 @@ exec(open('sequenoscope/version.py').read())
 
 setup(
     name='sequenoscope',
-    include_package_data=True,
     version='1.0.0',
     python_requires='>=3.7.0',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=find_packages(exclude=['tests']),
+    include_package_data=True,
     url='https://github.com/phac-nml/sequenoscope',
-    license='GPLv3',
+    license='Apache-2.0',
     author='Abdallah Meknas',
-    author_email='abdallah.meknas@phac-aspc.gc.ca',
+    author_email='abdallahmeknas@gmail.com',
     description=(
         'Description'),
     keywords='Keywords',
@@ -53,9 +53,7 @@ setup(
         'plotly',
         'psutil',
         'pysam',
-        'pytest',
         'scipy',
-        'seqtk',
         'simplejson',
         'six'
     ],
