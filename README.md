@@ -755,11 +755,11 @@ Sequenoscope infers per-read adaptive sampling outcomes using the `end_reason` f
 It is normal that adaptive sampling summary file does not contain all sequenced reads, as MinKNOW logs only reads that trigger an explicit ReadUntil decision and belong to the **test sample**. Consequently, discrepancies are expected when comparing adaptive sequencing file to the FASTQ and sequencing summary outputs, which are complete and include all reads generated during the run.
 
 
-| Sequenoscope category | `end_reason` values | Interpretation |
+| Sequenoscope Adaptive Sampling Category| ONT Sequencing Summary `end_reason` values | Interpretation |
 |----------------------|--------------------------------------|----------------|
-| `stop_receiving` | `signal_positive` | Accepted read sequenced to completion|
-| `unblocked` | `data_service_unblock_mux_change` | Rejected read |
-| `no_decision` | `signal_negative`, `unblock_mux_change` | No definitive adaptive sampling decision was made |
+| `stop_receiving` | `signal_positive` | *Accepted* read sequenced to completion|
+| `unblocked` | `data_service_unblock_mux_change` | *Rejected* read |
+| `no_decision` | `signal_negative`, `unblock_mux_change` | *No decision* read indicating a definitive adaptive sampling decision was not reached during read sequencing due to technical factors (e.g., poor signal quality or scheduled pore switching process occured `mux_change`)  or biological constrains (e.g., reads too short or highly repetitive/complex to classify), or high computational latency (e.g., real-time processing was too slow to provide a response before the read finished translocating through the pore). |
 
 >[!Note]
 >These inferred read classification AS categories do not correspond one-to-one with true ReadUntil API decision  recorded in **adaptive sampling decision file**. In particular, reads classified as `stop_receiving` include both reads accepted by adaptive sampling (`stop_receiving`) and reads that were fully sequenced without a definitive adaptive sampling  (`no_decision`). Future versions of Sequenoscope will support direct parsing of adaptive sampling summary files when available to improve accuracy of inferred AS read decisions.
