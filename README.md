@@ -365,7 +365,7 @@ This enhancement will improve result accuracy, interpretability and quality cont
 Sequenoscope infers per-read adaptive sampling outcomes using the `end_reason` field recorded in *sequencing summary file*. Because true ReadUntil API decision logs are not always generated or available, these classifications represent post run approximations rather than direct adaptive sampling control signals. Future versions will support direct incorporation of *adaptive sampling summary files**, when available, to leverage per-read ReadUntil API decisions for more precise adaptive sampling read classification.
 
 ### Reference database dependence
-Taxonomic classification accuracy depends on the completeness and quality of the provided reference database. Sequenoscope does not perform de novo taxa mappings, and organisms absent from the reference set may be underrepresented or assigned at higher taxonomic levels.
+Taxonomic classification accuracy depends on the completeness and quality of the provided reference database. Sequenoscope does not perform *de novo* taxonomic assignment and organisms absent from the reference set may be underrepresented or assigned at artifically higher taxonomic levels.
 
 
 ## Use-case Example
