@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+import importlib
 import sys
 import subprocess
-import os
-import argparse
+
+
+from numpy import mod
 from sequenoscope.version import __version__
 from sequenoscope.utils.__init__ import format_time
 
@@ -109,8 +111,9 @@ def main():
         print(f'Task "{module}" not recognised. Cannot continue.\n', file=sys.stderr)
         print_usage_and_exit()
 
-    exec("import sequenoscope.{}.{}".format(module, module))
-    exec("sequenoscope.{}.{}".format(module, module) + '.run()')
+    #Works more reliably in conda tests then exec("import sequenoscope.{}.{}".format(module, module)) and exec("sequenoscope.{}.{}".format(module, module) + '.run()')
+    module = importlib.import_module(f"sequenoscope.{module}.{module}")
+    module.run()
 
 if __name__ == '__main__':
     main()
