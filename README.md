@@ -790,5 +790,5 @@ specific language governing permissions and limitations under the License.
 
 ## Contacts
 
-**Kyrylo Bessonov**: kyrylo.bessonov@phac-aspc.gc.ca 
-**Abdallah Meknas**: abdallahmeknas@gmail.com
+- **Kyrylo Bessonov**: kyrylo.bessonov@phac-aspc.gc.ca 
+- **Abdallah Meknas**: abdallahmeknas@gmail.com
